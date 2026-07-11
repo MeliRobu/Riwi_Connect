@@ -1,2 +1,3 @@
-THIS IS THE MAIN BRANCH
+THIS IS THE "frontend" BRANCH, for frontend features
+
 
