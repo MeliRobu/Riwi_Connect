@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:17
+    container_name: riwi_connect_db-postgres
+
+    environment:
+      POSTGRES_DB: riwi_connect_db
+      POSTGRES_USER: admin_rc
+      POSTGRES_PASSWORD: '123456' 
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - riwi-db-data:/var/lib/postgresql/data
+
+volumes:
+  riwi-db-data:
+  
