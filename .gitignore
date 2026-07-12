@@ -2,3 +2,8 @@ config.py
 .env
 __pycache__/
 *.pyc
+*log
+logs/
+node_modules/
+dist/
+build/
