@@ -1,19 +1,35 @@
 services:
   db:
     image: postgres:17
-    container_name: riwi_connect_db-postgres
-
+    container_name: riwi_connect_db
     environment:
-      POSTGRES_DB: riwi_connect_db
-      POSTGRES_USER: admin_rc
-      POSTGRES_PASSWORD: '123456' 
-
+      POSTGRES_DB: riwi_connect
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
-      - "5433:5432"
-
+      - "5432:5432"
     volumes:
-      - riwi-db-data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+      - ./database:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d riwi_connect"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+    container_name: riwi_connect_backend
+    volumes:
+      - ./backend:/app
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
-  riwi-db-data:
-  
+  pgdata:
