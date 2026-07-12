@@ -5,6 +5,12 @@ from database.connection import get_connection
 # so we avoid having to configure CORS between two separate servers.
 app = Flask(__name__, static_folder="frontend_dist", static_url_path="")
 
+@app.route("/")
+def index():
+    # Serves the compiled frontend's entry point.
+    # Everything after this is handled client-side by router.js (hash routing),
+    # so we only need to serve index.html once, here at the root.
+    return app.send_static_file("index.html")
 
 @app.route("/health")
 def health():
