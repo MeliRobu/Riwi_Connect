@@ -20,7 +20,8 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: riwi_connect_backend
     volumes:
       - ./backend:/app
