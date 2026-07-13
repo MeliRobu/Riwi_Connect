@@ -35,12 +35,12 @@ CREATE TABLE users (
     id_institutional_source INT NOT NULL UNIQUE,
     CONSTRAINT FK_id_institutional_source FOREIGN KEY (id_institutional_source) REFERENCES institutional_sources(id_institutional_source),
     
-    status VARCHAR(20) NOT NULL  DEFAULT 'active'
-        CHECK (status IN ('active','inactive')),
+    status VARCHAR(20) NOT NULL  DEFAULT 'AVAILABLE'
+        CHECK (status IN ('AVAILABLE','IN_TEAM')),
     role VARCHAR(20)
         NOT NULL
-        DEFAULT 'student'
-        CHECK (role IN ('student','admin')),
+        DEFAULT 'STUDENT'
+        CHECK (role IN ('STUDENT','ADMINISTRATOR')),
     profile_image VARCHAR(255)
 );
 --6. Assessments configuration
@@ -53,14 +53,11 @@ CREATE TABLE assessment_configurations (
 --7. Assessment 
 CREATE TABLE assessments (
     id_assessment SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id INT NOT NULL UNIQUE,
     CONSTRAINT FK_user_id FOREIGN KEY (user_id) REFERENCES users(id_user),
     description VARCHAR(100) NOT NULL,
     started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    completed_at TIMESTAMP,
-    status VARCHAR(20)
-        DEFAULT 'pending'
-        CHECK (status IN ('pending','in_progress','completed','abandoned'))
+    completed_at TIMESTAMP
 );
 --8. Assessment results
 CREATE TABLE assessment_results(
@@ -82,13 +79,10 @@ CREATE TABLE assessment_results(
 --9. Questions
 CREATE TABLE questions (
     id_question SERIAL PRIMARY KEY,
-    assessment_id INT NOT NULL,
-    CONSTRAINT FK_assessment_id FOREIGN KEY (assessment_id) REFERENCES assessments(id_assessment),
-    
     statement VARCHAR(255) NOT NULL,
     category VARCHAR(50) NOT NULL,
     difficulty_level VARCHAR(20) NOT NULL
-        CHECK (difficulty_level IN ('easy','medium','hard'))
+        CHECK (difficulty_level IN ('EASY','MEDIUM','HARD'))
     
 );
 --10. Answer options
@@ -121,7 +115,7 @@ CREATE TABLE teams (
 --13. Team members
 CREATE TABLE team_members (
     id_team_member SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id INT NOT NULL UNIQUE,
     CONSTRAINT FK_user_id FOREIGN KEY (user_id) REFERENCES users(id_user),
     team_id INT NOT NULL,
     CONSTRAINT FK_team_id FOREIGN KEY (team_id) REFERENCES teams(id_team),
@@ -135,8 +129,8 @@ CREATE TABLE team_requests (
     receiver_user_id INT NOT NULL,
     team_id INT NOT NULL,
         status VARCHAR(20)
-        DEFAULT 'pending'
-        CHECK (status IN ('pending','accepted','rejected')),
+        DEFAULT 'PENDING'
+        CHECK (status IN ('PENDING','ACCEPTED','REJECTED')),
     CONSTRAINT fk_sender FOREIGN KEY (sender_user_id) REFERENCES users(id_user),
     CONSTRAINT fk_receiver FOREIGN KEY (receiver_user_id) REFERENCES users(id_user),
     CONSTRAINT fk_team FOREIGN KEY (team_id) REFERENCES teams(id_team),
