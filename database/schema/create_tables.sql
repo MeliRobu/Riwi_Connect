@@ -78,10 +78,11 @@ CREATE TABLE assessment_results(
     improvement_opportunities VARCHAR(100) NOT NULL,
     profile_description VARCHAR(100) NOT NULL
 
-)
+);
 --9. Questions
 CREATE TABLE questions (
     id_question SERIAL PRIMARY KEY,
+    assessment_id INT NOT NULL,
     CONSTRAINT FK_assessment_id FOREIGN KEY (assessment_id) REFERENCES assessments(id_assessment),
     
     statement VARCHAR(255) NOT NULL,
@@ -123,7 +124,7 @@ CREATE TABLE team_members (
     user_id INT NOT NULL,
     CONSTRAINT FK_user_id FOREIGN KEY (user_id) REFERENCES users(id_user),
     team_id INT NOT NULL,
-    CONSTRAINT FK_team_id FOREIGN KEY (team_id) REFERENCES teams(id_team)
+    CONSTRAINT FK_team_id FOREIGN KEY (team_id) REFERENCES teams(id_team),
     joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_leader BOOLEAN NOT NULL DEFAULT FALSE
 );
@@ -137,8 +138,8 @@ CREATE TABLE team_requests (
         DEFAULT 'pending'
         CHECK (status IN ('pending','accepted','rejected')),
     CONSTRAINT fk_sender FOREIGN KEY (sender_user_id) REFERENCES users(id_user),
-    CONSTRAINT fk_receiverFOREIGN KEY (receiver_user_id) REFERENCES users(id_user),
-    CONSTRAINT fk_team FOREIGN KEY (team_id) REFERENCES teams(id_team)
+    CONSTRAINT fk_receiver FOREIGN KEY (receiver_user_id) REFERENCES users(id_user),
+    CONSTRAINT fk_team FOREIGN KEY (team_id) REFERENCES teams(id_team),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     response_at TIMESTAMP
 );
