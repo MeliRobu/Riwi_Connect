@@ -41,14 +41,14 @@ CREATE TABLE users (
         NOT NULL
         DEFAULT 'student'
         CHECK (role IN ('student','admin')),
-    profile_image VARCHAR(255),
+    profile_image VARCHAR(255)
 );
 --6. Assessments configuration
 CREATE TABLE assessment_configurations (
     id_assessment_configuration SERIAL PRIMARY KEY,
     question_count INT NOT NULL,
     selection_method VARCHAR(50) NOT NULL,
-    time_limit INT NOT NULL,
+    time_limit INT NOT NULL
 );
 --7. Assessment 
 CREATE TABLE assessments (
@@ -60,7 +60,7 @@ CREATE TABLE assessments (
     completed_at TIMESTAMP,
     status VARCHAR(20)
         DEFAULT 'pending'
-        CHECK (status IN ('pending','in_progress','completed','abandoned')),
+        CHECK (status IN ('pending','in_progress','completed','abandoned'))
 );
 --8. Assessment results
 CREATE TABLE assessment_results(
@@ -76,13 +76,12 @@ CREATE TABLE assessment_results(
     css_score DECIMAL (5,2) NOT NULL,
     strengths VARCHAR(100) NOT NULL,
     improvement_opportunities VARCHAR(100) NOT NULL,
-    profile_description VARCHAR(100) NOT NULL,
+    profile_description VARCHAR(100) NOT NULL
 
 )
 --9. Questions
 CREATE TABLE questions (
     id_question SERIAL PRIMARY KEY,
-    assessment_id INT NOT NULL,
     CONSTRAINT FK_assessment_id FOREIGN KEY (assessment_id) REFERENCES assessments(id_assessment),
     
     statement VARCHAR(255) NOT NULL,
@@ -97,17 +96,17 @@ CREATE TABLE answer_options (
     question_id INT NOT NULL,
     CONSTRAINT FK_question_id FOREIGN KEY (question_id) REFERENCES questions(id_question),
     content TEXT NOT NULL,
-    is_correct BOOLEAN NOT NULL
+    is_correct BOOLEAN NOT NULL DEFAULT FALSE
 );
 --11. Student answers
 CREATE TABLE student_answers (
     id_student_answer SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
-    CONSTRAINT FK_user_id FOREIGN KEY (user_id) REFERENCES users(id_user),
+    assessment_id INT NOT NULL,
+    CONSTRAINT FK_assessment_id FOREIGN KEY (assessment_id) REFERENCES assessments(id_assessment),
     question_id INT NOT NULL,
     CONSTRAINT FK_question_id FOREIGN KEY (question_id) REFERENCES questions(id_question),
-    selected_option_id INT NOT NULL,
-    CONSTRAINT FK_selected_option_id FOREIGN KEY (selected_option_id) REFERENCES answer_options(id_answer_option)
+    answer_option_id INT NOT NULL,
+    CONSTRAINT FK_answer_option_id FOREIGN KEY (answer_option_id) REFERENCES answer_options(id_answer_option),
     answered_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 --12. Team 
@@ -116,7 +115,7 @@ CREATE TABLE teams (
     team_name VARCHAR(50) NOT NULL,
     team_description VARCHAR(100) NOT NULL,
     max_members INT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 --13. Team members
 CREATE TABLE team_members (
@@ -140,5 +139,6 @@ CREATE TABLE team_requests (
     CONSTRAINT fk_sender FOREIGN KEY (sender_user_id) REFERENCES users(id_user),
     CONSTRAINT fk_receiverFOREIGN KEY (receiver_user_id) REFERENCES users(id_user),
     CONSTRAINT fk_team FOREIGN KEY (team_id) REFERENCES teams(id_team)
-
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    response_at TIMESTAMP
 );
