@@ -134,8 +134,8 @@ VALUES
     ('¿Cuál es la diferencia principal entre let y var?', 'JAVASCRIPT', 'MEDIUM'),
     ('¿Qué método convierte un objeto JavaScript en una cadena JSON?', 'JAVASCRIPT', 'MEDIUM'),
     ('¿Qué operador compara tanto el valor como el tipo de dato?', 'JAVASCRIPT', 'MEDIUM'),
-    ('¿Qué es una función flecha (Arrow Function)?', 'JavaScript', 'HARD'),
-    ('¿Qué método permite recorrer un arreglo ejecutando una función sobre cada elemento?', 'JavaScript', 'HARD');
+    ('¿Qué es una función flecha (Arrow Function)?', 'JAVASCRIPT', 'HARD'),
+    ('¿Qué método permite recorrer un arreglo ejecutando una función sobre cada elemento?', 'JAVASCRIPT', 'HARD');
 
 INSERT INTO answer_options (question_id, content, is_correct)
 VALUES
