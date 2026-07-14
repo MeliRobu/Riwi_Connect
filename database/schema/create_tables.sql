@@ -21,7 +21,7 @@ CREATE TABLE institutional_sources (
     email VARCHAR(100) NOT NULL UNIQUE,
     id_campus INT NOT NULL,
     id_journey INT NOT NULL,
-    id_clan INT NOT NULL,
+    id_clan INT,
 
     CONSTRAINT FK_campus FOREIGN KEY (id_campus) REFERENCES campus(id_campus),
     CONSTRAINT FK_journey FOREIGN KEY (id_journey) REFERENCES journeys(id_journey),
@@ -30,8 +30,8 @@ CREATE TABLE institutional_sources (
 --5. Users
 CREATE TABLE users (
     id_user SERIAL PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password_hash VARCHAR(100) NOT NULL,
+    document_number INT NOT NULL UNIQUE,
+    password_hash VARCHAR(250) NOT NULL,
     id_institutional_source INT NOT NULL UNIQUE,
     CONSTRAINT FK_id_institutional_source FOREIGN KEY (id_institutional_source) REFERENCES institutional_sources(id_institutional_source),
     
@@ -41,7 +41,7 @@ CREATE TABLE users (
         NOT NULL
         DEFAULT 'STUDENT'
         CHECK (role IN ('STUDENT','ADMINISTRATOR')),
-    profile_image VARCHAR(255) NOT NULL DEFAULT 'default_avatar.png'
+    profile_image VARCHAR(255) NOT NULL DEFAULT 'assets/default_avatar.png'
 );
 --6. Assessments configuration
 CREATE TABLE assessment_configurations (
@@ -49,13 +49,12 @@ CREATE TABLE assessment_configurations (
     question_count INT NOT NULL,
     selection_method VARCHAR(50) NOT NULL,
     time_limit INT NOT NULL
-);
+); 
 --7. Assessment 
 CREATE TABLE assessments (
     id_assessment SERIAL PRIMARY KEY,
     user_id INT NOT NULL UNIQUE,
     CONSTRAINT FK_user_id FOREIGN KEY (user_id) REFERENCES users(id_user),
-    description VARCHAR(100) NOT NULL,
     started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP
 );
@@ -122,15 +121,22 @@ CREATE TABLE team_members (
 --14. Team requests
 CREATE TABLE team_requests (
     id_team_request SERIAL PRIMARY KEY,
-    sender_user_id INT NOT NULL,
-    receiver_user_id INT NOT NULL,
-    team_id INT NOT NULL,
-        status VARCHAR(20)
+    sender_user_id INT NOT NULL UNIQUE,
+    receiver_user_id INT NOT NULL UNIQUE,
+    team_id INT NOT NULL UNIQUE,
+    status VARCHAR(20)
         DEFAULT 'PENDING'
-        CHECK (status IN ('PENDING','ACCEPTED','REJECTED')),
+        CHECK (status IN ('PENDING','ACCEPTED','REJECTED', 'CANCELLED')),
+    type VARCHAR (20) NOT NULL
+        CHECK ( type IN('REQUEST', 'INVITATION')),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    response_at TIMESTAMP,
+
     CONSTRAINT fk_sender FOREIGN KEY (sender_user_id) REFERENCES users(id_user),
     CONSTRAINT fk_receiver FOREIGN KEY (receiver_user_id) REFERENCES users(id_user),
     CONSTRAINT fk_team FOREIGN KEY (team_id) REFERENCES teams(id_team),
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    response_at TIMESTAMP
+--This constraint ensures that a user cannot send a request to themselves or invite themselves to a team.
+    CONSTRAINT chk_sender_receiver CHECK (sender_user_id <> receiver_user_id)
 );
+
+
