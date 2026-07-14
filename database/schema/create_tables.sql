@@ -41,7 +41,7 @@ CREATE TABLE users (
         NOT NULL
         DEFAULT 'STUDENT'
         CHECK (role IN ('STUDENT','ADMINISTRATOR')),
-    profile_image VARCHAR(255)
+    profile_image VARCHAR(255) NOT NULL DEFAULT 'default_avatar.png'
 );
 --6. Assessments configuration
 CREATE TABLE assessment_configurations (
@@ -64,16 +64,16 @@ CREATE TABLE assessment_results(
     id_assessment_result SERIAL PRIMARY KEY,
     assessment_id INT NOT NULL UNIQUE,
     CONSTRAINT FK_assessment_id FOREIGN KEY (assessment_id) REFERENCES assessments(id_assessment),
-    
+
     overall_score DECIMAL (5,2) NOT NULL CHECK (overall_score BETWEEN 0 AND 100),
     python_score DECIMAL (5,2) NOT NULL,
     sql_score DECIMAL (5,2) NOT NULL,
     javascript_score DECIMAL (5,2) NOT NULL,
     html_score DECIMAL (5,2) NOT NULL,
     css_score DECIMAL (5,2) NOT NULL,
-    strengths VARCHAR(100) NOT NULL,
-    improvement_opportunities VARCHAR(100) NOT NULL,
-    profile_description VARCHAR(100) NOT NULL
+    strengths TEXT ,
+    improvement_opportunities TEXT,
+    profile_description TEXT
 
 );
 --9. Questions
@@ -83,7 +83,6 @@ CREATE TABLE questions (
     category VARCHAR(50) NOT NULL,
     difficulty_level VARCHAR(20) NOT NULL
         CHECK (difficulty_level IN ('EASY','MEDIUM','HARD'))
-    
 );
 --10. Answer options
 CREATE TABLE answer_options (
@@ -96,20 +95,18 @@ CREATE TABLE answer_options (
 --11. Student answers
 CREATE TABLE student_answers (
     id_student_answer SERIAL PRIMARY KEY,
-    assessment_id INT NOT NULL,
+    assessment_id INT NOT NULL UNIQUE,
     CONSTRAINT FK_assessment_id FOREIGN KEY (assessment_id) REFERENCES assessments(id_assessment),
-    question_id INT NOT NULL,
+    question_id INT NOT NULL UNIQUE,
     CONSTRAINT FK_question_id FOREIGN KEY (question_id) REFERENCES questions(id_question),
-    answer_option_id INT NOT NULL,
+    answer_option_id INT NOT NULL ,
     CONSTRAINT FK_answer_option_id FOREIGN KEY (answer_option_id) REFERENCES answer_options(id_answer_option),
     answered_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 --12. Team 
 CREATE TABLE teams (
     id_team SERIAL PRIMARY KEY,
-    team_name VARCHAR(50) NOT NULL,
-    team_description VARCHAR(100) NOT NULL,
-    max_members INT NOT NULL,
+    team_name VARCHAR(50) NOT NULL UNIQUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 --13. Team members
