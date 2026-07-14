@@ -1,2 +1,3 @@
-THIS IS THE MAIN BRANCH
+THIS IS THE "database" BRANCH, for structuring the database of the app
+
 
