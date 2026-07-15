@@ -94,11 +94,11 @@ CREATE TABLE answer_options (
 --11. Student answers
 CREATE TABLE student_answers (
     id_student_answer SERIAL PRIMARY KEY,
-    assessment_id INT NOT NULL UNIQUE,
+    assessment_id INT,
     CONSTRAINT FK_assessment_id FOREIGN KEY (assessment_id) REFERENCES assessments(id_assessment),
-    question_id INT NOT NULL UNIQUE,
+    question_id INT,
     CONSTRAINT FK_question_id FOREIGN KEY (question_id) REFERENCES questions(id_question),
-    answer_option_id INT NOT NULL ,
+    answer_option_id INT,
     CONSTRAINT FK_answer_option_id FOREIGN KEY (answer_option_id) REFERENCES answer_options(id_answer_option),
     answered_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -111,7 +111,7 @@ CREATE TABLE teams (
 --13. Team members
 CREATE TABLE team_members (
     id_team_member SERIAL PRIMARY KEY,
-    user_id INT NOT NULL UNIQUE,
+    user_id INT,
     CONSTRAINT FK_user_id FOREIGN KEY (user_id) REFERENCES users(id_user),
     team_id INT NOT NULL,
     CONSTRAINT FK_team_id FOREIGN KEY (team_id) REFERENCES teams(id_team),
@@ -121,9 +121,9 @@ CREATE TABLE team_members (
 --14. Team requests
 CREATE TABLE team_requests (
     id_team_request SERIAL PRIMARY KEY,
-    sender_user_id INT NOT NULL UNIQUE,
-    receiver_user_id INT NOT NULL UNIQUE,
-    team_id INT NOT NULL UNIQUE,
+    sender_user_id INT,
+    receiver_user_id INT,
+    team_id INT,
     status VARCHAR(20)
         DEFAULT 'PENDING'
         CHECK (status IN ('PENDING','ACCEPTED','REJECTED', 'CANCELLED')),
