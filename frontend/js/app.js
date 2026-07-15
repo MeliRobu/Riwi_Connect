@@ -12,3 +12,4 @@ window.toggleUserMenu = toggleUserMenu;
 window.toggleSettingsSubmenu = toggleSettingsSubmenu;
 initUserMenuListener();
 router();
+

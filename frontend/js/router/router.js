@@ -1,57 +1,65 @@
 import { routes } from "./routes";
 import { updateActiveNavLink } from "../utils";
 
-// Reemplaza esto con tu lógica real de autenticación
+// Placeholders representing simulated authentication states
 const isLogged = true; 
 const role = "user";
 
+/**
+ * Core SPA Hash Router Function
+ * Orchestrates the application state by matching the current URL hash to a registered route, 
+ * validating authentication/privacy parameters, dynamically toggling layout sidebars, 
+ * injecting the corresponding HTML template, and triggering transition animations.
+ */
 export async function router() {
   let currentPath = window.location.hash.slice(1) || "/";
   let view = routes[currentPath];
 
-  /** Rutes que no deben mostrar la barra de navegación */
+  /** Array of route paths that should omit the sidebar display */
   const routesWithoutNav = ["/login", "/register", '/home'];
   
   const root = document.getElementById("root");
   const sidebarContainer = document.getElementById("sidebar-container");
   const shouldShowNav = !routesWithoutNav.includes(currentPath);
 
+  // Dynamically alters layout structure and sidebar visibility depending on the current route
   sidebarContainer.style.display = shouldShowNav ? "block" : "none";
   root.className = shouldShowNav
-  ? "grid grid-cols-[clamp(220px,16vw,300px)_1fr] h-full w-full"
-  : "grid grid-cols-1 h-full w-full";
+    ? "grid grid-cols-[clamp(220px,16vw,300px)_1fr] h-full w-full"
+    : "grid grid-cols-1 h-full w-full";
 
-
-
-  // 1. Validar si la ruta existe, si no, mostrar 404
+  // 1. Fallback: If the requested path does not exist, renders the 404 Not Found view
   if (!view) {
     document.getElementById("app").innerHTML = notFound();
     return;
   }
 
- // 2. CORREGIDO: Redirigir solo si la ruta es explícitamente privada y el usuario no está logueado
+  // 2. Security Guard: Redirects unauthorized requests attempting to access private routes to the login page
   if (view.isPrivate && !isLogged) {
     window.location.hash = "/login";
-    currentPath = "/login"; // Actualizamos la ruta actual
+    currentPath = "/login"; // Updates local path variable
     view = routes["/login"];
   }
 
-  // 3. Renderizar la navbar condicionalmente
-
-
-  // 4. Renderizar la vista con animación
+  // 3. Render: Injects the active view template with a quick CSS transition refresh
   const container = document.getElementById("app");
   container.innerHTML = view.render();
 
+  // Forces a DOM reflow to ensure the fade-in CSS keyframe animation executes consistently on view changes
   container.style.animation = "none";
-  void container.offsetWidth; // Forzar reflow para reiniciar la animación CSS
+  void container.offsetWidth; 
   container.style.animation = "fade-in 0.5s ease";
 
+  // Keeps the sidebar navigation links styled with appropriate active states based on current route
   updateActiveNavLink();
 }
 
 /**
- * Navega programáticamente a una ruta usando el Hash Routing
+ * Programmatic Navigation Helper
+ * Safely prevents standard browser action triggers and updates the window hash address,
+ * prompting the global router execution.
+ * * @param {Event} [event] - The triggering DOM interaction event.
+ * @param {string} route - The target path destination (e.g., '/dashboard').
  */
 export function navigate(event, route) {
   if (event && typeof event.preventDefault === "function") {
@@ -60,11 +68,11 @@ export function navigate(event, route) {
   window.location.hash = route;
 }
 
-// Manejar la navegación de hacia atrás/adelante del navegador
+// Subscribes router initialization to history navigation and address updates
 window.addEventListener("hashchange", router);
 
-// Exponer navigate globalmente para usar en HTML inline
+// Exposes navigate method globally to let raw inline strings execute it
 window.navigate = navigate;
 
-// Inicializar el router cuando el DOM esté listo
+// Initializes router configuration as soon as DOM tree parsing completes
 document.addEventListener("DOMContentLoaded", router);
