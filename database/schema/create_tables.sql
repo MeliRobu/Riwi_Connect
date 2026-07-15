@@ -19,8 +19,8 @@ CREATE TABLE institutional_sources (
     document_number INT NOT NULL UNIQUE,
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
-    id_campus INT NOT NULL,
-    id_journey INT NOT NULL,
+    id_campus INT,
+    id_journey INT,
     id_clan INT,
 
     CONSTRAINT FK_campus FOREIGN KEY (id_campus) REFERENCES campus(id_campus),
@@ -32,7 +32,7 @@ CREATE TABLE users (
     id_user SERIAL PRIMARY KEY,
     document_number INT NOT NULL UNIQUE,
     password_hash VARCHAR(250) NOT NULL,
-    id_institutional_source INT NOT NULL UNIQUE,
+    id_institutional_source INT,
     CONSTRAINT FK_id_institutional_source FOREIGN KEY (id_institutional_source) REFERENCES institutional_sources(id_institutional_source),
     
     status VARCHAR(20) NOT NULL  DEFAULT 'AVAILABLE'
@@ -53,7 +53,7 @@ CREATE TABLE assessment_configurations (
 --7. Assessment 
 CREATE TABLE assessments (
     id_assessment SERIAL PRIMARY KEY,
-    user_id INT NOT NULL UNIQUE,
+    user_id INT,
     CONSTRAINT FK_user_id FOREIGN KEY (user_id) REFERENCES users(id_user),
     started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP
@@ -61,7 +61,7 @@ CREATE TABLE assessments (
 --8. Assessment results
 CREATE TABLE assessment_results(
     id_assessment_result SERIAL PRIMARY KEY,
-    assessment_id INT NOT NULL UNIQUE,
+    assessment_id INT,
     CONSTRAINT FK_assessment_id FOREIGN KEY (assessment_id) REFERENCES assessments(id_assessment),
 
     overall_score DECIMAL (5,2) NOT NULL CHECK (overall_score BETWEEN 0 AND 100),
@@ -86,7 +86,7 @@ CREATE TABLE questions (
 --10. Answer options
 CREATE TABLE answer_options (
     id_answer_option SERIAL PRIMARY KEY,
-    question_id INT NOT NULL,
+    question_id INT,
     CONSTRAINT FK_question_id FOREIGN KEY (question_id) REFERENCES questions(id_question),
     content TEXT NOT NULL,
     is_correct BOOLEAN NOT NULL DEFAULT FALSE
@@ -113,7 +113,7 @@ CREATE TABLE team_members (
     id_team_member SERIAL PRIMARY KEY,
     user_id INT,
     CONSTRAINT FK_user_id FOREIGN KEY (user_id) REFERENCES users(id_user),
-    team_id INT NOT NULL,
+    team_id INT,
     CONSTRAINT FK_team_id FOREIGN KEY (team_id) REFERENCES teams(id_team),
     joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_leader BOOLEAN NOT NULL DEFAULT FALSE
