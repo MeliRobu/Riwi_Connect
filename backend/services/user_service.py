@@ -2,6 +2,8 @@ import psycopg2
 from werkzeug.security import generate_password_hash
 from database.connection import get_connection
 
+# HU: US-001 — Registro de Usuario (EP-001 — User Management)
+
 def register_user(document_number, password):
     # Open a connection to PostgreSQL
     conn = get_connection()
@@ -51,6 +53,9 @@ def register_user(document_number, password):
     conn.close()
 
     return {"message": "User registered successfully"}, 201
+
+
+# HU: US-003 — Consultar mi Perfil (EP-001 — User Management)
 
 def get_user_by_id(id_user):
     # Open a connection to PostgreSQL

@@ -80,7 +80,9 @@ CREATE TABLE questions (
     statement VARCHAR(255) NOT NULL,
     category VARCHAR(50) NOT NULL,
     difficulty_level VARCHAR(20) NOT NULL
-        CHECK (difficulty_level IN ('EASY','MEDIUM','HARD'))
+        CHECK (difficulty_level IN ('EASY','MEDIUM','HARD')),
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'
+        CHECK (status IN ('ACTIVE','INACTIVE'))
 );
 --10. Answer options
 CREATE TABLE answer_options (
@@ -99,7 +101,8 @@ CREATE TABLE student_answers (
     CONSTRAINT FK_question_id FOREIGN KEY (question_id) REFERENCES questions(id_question),
     answer_option_id INT,
     CONSTRAINT FK_answer_option_id FOREIGN KEY (answer_option_id) REFERENCES answer_options(id_answer_option),
-    answered_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    answered_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_assessment_question UNIQUE (assessment_id, question_id)
 );
 --12. Team 
 CREATE TABLE teams (

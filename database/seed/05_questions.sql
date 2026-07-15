@@ -31,7 +31,6 @@ VALUES
 (3, '<class ''float''>', FALSE),
 (3, '<class ''int''>', TRUE),
 (3, 'int', FALSE),
-(3, 'number', FALSE),
 
 -- Question 4
 (4, 'insert()', FALSE),
@@ -309,3 +308,6 @@ VALUES
 (40, 'No existe diferencia entre ambas etiquetas', FALSE),
 (40, '<div> solo puede contener texto', FALSE);
 
+ALTER TABLE questions
+ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'
+    CHECK (status IN ('ACTIVE', 'INACTIVE'));
