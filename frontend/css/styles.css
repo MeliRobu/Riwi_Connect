@@ -1,1 +1,84 @@
 @import "tailwindcss";
+
+/* Change the styles of grey "off" color to a dark-purple "active-Color"*/
+.active-link {
+  background: #EEEDFE !important;
+  color: #4B3FA8 !important;
+}
+
+.nav-link {
+  transition: background-color 200ms ease, color 500ms ease;
+}
+#user-menu {
+  transition: opacity 150ms ease, transform 150ms ease;
+  transform-origin: bottom;
+}
+
+.menu-closed {
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+  pointer-events: none;
+}
+
+.menu-open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.submenu-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 200ms ease;
+}
+
+.submenu-grid.submenu-open {
+  grid-template-rows: 1fr;
+}
+
+.submenu-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+@keyframes fade-in {
+  from { opacity: 0;  }
+  to { opacity: 1;}
+}
+
+#app {
+  animation: fade-in 0.5s ease;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+#root {
+  height: 100vh;
+}
+
+.typewriter h1 {
+  overflow: hidden; /* Ensures the content is not revealed until the animation */
+  border-right: .25em solid rgb(255, 0, 0); /* The typwriter cursor */
+  white-space: nowrap; /* Keeps the content on a single line */
+  margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+  letter-spacing: .15em; /* Adjust as needed */
+  animation: 
+    typing 3.5s steps(40, end),
+    blink-caret .75s step-end infinite;
+}
+
+/* The typing effect */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+/* The typewriter cursor effect */
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: rgb(255, 0, 0); }
+}
