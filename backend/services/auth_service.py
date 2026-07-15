@@ -1,6 +1,9 @@
 from werkzeug.security import check_password_hash
 from database.connection import get_connection
 
+
+# HU: US-002 — Inicio de Sesión (EP-001 — User Management)
+
 def login_user(document_number, password):
     # Open a connection to PostgreSQL
     conn = get_connection()
@@ -35,6 +38,8 @@ def login_user(document_number, password):
     # Return the data needed to build the session
     return {"id_user": id_user, "role": role}, 200
 
+
+# HU: US-002 — Inicio de Sesión (session teardown counterpart to login_user)
 
 def logout_user(session):
     # Clear all session data (RN-038)
