@@ -1,40 +1,32 @@
 from flask import Flask
 from database.connection import get_connection
+from config import SECRET_KEY
+from routes.user_routes import user_routes
 
-# Flask also serves the frontend directly (files in ../frontend),
-# so we avoid having to configure CORS between two separate servers.
+# Flask also serves the frontend directly (static files in frontend_dist),
+# so we don't need to deal with CORS between two separate servers
 app = Flask(__name__, static_folder="frontend_dist", static_url_path="")
+app.secret_key = SECRET_KEY  # required for session to work (login/logout)
+app.register_blueprint(user_routes)
 
 @app.route("/")
 def index():
-    # Serves the compiled frontend's entry point.
-    # Everything after this is handled client-side by router.js (hash routing),
-    # so we only need to serve index.html once, here at the root.
+    # index.html handles everything else client-side via hash routing
     return app.send_static_file("index.html")
 
 @app.route("/health")
 def health():
-    """
-    Simple check to confirm everything is working: that Flask
-    started correctly and can connect to Postgres.
-
-    Not part of any real module yet, just a sanity check that
-    the foundation is ready to build on.
-    """
+    # just a sanity check that Flask is up and can reach Postgres,
+    # not tied to any real module
     try:
         conn = get_connection()
         conn.close()
         return {"status": "ok", "database": "connected"}
     except Exception as e:
-        # If Postgres doesn't respond, return a 500 instead of "ok",
-        # so it's immediately clear the issue is the connection.
         return {"status": "ok", "database": "error", "detail": str(e)}, 500
 
 
-# Real project routes (login, assessment, teams, etc.) will be
-# added below as each module gets built.
-
 if __name__ == "__main__":
-    # host="0.0.0.0" is required so the container is reachable
-    # from outside. With 127.0.0.1 it would only work internally.
+    # 0.0.0.0 so the container is reachable from outside;
+    # 127.0.0.1 would only work internally
     app.run(host="0.0.0.0", port=5000, debug=True)
