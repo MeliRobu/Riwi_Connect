@@ -30,7 +30,6 @@ CREATE TABLE institutional_sources (
 --5. Users
 CREATE TABLE users (
     id_user SERIAL PRIMARY KEY,
-    document_number INT NOT NULL UNIQUE,
     password_hash VARCHAR(250) NOT NULL,
     id_institutional_source INT,
     CONSTRAINT FK_id_institutional_source FOREIGN KEY (id_institutional_source) REFERENCES institutional_sources(id_institutional_source),
