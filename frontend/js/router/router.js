@@ -16,14 +16,16 @@ export async function router() {
   let view = routes[currentPath];
 
   /** Array of route paths that should omit the sidebar display */
-  const routesWithoutNav = ["/login", "/register", '/home'];
+  const routesWithoutNav = ["/login", "/register", '/'];
   
-  const root = document.getElementById("root");
-  const sidebarContainer = document.getElementById("sidebar-container");
+   const root = document.getElementById("root");
   const shouldShowNav = !routesWithoutNav.includes(currentPath);
 
+  // Toggle de clase en body en vez de manipular sidebarContainer directamente
+  document.body.classList.toggle("no-nav", !shouldShowNav);
+
   // Dynamically alters layout structure and sidebar visibility depending on the current route
-  sidebarContainer.style.display = shouldShowNav ? "block" : "none";
+ 
   root.className = shouldShowNav
     ? "grid grid-cols-[clamp(220px,16vw,300px)_1fr] h-full w-full"
     : "grid grid-cols-1 h-full w-full";

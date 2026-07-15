@@ -21,7 +21,7 @@ import { admin_teams } from "../../pages/admin/teams";
  */
 export const routes = {
 
-  "/home" : {
+  "/" : {
     isPrivate: false,
     setup: () => {},
     render: home,
