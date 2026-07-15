@@ -7,9 +7,8 @@ VALUES
 
  -- ADMINISTRATOR - BARRANQUILLA
  -- Initial password: admin123 (hashed by Flask in production)
-INSERT INTO users (document_number, password_hash, id_institutional_source, status, role)
+INSERT INTO users (password_hash, id_institutional_source, status, role)
 SELECT
-    document_number,
     'admin123',
     id_institutional_source,
     'AVAILABLE',
@@ -20,14 +19,9 @@ WHERE email = 'admin.baq@riwi.io';
 -- ADMINISTRATOR - MEDELLIN , ANOTHER WAY TO DO IT
 
 INSERT INTO users
-(document_number, password_hash, id_institutional_source, status, role)
+(password_hash, id_institutional_source, status, role)
 VALUES
 (
-    (
-        SELECT document_number
-        FROM institutional_sources
-        WHERE email = 'admin.med@riwi.io'
-    ),
     'admin123',
     (
         SELECT id_institutional_source
