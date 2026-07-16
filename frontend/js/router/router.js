@@ -1,64 +1,69 @@
 import { routes } from "./routes";
 import { updateActiveNavLink } from "../utils";
+import { not_found } from "../../pages/not_found";
 
 // Placeholders representing simulated authentication states
-const isLogged = true; 
+const isLogged = true;
 const role = "admin";
+
+function resolveCurrentPath(hash = window.location.hash) {
+  const rawHash = hash.startsWith("#") ? hash.slice(1) : hash;
+  const normalized = rawHash || "/";
+
+  if (!normalized || normalized === "/") {
+    return "/";
+  }
+
+  if (normalized.startsWith("/")) {
+    return normalized;
+  }
+
+  return "/";
+}
 
 /**
  * Core SPA Hash Router Function
- * Orchestrates the application state by matching the current URL hash to a registered route, 
- * validating authentication/privacy parameters, dynamically toggling layout sidebars, 
+ * Orchestrates the application state by matching the current URL hash to a registered route,
+ * validating authentication/privacy parameters, dynamically toggling layout sidebars,
  * injecting the corresponding HTML template, and triggering transition animations.
  */
 export async function router() {
-  let currentPath = window.location.hash.slice(1) || "/";
+  const currentPath = resolveCurrentPath();
   let view = routes[currentPath];
 
   /** Array of route paths that should omit the sidebar display */
-  const routesWithoutNav = ["/login", "/register", '/'];
-  
-   const root = document.getElementById("root");
+  const routesWithoutNav = ["/login", "/register", "/"];
+  const root = document.getElementById("root");
   const shouldShowNav = !routesWithoutNav.includes(currentPath);
 
-  // Toggle de clase en body en vez de manipular sidebarContainer directamente
   document.body.classList.toggle("no-nav", !shouldShowNav);
 
-  // Dynamically alters layout structure and sidebar visibility depending on the current route
- 
   root.className = shouldShowNav
     ? "grid grid-cols-[clamp(220px,16vw,300px)_1fr] h-full w-full"
     : "grid grid-cols-1 h-full w-full";
 
-  // 1. Fallback: If the requested path does not exist, renders the 404 Not Found view
   if (!view) {
-    document.getElementById("app").innerHTML = notFound();
+    document.getElementById("app").innerHTML = not_found();
     return;
   }
 
-  // 2. Security Guard: Redirects unauthorized requests attempting to access private routes to the login page
   if (view.isPrivate && !isLogged) {
     window.location.hash = "/login";
-    currentPath = "/login"; // Updates local path variable
-    view = routes["/login"];
+    return;
   }
 
-  if (view.isPrivate && view.admin && role !== 'admin'){
+  if (view.isPrivate && view.admin && role !== "admin") {
     window.location.hash = "/login";
-    currentPath = "/login"; // Updates local path variable
-    view = routes["/login"];
-  
+    return;
   }
-  // 3. Render: Injects the active view template with a quick CSS transition refresh
+
   const container = document.getElementById("app");
   container.innerHTML = view.render();
 
-  // Forces a DOM reflow to ensure the fade-in CSS keyframe animation executes consistently on view changes
   container.style.animation = "none";
-  void container.offsetWidth; 
+  void container.offsetWidth;
   container.style.animation = "fade-in 0.5s ease";
 
-  // Keeps the sidebar navigation links styled with appropriate active states based on current route
   updateActiveNavLink();
 }
 
@@ -76,11 +81,6 @@ export function navigate(event, route) {
   window.location.hash = route;
 }
 
-// Subscribes router initialization to history navigation and address updates
 window.addEventListener("hashchange", router);
-
-// Exposes navigate method globally to let raw inline strings execute it
 window.navigate = navigate;
-
-// Initializes router configuration as soon as DOM tree parsing completes
 document.addEventListener("DOMContentLoaded", router);
