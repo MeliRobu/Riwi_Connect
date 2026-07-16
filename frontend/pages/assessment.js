@@ -1,11 +1,14 @@
-import { progressBar } from "../components/progress_bar"
+import { progressBar } from "../components/progress_bar";
+import Swal from 'sweetalert2';
+
 let currentQuestionIndex = 0;
 let userAnswers = {}; // { questionId: [respuestas seleccionadas] }
+
 const questions = [
     {
         id: 'q1',
         text: '¿Cuáles de las siguientes son estructuras de datos en JavaScript?',
-        type: 'multiple', // multiple = varias respuestas correctas (checkbox)
+        type: 'single',
         options: [
             { id: 'a', text: 'Array' },
             { id: 'b', text: 'Object' },
@@ -27,7 +30,7 @@ const questions = [
     {
         id: 'q3',
         text: '¿Cuáles son formas válidas de declarar una variable en JS?',
-        type: 'multiple',
+        type: 'single',
         options: [
             { id: 'a', text: 'var' },
             { id: 'b', text: 'let' },
@@ -36,16 +39,14 @@ const questions = [
         ]
     }
 ];
+
 function getProgressValue() {
     return Math.round(((currentQuestionIndex) / questions.length) * 100).toString();
 }
 
-export function assessment(){
-        // Estado del assessment (vive en memoria mientras el usuario hace la prueba)
-
-    
+export function assessment() {
     return `
-    </div>    <div class="m-10 p-2 flex flex-col gap-2">
+    <div class="m-10 p-2 flex flex-col gap-2">
         <span class="text-3xl font-bold">Assessment técnico</span>
         <span>Responde cada pregunta con cuidado. Sólo serás capaz de presentar esta prueba una vez</span>
         
@@ -60,15 +61,14 @@ export function assessment(){
             ${renderQuestion()}
         </div>
     </div>
-    
-    `
+    `;
 }
 
 function renderQuestion() {
     const question = questions[currentQuestionIndex];
     const isLast = currentQuestionIndex === questions.length - 1;
     const isFirst = currentQuestionIndex === 0;
-    const inputType = question.type === 'single' ? 'radio' : 'checkbox';
+    const inputType = 'radio';
     const selectedAnswers = userAnswers[question.id] || [];
 
     return `
@@ -77,19 +77,22 @@ function renderQuestion() {
             <span class="text-xl font-bold">${question.text}</span>
 
             <div class="flex flex-col gap-3 mt-2">
-                ${question.options.map(opt => `
-                    <label class="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 cursor-pointer hover:bg-[#F3F1FA] transition-all duration-200 has-[:checked]:border-[#4B3FA8] has-[:checked]:bg-[#F3F1FA]">
+                ${question.options.map(opt => {
+                    const isChecked = selectedAnswers.includes(opt.id);
+                    return `
+                    <label class="flex items-center gap-3 border rounded-xl px-4 py-3 cursor-pointer transition-all duration-200 ${isChecked ? 'border-[#4B3FA8] bg-[#F3F1FA] shadow-sm ring-1 ring-[#4B3FA8]/20' : 'border-gray-200 hover:bg-[#F3F1FA]'}">
                         <input 
                             type="${inputType}" 
                             name="question-${question.id}" 
                             value="${opt.id}"
-                            ${selectedAnswers.includes(opt.id) ? 'checked' : ''}
-                            onchange="handleAnswerChange('${question.id}', '${opt.id}', '${question.type}')"
+                            ${isChecked ? 'checked' : ''}
+                            onchange="handleAnswerChange('${question.id}', '${opt.id}')"
                             class="w-4 h-4 accent-[#4B3FA8]"
                         >
-                        <span class="text-sm font-medium">${opt.text}</span>
+                        <span class="text-sm font-medium ${isChecked ? 'text-[#4B3FA8] font-semibold' : 'text-gray-700'}">${opt.text}</span>
                     </label>
-                `).join('')}
+                    `;
+                }).join('')}
             </div>
 
             <div class="flex justify-between mt-6">
@@ -111,19 +114,10 @@ function renderQuestion() {
     `;
 }
 
-// Guarda la respuesta seleccionada según el tipo de pregunta
-window.handleAnswerChange = function(questionId, optionId, type) {
-    if (type === 'single') {
-        userAnswers[questionId] = [optionId];
-    } else {
-        if (!userAnswers[questionId]) userAnswers[questionId] = [];
-        const index = userAnswers[questionId].indexOf(optionId);
-        if (index > -1) {
-            userAnswers[questionId].splice(index, 1); // desmarca
-        } else {
-            userAnswers[questionId].push(optionId); // marca
-        }
-    }
+// Guarda una única respuesta por pregunta.
+window.handleAnswerChange = function(questionId, optionId) {
+    userAnswers[questionId] = [optionId];
+    rerenderQuestion();
 };
 
 window.goToNextQuestion = function() {
@@ -140,18 +134,32 @@ window.goToPreviousQuestion = function() {
     }
 };
 
-// Actualiza solo el contenedor de la pregunta y la barra de progreso, sin recargar toda la vista
+// Actualiza solo el contenedor de la pregunta y la barra de progreso
 function rerenderQuestion() {
-    document.getElementById('question-container').innerHTML = renderQuestion();
-    document.getElementById('progress-bar-container').innerHTML = progressBar({
-        value: getProgressValue(),
-        size: 'w-full h-3'
-    });
+    const questionContainer = document.getElementById('question-container');
+    const progressBarContainer = document.getElementById('progress-bar-container');
+    
+    if (questionContainer) {
+        questionContainer.innerHTML = renderQuestion();
+    }
+    if (progressBarContainer) {
+        progressBarContainer.innerHTML = progressBar({
+            value: getProgressValue(),
+            size: 'w-full h-3'
+        });
+    }
 }
 
 window.submitAssessment = function() {
     console.log('Respuestas finales:', userAnswers);
-    alert('¡Assessment completado! Revisa la consola para ver las respuestas guardadas.');
-    // Aquí luego puedes navegar a otra vista o enviar las respuestas a un backend
-    // navigate(null, '/dashboard');
+    Swal.fire({
+        title: '¡Assessment completado!',
+        text: 'Tu evaluación ha sido enviada correctamente. Ahora serás redirigido a tu perfil.',
+        icon: 'success',
+        confirmButtonText: 'Ver perfil',
+        confirmButtonColor: '#4B3FA8',
+        timerProgressBar: true
+    }).then(() => {
+        window.location.hash = '#/profile';
+    });
 };
