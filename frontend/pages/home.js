@@ -309,7 +309,7 @@ export function home() {
         <button class="relative inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-300 bg-brand-600 rounded-2xl hover:bg-brand-700 hover:shadow-[0_8px_30px_rgba(124,58,237,0.3)] hover:-translate-y-1 overflow-hidden group">
           <span class="absolute inset-0 w-full h-full -mt-1 rounded-lg opacity-30 bg-gradient-to-b from-transparent via-transparent to-black"></span>
           <a href="#/register" data-route="/register" onclick="navigate(event, '/register')" class="relative flex items-center gap-2">
-            ¡Empezar gratis!
+            ¡Empieza ahora!
             <svg class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
