@@ -95,3 +95,80 @@ def create_team(user_id, team_name):
     finally:
         cursor.close()
         conn.close()
+
+# HU: US-010 — Send Invitation
+# A team Leader invites an AVAILABLE student to join their team.
+def create_invitation(sender_id, team_id, receiver_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Check that the sender is the Leader of this team
+        cursor.execute(
+            """
+            SELECT is_leader
+            FROM team_members
+            WHERE user_id = %s AND team_id = %s
+            """,
+            (sender_id, team_id)
+        )
+        member = cursor.fetchone()
+        if member is None or member[0] is not True:
+            cursor.close()
+            conn.close()
+            return {"error": "Only the team Leader can send invitations"}, 403
+
+        # Check that the receiver exists and is AVAILABLE
+        cursor.execute(
+            """
+            SELECT status
+            FROM users
+            WHERE id_user = %s
+            """,
+            (receiver_id,)
+        )
+        receiver = cursor.fetchone()
+        if receiver is None:
+            cursor.close()
+            conn.close()
+            return {"error": "User not found"}, 404
+        if receiver[0] != "AVAILABLE":
+            cursor.close()
+            conn.close()
+            return {"error": "User is not available"}, 409
+
+        # Check there isn't already a pending invitation to this team
+        cursor.execute(
+            """
+            SELECT id_team_request
+            FROM team_requests
+            WHERE receiver_user_id = %s AND team_id = %s AND status = 'PENDING'
+            """,
+            (receiver_id, team_id)
+        )
+        if cursor.fetchone() is not None:
+            cursor.close()
+            conn.close()
+            return {"error": "Invitation already sent to this user"}, 409
+
+        # Create the invitation
+        cursor.execute(
+            """
+            INSERT INTO team_requests (sender_user_id, receiver_user_id, team_id, status, type)
+            VALUES (%s, %s, %s, 'PENDING', 'INVITATION')
+            RETURNING id_team_request
+            """,
+            (sender_id, receiver_id, team_id)
+        )
+        request_id = cursor.fetchone()[0]
+
+        conn.commit()
+        return {
+            "message": "Invitation sent successfully",
+            "request_id": request_id
+        }, 201
+    except Exception as e:
+        conn.rollback()
+        return {"error": str(e)}, 500
+    finally:
+        cursor.close()
+        conn.close()

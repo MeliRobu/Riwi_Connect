@@ -18,3 +18,4 @@ def create():
 
     result, status_code = create_team(session["user_id"], team_name)
     return result, status_code
+
