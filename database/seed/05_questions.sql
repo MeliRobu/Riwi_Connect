@@ -307,7 +307,3 @@ VALUES
 (40, '<span> reemplaza a <div>', FALSE),
 (40, 'No existe diferencia entre ambas etiquetas', FALSE),
 (40, '<div> solo puede contener texto', FALSE);
-
-ALTER TABLE questions
-ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'
-    CHECK (status IN ('ACTIVE', 'INACTIVE'));
