@@ -1,6 +1,16 @@
 import CanvasJS from '@canvasjs/charts';
 import { card } from '../components/card';
-import {getFormattedDate} from '../js/utils'
+
+function getFormattedDate() {
+    const date = new Date();
+    return date.toLocaleDateString('es-ES', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
 export function dashboard () {
 
     return `
@@ -28,9 +38,9 @@ export function dashboard () {
                 <span class="  text-l py-12 text-sm font-semibold text-gray-200 mb-1">${getFormattedDate()}</span>
             </div>
         </div>
-            <div class="w-full max-w-[1200px] gap-6 md:gap-10 flex flex-col md:flex-row items-stretch">
-    <a class="group w-full cursor-pointer" 
-        href="#/assessment" data-route="/assessment" onclick="navigate(event, '/assessment')">
+        <div class="w-full max-w-[1200px] mx-auto gap-6 md:gap-10 flex flex-col md:flex-row items-stretch justify-center">
+            <a class="group max-w-[360px] w-full cursor-pointer" 
+         href="#/assessment" data-route="/assessment" onclick="navigate(event, '/assessment')">
         ${card({
             className: 'h-auto min-h-[280px] md:h-110 overflow-visible transition-all duration-300 group-hover:bg-[#4b3fa8] group-hover:text-white',
             width: 'w-full',
@@ -44,7 +54,7 @@ export function dashboard () {
         })}
     </a>
 
-    <a class="group w-full cursor-pointer" 
+    <a class="group max-w-[360px] w-full cursor-pointer" 
         href="#/profile" data-route="/profile" onclick="navigate(event, '/profile')">
         ${card({
             className: 'h-auto min-h-[280px] md:h-110 overflow-visible transition-all duration-300 group-hover:bg-yellow-400 group-hover:text-white',
@@ -59,7 +69,7 @@ export function dashboard () {
         })}
     </a>
 
-    <a class="group w-full cursor-pointer" 
+    <a class="group max-w-[360px] w-full cursor-pointer" 
         href="#/teams" data-route="/teams" onclick="navigate(event, '/teams')">
         ${card({
             className: 'h-auto min-h-[280px] md:h-110 overflow-visible transition-all duration-300 group-hover:bg-cyan-400 group-hover:text-white',
@@ -73,12 +83,7 @@ export function dashboard () {
                 `
         })}
     </a>
-</div>
+    </div>
         </main>
-        
-
-        </div>
-        
-    </main>
     `
 }

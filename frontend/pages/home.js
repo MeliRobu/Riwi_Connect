@@ -231,7 +231,7 @@ export function home() {
 
       <!-- Nav Actions -->
       <div class="hidden md:flex nav-actions opacity-0 animate-nav-in [animation-delay:800ms]">
-        <a href="#/login" data-route="/login" onclick="navigate(event, '/login') class="btn-signinrounded">Iniciar sesión</a>
+        <a href="#/login" data-route="/login" onclick="navigate(event, '/login')" class="btn-signin rounded">Iniciar sesión</a>
         <a href="#/register" data-route="/register" onclick="navigate(event, '/register')" class="btn-cta">
           <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
             <line x1="7" y1="17" x2="17" y2="7"></line>

@@ -24,7 +24,7 @@ const questions = [
             { id: 'a', text: 'push()' },
             { id: 'b', text: 'pop()' },
             { id: 'c', text: 'shift()' },
-            { id: 'd', text: 'unshift()' }
+            { id: 'd', text: 'unshif    t()' }
         ]
     },
     {
