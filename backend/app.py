@@ -3,6 +3,7 @@ from database.connection import get_connection
 from config import SECRET_KEY
 from routes.user_routes import user_routes
 from routes.assessment_routes import assessment_routes
+from routes.team_routes import team_routes
 
 # Flask also serves the frontend directly (static files in frontend_dist),
 # so we don't need to deal with CORS between two separate servers
@@ -10,6 +11,7 @@ app = Flask(__name__, static_folder="frontend_dist", static_url_path="")
 app.secret_key = SECRET_KEY  # required for session to work (login/logout)
 app.register_blueprint(user_routes)
 app.register_blueprint(assessment_routes)
+app.register_blueprint(team_routes)
 
 @app.route("/")
 def index():
