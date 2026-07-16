@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+body.no-nav #app {
+  padding: 0 !important;
+}
+
+body.no-nav #app > section:first-child {
+  margin-top: 0;
+  padding-top: 1.5rem;
+}
+
+body.no-nav #app .max-w-7xl,
+body.no-nav #app .max-w-6xl,
+body.no-nav #app .max-w-4xl {
+  width: 100%;
+  max-width: 100%;
+}
+
 @theme {
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-heading: 'Outfit', sans-serif;

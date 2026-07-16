@@ -66,6 +66,14 @@ html, body {
 
 #root {
   height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  width: 100%;
+}
+
+body:not(.no-nav) #root {
+  grid-template-columns: clamp(220px, 16vw, 300px) minmax(0, 1fr);
 }
 
 .typewriter h1 {
@@ -91,21 +99,17 @@ html, body {
   50% { border-color: rgb(255, 0, 0); }
 }
 
-  #root {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  @media (min-width: 768px) {
-    #root {
-      grid-template-columns: clamp(220px, 16vw, 300px) 1fr;
-    }
-  }
-
-  /* Para el contenedor que tenga overflow, ej: #app */
+/* Para el contenedor que tenga overflow, ej: #app */
 #app {
   scrollbar-width: none; 
   -ms-overflow-style: none; 
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+body.no-nav #app {
+  padding: 0;
 }
 
 #app::-webkit-scrollbar {

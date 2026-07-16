@@ -1,5 +1,5 @@
 import '../css/home.css';
-
+import {button} from '../components/button'
 export function home() {
   setTimeout(() => {
     const header = document.getElementById('site-header');
@@ -223,17 +223,16 @@ export function home() {
       <!-- Desktop Nav -->
       <nav id="desktop-nav" class="hidden md:flex nav-pill relative">
         <div class="nav-pill-indicator" id="nav-indicator"></div>
-        <a href="#como-funciona" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:300ms] active">Cómo funciona</a>
-        <a href="#caracteristicas" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:400ms]">Características</a>
-        <a href="#testimonios" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:500ms]">Testimonios</a>
-        <a href="#planes" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:600ms]">Planes</a>
-        <a href="#faq" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:700ms]">FAQ</a>
+        <a href="/#como-funciona" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:300ms] active">Cómo funciona</a>
+        <a href="/#caracteristicas" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:400ms]">Características</a>
+        <a href="/#testimonios" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:500ms]">Testimonios</a>
+        <a href="/#faq" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:700ms]">FAQ</a>
       </nav>
 
       <!-- Nav Actions -->
       <div class="hidden md:flex nav-actions opacity-0 animate-nav-in [animation-delay:800ms]">
-        <a href="#hero" class="btn-signin">Iniciar sesión</a>
-        <a href="#hero" class="btn-cta">
+        <a href="#/login" data-route="/login" onclick="navigate(event, '/login') class="btn-signinrounded">Iniciar sesión</a>
+        <a href="#/register" data-route="/register" onclick="navigate(event, '/register')" class="btn-cta">
           <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
             <line x1="7" y1="17" x2="17" y2="7"></line>
             <polyline points="7 7 17 7 17 17"></polyline>
@@ -309,20 +308,14 @@ export function home() {
       <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto reveal reveal-delay-3">
         <button class="relative inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-300 bg-brand-600 rounded-2xl hover:bg-brand-700 hover:shadow-[0_8px_30px_rgba(124,58,237,0.3)] hover:-translate-y-1 overflow-hidden group">
           <span class="absolute inset-0 w-full h-full -mt-1 rounded-lg opacity-30 bg-gradient-to-b from-transparent via-transparent to-black"></span>
-          <span class="relative flex items-center gap-2">
+          <a href="#/register" data-route="/register" onclick="navigate(event, '/register')" class="relative flex items-center gap-2">
             ¡Empezar gratis!
             <svg class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
-          </span>
+          </a>
         </button>
-        <button class="inline-flex items-center justify-center px-8 py-4 font-bold transition-all duration-300 bg-white/80 backdrop-blur-md border border-slate-200 text-slate-700 rounded-2xl hover:border-brand-300 hover:text-brand-700 hover:-translate-y-1 hover:shadow-lg">
-          <svg class="w-5 h-5 mr-2 text-brand-500" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z" />
-          </svg>
-          Ver demostración
-        </button>
-      </div>
+       </div>
 
       <!-- Interfaz Flotante (Mockup Dashboard) -->
       <div class="mt-16 w-full max-w-5xl mx-auto relative reveal reveal-delay-4 z-20">
@@ -333,7 +326,7 @@ export function home() {
             <div class="w-3 h-3 rounded-full bg-amber-400"></div>
             <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
           </div>
-          <img src="img/home.jpg" alt="Connect Dashboard" class="w-full rounded-b-2xl shadow-inner object-cover h-[300px] sm:h-[400px] lg:h-[550px] grayscale-[15%] hover:grayscale-0 transition-all duration-700" />
+          <img src="./assets/home.jpg" alt="Connect Dashboard" class="w-full rounded-b-2xl shadow-inner object-cover h-[300px] sm:h-[400px] lg:h-[550px] grayscale-[15%] hover:grayscale-0 transition-all duration-700" />
 
           <div class="absolute -left-6 top-1/4 bg-white/90 backdrop-blur-md p-4 rounded-2xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] animate-float hidden md:flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center text-emerald-600 shadow-inner">
@@ -440,69 +433,69 @@ export function home() {
     <div class="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
       <div class="text-center max-w-3xl mx-auto mb-20 reveal">
         <h2 class="text-brand-400 font-bold tracking-widest uppercase text-sm mb-4">Características Premium</h2>
-        <h3 class="text-4xl md:text-5xl font-heading font-black text-white tracking-tight">Potencia tu flujo de trabajo</h3>
-        <p class="text-slate-400 mt-5 text-lg leading-relaxed">Todo lo necesario para que los equipos de desarrollo colaboren, organicen y desplieguen más rápido.</p>
+        <h3 class="text-4xl md:text-5xl font-heading font-black text-white tracking-tight">Todo lo que necesitas para gestionar Coders</h3>
+        <p class="text-slate-400 mt-5 text-lg leading-relaxed">Una plataforma pensada para evaluar, organizar y potenciar el crecimiento de los equipos de desarrollo.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div class="p-8 rounded-3xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] hover:bg-white/[0.05] hover:border-brand-500/40 transition-all duration-500 group reveal">
           <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 flex items-center justify-center mb-6 border border-violet-500/30 group-hover:scale-110 group-hover:-rotate-3 transition-transform text-violet-400">
             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <h4 class="text-xl font-bold text-white mb-3 font-heading">Match Inteligente</h4>
-          <p class="text-slate-400 leading-relaxed text-sm">Nuestro algoritmo de inteligencia artificial analiza miles de perfiles para emparejarte con las skills perfectas para tu proyecto.</p>
+          <h4 class="text-xl font-bold text-white mb-3 font-heading">Banco de preguntas</h4>
+          <p class="text-slate-400 leading-relaxed text-sm">Crea, edita, activa o desactiva preguntas y configura pruebas técnicas a la medida de cada proceso de evaluación.</p>
         </div>
 
         <div class="p-8 rounded-3xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] hover:bg-white/[0.05] hover:border-indigo-500/40 transition-all duration-500 group reveal reveal-delay-1">
           <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-blue-500/20 flex items-center justify-center mb-6 border border-indigo-500/30 group-hover:scale-110 group-hover:-rotate-3 transition-transform text-indigo-400">
             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
           </div>
-          <h4 class="text-xl font-bold text-white mb-3 font-heading">Kanban Integrado</h4>
-          <p class="text-slate-400 leading-relaxed text-sm">Gestiona tareas con tableros interactivos sincronizados en tiempo real. Asigna, mueve y completa tickets sin salir de la plataforma.</p>
+          <h4 class="text-xl font-bold text-white mb-3 font-heading">Estadísticas en tiempo real</h4>
+          <p class="text-slate-400 leading-relaxed text-sm">Revisa el progreso de registro y las estadísticas generales de cada equipo, con datos siempre actualizados.</p>
         </div>
 
         <div class="p-8 rounded-3xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] hover:bg-white/[0.05] hover:border-rose-500/40 transition-all duration-500 group reveal reveal-delay-2">
           <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500/20 to-orange-500/20 flex items-center justify-center mb-6 border border-rose-500/30 group-hover:scale-110 group-hover:-rotate-3 transition-transform text-rose-400">
             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
-          <h4 class="text-xl font-bold text-white mb-3 font-heading">Code Reviews</h4>
-          <p class="text-slate-400 leading-relaxed text-sm">Comenta, revisa y aprueba el código directamente. Integración nativa con tus repositorios favoritos para un flujo perfecto.</p>
+          <h4 class="text-xl font-bold text-white mb-3 font-heading">Gestión de equipos</h4>
+          <p class="text-slate-400 leading-relaxed text-sm">Consulta las fortalezas y debilidades de los equipos conformados, y toma decisiones informadas sobre su composición.</p>
         </div>
 
         <div class="p-8 rounded-3xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] hover:bg-white/[0.05] hover:border-emerald-500/40 transition-all duration-500 group reveal">
           <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center mb-6 border border-emerald-500/30 group-hover:scale-110 group-hover:-rotate-3 transition-transform text-emerald-400">
             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
           </div>
-          <h4 class="text-xl font-bold text-white mb-3 font-heading">CI/CD Nativo</h4>
-          <p class="text-slate-400 leading-relaxed text-sm">Despliegues automatizados y continuos. Configura pipelines visualmente y deja que nuestra plataforma se encargue del trabajo pesado.</p>
+          <h4 class="text-xl font-bold text-white mb-3 font-heading">Pruebas técnicas configurables</h4>
+          <p class="text-slate-400 leading-relaxed text-sm">Diseña assessments a la medida, activa las preguntas que necesites y evalúa el nivel técnico real de cada Coder.</p>
         </div>
 
         <div class="p-8 rounded-3xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] hover:bg-white/[0.05] hover:border-amber-500/40 transition-all duration-500 group reveal reveal-delay-1">
           <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500/20 to-yellow-500/20 flex items-center justify-center mb-6 border border-amber-500/30 group-hover:scale-110 group-hover:-rotate-3 transition-transform text-amber-400">
             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
-          <h4 class="text-xl font-bold text-white mb-3 font-heading">Chat en Vivo</h4>
-          <p class="text-slate-400 leading-relaxed text-sm">Comunícate al instante. Canales temáticos, hilos, menciones y notificaciones push para mantener al equipo siempre sincronizado.</p>
+          <h4 class="text-xl font-bold text-white mb-3 font-heading">Recomendaciones inteligentes</h4>
+          <p class="text-slate-400 leading-relaxed text-sm">Recibe sugerencias personalizadas para mejorar el rendimiento individual y grupal de tus equipos de Coders.</p>
         </div>
 
         <div class="p-8 rounded-3xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] hover:bg-white/[0.05] hover:border-cyan-500/40 transition-all duration-500 group reveal reveal-delay-2">
           <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center mb-6 border border-cyan-500/30 group-hover:scale-110 group-hover:-rotate-3 transition-transform text-cyan-400">
             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17a5 5 0 110-10 5 5 0 010 10z" />
             </svg>
           </div>
-          <h4 class="text-xl font-bold text-white mb-3 font-heading">Métricas de Equipo</h4>
-          <p class="text-slate-400 leading-relaxed text-sm">Visualiza la velocidad de tu sprint, calidad de código y el aporte individual. Dashboards hermosos listos para analizar.</p>
+          <h4 class="text-xl font-bold text-white mb-3 font-heading">Panel de administración</h4>
+          <p class="text-slate-400 leading-relaxed text-sm">Gestiona todo desde un solo lugar: usuarios, roles, equipos y contenido de evaluación, con control total como administrador.</p>
         </div>
       </div>
     </div>
@@ -632,120 +625,6 @@ export function home() {
     </div>
   </section>
 
-  <!-- ===== SECCIÓN PLANES ===== -->
-  <section id="planes" class="py-24 lg:py-32 bg-white relative overflow-hidden">
-    <div class="absolute inset-0 dot-grid opacity-30"></div>
-    <div class="text-center max-w-3xl mx-auto mb-20 relative z-10 reveal">
-      <h2 class="text-brand-600 font-bold tracking-widest uppercase text-sm mb-4">Planes</h2>
-      <h3 class="text-4xl md:text-5xl font-heading font-black text-slate-900 tracking-tight">Invierte en tu equipo</h3>
-      <p class="text-slate-500 mt-5 text-lg leading-relaxed">Sin sorpresas. Escala desde proyectos en solitario hasta corporaciones gigantes de forma transparente.</p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-5 sm:px-6 items-center relative z-10">
-      <div class="bg-white rounded-[2rem] p-8 md:p-10 border border-slate-200 shadow-lg reveal reveal-delay-1 hover:-translate-y-2 transition-transform duration-300">
-        <h4 class="text-xl font-bold text-slate-900 font-heading">Starter</h4>
-        <p class="text-slate-500 text-sm mt-2">Para comenzar a explorar</p>
-        <div class="my-8 flex items-baseline">
-          <span class="text-5xl font-black text-slate-900">$0</span>
-          <span class="text-slate-500 ml-2">/ mes</span>
-        </div>
-        <ul class="space-y-4 mb-8">
-          <li class="flex items-center gap-3 text-slate-600">
-            <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-            </svg>
-            Perfil público
-          </li>
-          <li class="flex items-center gap-3 text-slate-600">
-            <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-            </svg>
-            3 matches a la semana
-          </li>
-          <li class="flex items-center gap-3 text-slate-600">
-            <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-            </svg>
-            Kanban básico
-          </li>
-        </ul>
-        <button class="w-full py-4 rounded-xl border-2 border-slate-200 font-bold text-slate-700 hover:border-brand-500 hover:text-brand-600 transition-colors">Crear cuenta gratis</button>
-      </div>
-
-      <div class="bg-dark rounded-[2.5rem] p-8 md:p-12 border border-slate-800 shadow-2xl shadow-brand-500/20 relative transform md:-translate-y-6 reveal reveal-delay-2 group overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-brand-600/20 to-indigo-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-500 to-indigo-500 text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider shadow-lg shadow-brand-500/30">
-          Más Popular
-        </div>
-        <div class="relative z-10">
-          <h4 class="text-xl font-bold text-white font-heading">Pro</h4>
-          <p class="text-slate-400 text-sm mt-2">Para equipos que crecen</p>
-          <div class="my-8 flex items-baseline text-white">
-            <span class="text-5xl font-black">$19</span>
-            <span class="text-slate-400 ml-2">/ mes</span>
-          </div>
-          <ul class="space-y-4 mb-8">
-            <li class="flex items-center gap-3 text-slate-300">
-              <svg class="w-5 h-5 text-brand-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-              </svg>
-              Matches ilimitados
-            </li>
-            <li class="flex items-center gap-3 text-slate-300">
-              <svg class="w-5 h-5 text-brand-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-              </svg>
-              Code Reviews Integrados
-            </li>
-            <li class="flex items-center gap-3 text-slate-300">
-              <svg class="w-5 h-5 text-brand-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-              </svg>
-              CI/CD Pipelines
-            </li>
-            <li class="flex items-center gap-3 text-slate-300">
-              <svg class="w-5 h-5 text-brand-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-              </svg>
-              Métricas avanzadas
-            </li>
-          </ul>
-          <button class="w-full py-4 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 font-bold text-white shadow-lg hover:shadow-brand-500/40 transition-all active:scale-95">Empezar prueba</button>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-[2rem] p-8 md:p-10 border border-slate-200 shadow-lg reveal reveal-delay-3 hover:-translate-y-2 transition-transform duration-300">
-        <h4 class="text-xl font-bold text-slate-900 font-heading">Enterprise</h4>
-        <p class="text-slate-500 text-sm mt-2">Para organizaciones</p>
-        <div class="my-8 flex items-baseline">
-          <span class="text-5xl font-black text-slate-900">$49</span>
-          <span class="text-slate-500 ml-2">/ mes</span>
-        </div>
-        <ul class="space-y-4 mb-8">
-          <li class="flex items-center gap-3 text-slate-600">
-            <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-            </svg>
-            Todo lo de Pro
-          </li>
-          <li class="flex items-center gap-3 text-slate-600">
-            <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-            </svg>
-            SSO & Auditoría
-          </li>
-          <li class="flex items-center gap-3 text-slate-600">
-            <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-            </svg>
-            Soporte 24/7 VIP
-          </li>
-        </ul>
-        <button class="w-full py-4 rounded-xl border-2 border-slate-200 font-bold text-slate-700 hover:border-brand-500 hover:text-brand-600 transition-colors">Hablar con ventas</button>
-      </div>
-    </div>
-  </section>
-
   <!-- ===== SECCIÓN FAQ ===== -->
   <section id="faq" class="py-24 lg:py-32 bg-slate-50 relative overflow-hidden">
     <div class="max-w-4xl mx-auto px-5 sm:px-6 relative z-10">
@@ -779,17 +658,7 @@ export function home() {
           </div>
         </div>
 
-        <div class="faq-item bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-brand-300 transition-colors duration-300 reveal shadow-sm reveal-delay-2">
-          <button class="faq-btn w-full flex items-center justify-between p-6 text-left font-bold font-heading text-lg text-slate-900 transition-colors duration-300">
-            <span class="pr-4">¿Puedo cancelar mi plan en cualquier momento?</span>
-            <svg class="faq-btn-icon w-6 h-6 text-brand-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          <div class="faq-answer">
-            <p class="px-6 pb-6 text-slate-600 leading-relaxed">Sí, puedes cancelar tu suscripción en cualquier momento. No hay contratos anuales ni penalizaciones ocultas.</p>
-          </div>
-        </div>
+  
       </div>
     </div>
   </section>
@@ -804,8 +673,8 @@ export function home() {
       <p class="text-slate-400 text-lg mb-10 max-w-2xl mx-auto">Únete a miles de desarrolladores que ya encontraron su equipo ideal. Empieza en segundos, es completamente gratis.</p>
 
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <button class="px-8 py-4 bg-white text-slate-900 font-bold rounded-full hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_rgba(255,255,255,0.2)]">Crear cuenta gratis</button>
-        <button class="px-8 py-4 bg-white/10 text-white font-bold rounded-full hover:bg-white/20 transition-colors border border-white/20">Iniciar sesion</button>
+        <a href="#/register" data-route="/register" onclick="navigate(event, '/register')" class=" cursor-pointerpx-8 py-4 bg-white text-slate-900 font-bold rounded-full hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_rgba(255,255,255,0.2)]">Crear cuenta gratis</a>
+        <a href="#/login" data-route="/login" onclick="navigate(event, '/login')" class=" cursor-pointer px-8 py-4 bg-white/10 text-white font-bold rounded-full hover:bg-white/20 transition-colors border border-white/20">Iniciar sesion</a>
       </div>
     </div>
   </section>
