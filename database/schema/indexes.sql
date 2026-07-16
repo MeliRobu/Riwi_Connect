@@ -104,6 +104,9 @@ ON team_members(team_id);
 CREATE INDEX idx_team_members_leader
 ON team_members(is_leader);
 
+/* Search by users*/
+CREATE INDEX idx_team_members_user 
+ON team_members(user_id);
 
 
 /*Team Requests*/
