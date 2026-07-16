@@ -70,10 +70,22 @@ html, body {
   grid-template-columns: minmax(0, 1fr);
   min-width: 0;
   width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body:not(.no-nav) #root {
   grid-template-columns: clamp(220px, 16vw, 300px) minmax(0, 1fr);
+}
+
+@media (max-width: 767px) {
+  #root {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body:not(.no-nav) #root {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
 }
 
 .typewriter h1 {
