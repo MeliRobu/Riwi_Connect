@@ -6,3 +6,4 @@ class AssessmentConfiguration:
         self.question_count = question_count
         self.selection_method = selection_method
         self.time_limit = time_limit
+
