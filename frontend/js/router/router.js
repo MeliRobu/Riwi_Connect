@@ -16,7 +16,7 @@ export async function router() {
   let view = routes[currentPath];
 
   /** Array of route paths that should omit the sidebar display */
-  const routesWithoutNav = ["/login", "/register", '/home'];
+  const routesWithoutNav = ["/login", "/register", '/home', '/'];
   
   const root = document.getElementById("root");
   const sidebarContainer = document.getElementById("sidebar-container");

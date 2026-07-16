@@ -17,7 +17,7 @@ import { not_found } from "../../pages/not_found";
  */
 export const routes = {
 
-  "/home" : {
+  "/" : {
     isPrivate: false,
     setup: () => {},
     render: home
