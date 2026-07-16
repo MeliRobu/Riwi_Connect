@@ -9,3 +9,6 @@ dist/
 build/
 frontend_dist/
 cookies.txt
+cookies_a.txt
+cookies_b.txt
+cookies*.txt
