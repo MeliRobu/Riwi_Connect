@@ -30,7 +30,7 @@ export function card({
   return `
     <div class="${baseStyles} ${width} ${bgColor} ${padding} ${className}">
       ${headerHTML}
-      <div class="text-gray-600 dark:text-gray-300">
+      <div class="">
         ${content}
       </div>
     </div>

@@ -5,7 +5,15 @@
   background: #EEEDFE !important;
   color: #4B3FA8 !important;
 }
+#sidebar-container {
+  display: contents !important;
+}
 
+body.no-nav #sidebar,
+body.no-nav #menu-toggle,
+body.no-nav #menu-overlay {
+  display: none !important;
+}
 .nav-link {
   transition: background-color 200ms ease, color 500ms ease;
 }
@@ -81,4 +89,25 @@ html, body {
 @keyframes blink-caret {
   from, to { border-color: transparent }
   50% { border-color: rgb(255, 0, 0); }
+}
+
+  #root {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 768px) {
+    #root {
+      grid-template-columns: clamp(220px, 16vw, 300px) 1fr;
+    }
+  }
+
+  /* Para el contenedor que tenga overflow, ej: #app */
+#app {
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+}
+
+#app::-webkit-scrollbar {
+  display: none; 
 }

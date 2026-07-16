@@ -3,7 +3,7 @@ import { updateActiveNavLink } from "../utils";
 
 // Placeholders representing simulated authentication states
 const isLogged = true; 
-const role = "user";
+const role = "admin";
 
 /**
  * Core SPA Hash Router Function
@@ -16,14 +16,16 @@ export async function router() {
   let view = routes[currentPath];
 
   /** Array of route paths that should omit the sidebar display */
-  const routesWithoutNav = ["/login", "/register", '/home'];
+  const routesWithoutNav = ["/login", "/register", '/'];
   
-  const root = document.getElementById("root");
-  const sidebarContainer = document.getElementById("sidebar-container");
+   const root = document.getElementById("root");
   const shouldShowNav = !routesWithoutNav.includes(currentPath);
 
+  // Toggle de clase en body en vez de manipular sidebarContainer directamente
+  document.body.classList.toggle("no-nav", !shouldShowNav);
+
   // Dynamically alters layout structure and sidebar visibility depending on the current route
-  sidebarContainer.style.display = shouldShowNav ? "block" : "none";
+ 
   root.className = shouldShowNav
     ? "grid grid-cols-[clamp(220px,16vw,300px)_1fr] h-full w-full"
     : "grid grid-cols-1 h-full w-full";
@@ -41,6 +43,12 @@ export async function router() {
     view = routes["/login"];
   }
 
+  if (view.isPrivate && view.admin && role !== 'admin'){
+    window.location.hash = "/login";
+    currentPath = "/login"; // Updates local path variable
+    view = routes["/login"];
+  
+  }
   // 3. Render: Injects the active view template with a quick CSS transition refresh
   const container = document.getElementById("app");
   container.innerHTML = view.render();
