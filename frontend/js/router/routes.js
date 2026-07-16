@@ -7,6 +7,10 @@ import { smart_profile } from "../../pages/smart_profile";
 import { assessment } from "../../pages/assessment";
 import { assessment_result } from "../../pages/assessment_results";
 import { not_found } from "../../pages/not_found";
+import { admin_home } from "../../pages/admin/admin_home";
+import { questions } from "../../pages/admin/questions";
+import { statistics } from "../../pages/admin/statistics";
+import { admin_teams } from "../../pages/admin/teams";
 
 /**
  * SPA Route Registry
@@ -17,50 +21,77 @@ import { not_found } from "../../pages/not_found";
  */
 export const routes = {
 
-  "/home" : {
+  "/" : {
     isPrivate: false,
     setup: () => {},
-    render: home
+    render: home,
+    admin: false,
   },
   "/login":{
     isPrivate: false,
     setup: () => {},
-    render: login
+    render: login,
+    admin: false
   },
   "/register": {
     isPrivate: false,
     setup: () => {},
-    render: register
+    render: register,
+    admin:false
   }, 
 
   "/dashboard" : {
     isPrivate: true,
     setup: () => {},
-    render: dashboard
+    render: dashboard,
+    admin:false
   },
   "/teams" :{
     isPrivate: true,
     setup: () => {},
-    render: teams
+    render: teams,
+    admin:false
   },
   "/profile" : {
     isPrivate: true,
     setup: () => {},
     render: smart_profile,
+    admin: false
   },
   "/assessment" : {
     isPrivate: true,
     setup: () => {},
-    render: assessment
+    render: assessment,
+    admin:false
   },
-  "/assesment-result" : {
+  "/assessment-result" : {
     isPrivate: true,
     setup: () => {},
-    render: assessment_result
+    render: assessment_result,
+    admin : false
   },
   "/not-found" : {
     isPrivate: false,
     setup: () => {},
-    render: not_found
+    render: not_found,
+    admin : false
+  },
+  "/admin_home":{
+    isPrivate: true,
+    setup : () => {},
+    render: admin_home,
+    admin : true,
+  },
+  "/questions" : {
+    isPrivate : true,
+    setup: () => {},
+    render: questions,
+    admin: true
+  },
+  "/statistics" : {
+    isPrivate : true,
+    setup : () => {},
+    render : statistics,
+    admin: true
   }
 };

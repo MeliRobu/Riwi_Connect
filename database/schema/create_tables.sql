@@ -113,7 +113,7 @@ CREATE TABLE teams (
 --13. Team members
 CREATE TABLE team_members (
     id_team_member SERIAL PRIMARY KEY,
-    user_id INT,
+    user_id INT UNIQUE,
     CONSTRAINT FK_user_id FOREIGN KEY (user_id) REFERENCES users(id_user),
     team_id INT,
     CONSTRAINT FK_team_id FOREIGN KEY (team_id) REFERENCES teams(id_team),

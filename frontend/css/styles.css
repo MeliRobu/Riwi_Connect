@@ -5,7 +5,15 @@
   background: #EEEDFE !important;
   color: #4B3FA8 !important;
 }
+#sidebar-container {
+  display: contents !important;
+}
 
+body.no-nav #sidebar,
+body.no-nav #menu-toggle,
+body.no-nav #menu-overlay {
+  display: none !important;
+}
 .nav-link {
   transition: background-color 200ms ease, color 500ms ease;
 }
@@ -58,6 +66,14 @@ html, body {
 
 #root {
   height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  width: 100%;
+}
+
+body:not(.no-nav) #root {
+  grid-template-columns: clamp(220px, 16vw, 300px) minmax(0, 1fr);
 }
 
 .typewriter h1 {
@@ -81,4 +97,21 @@ html, body {
 @keyframes blink-caret {
   from, to { border-color: transparent }
   50% { border-color: rgb(255, 0, 0); }
+}
+
+/* Para el contenedor que tenga overflow, ej: #app */
+#app {
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+body.no-nav #app {
+  padding: 0;
+}
+
+#app::-webkit-scrollbar {
+  display: none; 
 }
