@@ -56,8 +56,7 @@ def create_question():
 
 
 def update_question(question_id):
-    #Handles PUT /admin/questions/{question_id}
-
+    """Handles PUT /admin/questions/{question_id} - US-020. Updates core fields, and answer_options too if provided."""
     permission_error = check_admin_permissions()
     if permission_error:
         return permission_error
@@ -65,7 +64,15 @@ def update_question(question_id):
     request_data = request.get_json()
 
     try:
+        # Always update the question's core fields
         updated_question = admin_service.update_question(question_id, request_data)
+
+        # Only touch answer_options if the client actually sent them
+        options = request_data.get('answer_options')
+        if options is not None:
+            updated_options = admin_service.update_answer_options(question_id, options)
+            updated_question['answer_options'] = updated_options
+
         return jsonify(updated_question), 200
 
     except ValueError as validation_error:

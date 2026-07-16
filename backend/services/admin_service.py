@@ -150,6 +150,54 @@ def update_question(question_id, data):
         # close the CONNECTION (this closes the cursor along with it)
         connection.close()
 
+def update_answer_options(question_id, options):
+    """
+    PUT /admin/questions/{question_id} - Updates the 4 answer options of an existing question.
+    Called from the controller only when 'answer_options' is present in the request body.
+    """
+
+    # Business rule: must have exactly 4 options
+    if len(options) != 4:
+        raise ValueError('Cada pregunta debe tener exactamente 4 opciones')
+
+    # Business rule: exactly 1 must be marked correct
+    correct_count = 0
+    for opt in options:
+        if opt.get('is_correct'):
+            correct_count += 1
+
+    if correct_count != 1:
+        raise ValueError('Debe haber exactamente 1 opción marcada como correcta')
+
+    # Open a new connection to PostgreSQL
+    connection = get_connection()
+
+    try:
+        # Create a cursor to run SQL commands
+        update_options_sql = connection.cursor()
+
+        # Loop through each of the 4 options and update it by its own id_answer_option
+        for opt in options:
+            update_options_sql.execute("""
+                UPDATE answer_options
+                SET content = %s, is_correct = %s
+                WHERE id_answer_option = %s AND question_id = %s
+            """, (opt['content'], opt['is_correct'], opt['id_answer_option'], question_id))
+
+        # commit() belongs to the CONNECTION, not the cursor
+        connection.commit()
+
+        # Return the same options back as confirmation
+        return options
+
+    except Exception:
+        # rollback() also belongs to the CONNECTION, not the cursor
+        connection.rollback()
+        raise
+
+    finally:
+        # close the CONNECTION (this closes the cursor along with it)
+        connection.close()
 
 def update_question_status(question_id, status):
     """PATCH /admin/questions/{question_id}/status - Activates or deactivates a question."""
