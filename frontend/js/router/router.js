@@ -3,7 +3,7 @@ import { updateActiveNavLink } from "../utils";
 
 // Placeholders representing simulated authentication states
 const isLogged = true; 
-const role = "user";
+const role = "admin";
 
 /**
  * Core SPA Hash Router Function
@@ -41,6 +41,12 @@ export async function router() {
     view = routes["/login"];
   }
 
+  if (view.isPrivate && view.admin && role !== 'admin'){
+    window.location.hash = "/login";
+    currentPath = "/login"; // Updates local path variable
+    view = routes["/login"];
+  
+  }
   // 3. Render: Injects the active view template with a quick CSS transition refresh
   const container = document.getElementById("app");
   container.innerHTML = view.render();
