@@ -1,7 +1,7 @@
 from backend.database.connection import get_connection
 
 def list_questions():
-    """GET /admin/questions - Lists all questions in the question bank."""
+    """GET /admin/questions - Lists all questions in the question bank, including their answer options."""
 
     # Open a new connection to PostgreSQL
     connection = get_connection()
@@ -25,14 +25,37 @@ def list_questions():
 
         # Loop through each row (tuple) returned from the database
         for row in rows_fetched:
-            # Convert the tuple into a dictionary with named keys.
-            # IMPORTANT: index order must match the SELECT column order above.
+            # Save the question_id so we can use it in the next query below
+            question_id = row[0]
+
+            # For this question, fetch its 4 answer options
+            read_sql_questions.execute("""
+                SELECT id_answer_option, content, is_correct
+                FROM answer_options
+                WHERE question_id = %s
+                ORDER BY id_answer_option
+            """, (question_id,))
+
+            options_rows = read_sql_questions.fetchall()
+
+            # Convert each option tuple into a dictionary
+            options_list = []
+            for opt_row in options_rows:
+                option = {
+                    'id_answer_option': opt_row[0],
+                    'content': opt_row[1],
+                    'is_correct': opt_row[2]
+                }
+                options_list.append(option)
+
+            # Convert the question tuple into a dictionary, now including its options
             question = {
-                'id_question': row[0],       # 1st column -> id_question
-                'statement': row[1],         # 2nd column -> statement
-                'category': row[2],          # 3rd column -> category
-                'difficulty_level': row[3],  # 4th column -> difficulty_level
-                'status': row[4]             # 5th column -> status
+                'id_question': question_id,       # 1st column -> id_question
+                'statement': row[1],               # 2nd column -> statement
+                'category': row[2],                # 3rd column -> category
+                'difficulty_level': row[3],        # 4th column -> difficulty_level
+                'status': row[4],                  # 5th column -> status
+                'answer_options': options_list     # options fetched separately above
             }
             # Add this dictionary to the results list
             question_list.append(question)
