@@ -36,12 +36,3 @@ export function toggleSettingsSubmenu(event) {
   submenu.classList.toggle("submenu-open");
   arrow.classList.toggle("rotate-180");
 }
-
-/* Get Date*/
-// utils.js
-export function getFormattedDate() {
-    const date = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    let formatted = date.toLocaleDateString('es-ES', options);
-    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
-}

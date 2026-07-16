@@ -151,7 +151,7 @@ def update_question(question_id, data):
         connection.close()
 
 
-    def update_question_status(question_id, status):
+def update_question_status(question_id, status):
     """PATCH /admin/questions/{question_id}/status - Activates or deactivates a question."""
 
     # Business rule: status can only be one of these two values
@@ -265,73 +265,6 @@ def update_assessment_configuration(data):
         # Always close the connection
         connection.close()
 
-def get_assessment_configuration():
-    """GET /admin/assessment/configuration - Reads the single configuration row."""
-
-    # Open a new connection to PostgreSQL
-    connection = get_connection()
-
-    try:
-        # Create a cursor to run SQL commands
-        read_config_sql = connection.cursor()
-
-        # This table always has exactly ONE row (Singleton Row pattern)
-        read_config_sql.execute("""
-            SELECT id_assessment_configuration, question_count, selection_method, time_limit
-            FROM assessment_configurations
-            LIMIT 1
-        """)
-
-        # Read that single row
-        config_row = read_config_sql.fetchone()
-
-        # If somehow the table is empty, return None so the controller can handle it
-        if not config_row:
-            return None
-
-        # Convert the tuple into a dictionary with named keys
-        return {
-            'id_assessment_configuration': config_row[0],
-            'question_count': config_row[1],
-            'selection_method': config_row[2],
-            'time_limit': config_row[3]
-        }
-
-    finally:
-        # Always close the connection
-        connection.close()
-
-
-def update_assessment_configuration(data):
-    """PUT /admin/assessment/configuration - Updates the single existing configuration row."""
-
-    # Open a new connection to PostgreSQL
-    connection = get_connection()
-
-    try:
-        # Create a cursor to run SQL commands
-        update_config_sql = connection.cursor()
-
-        # No WHERE clause needed: there's only ever one row in this table
-        update_config_sql.execute("""
-            UPDATE assessment_configurations
-            SET question_count = %s, selection_method = %s, time_limit = %s
-        """, (data['question_count'], data['selection_method'], data['time_limit']))
-
-        # commit() belongs to the CONNECTION, not the cursor
-        connection.commit()
-
-        # Return the same data back as confirmation
-        return data
-
-    except Exception:
-        # Undo any partial changes if something failed
-        connection.rollback()
-        raise
-
-    finally:
-        # Always close the connection
-        connection.close()
 
 def list_teams():
     """GET /admin/teams - Lists all teams with their member count."""
