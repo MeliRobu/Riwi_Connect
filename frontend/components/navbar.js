@@ -42,7 +42,7 @@ export function navbar(isAdmin = true) {
         Dashboard
       </a>
 
-      <a href="#/tasks" data-route="/tasks" onclick="navigate(event, '/tasks'); closeMobileMenu()"
+      <a href="#/assessment"data-route="/assessment" onclick="navigate(event, '/assessment'); closeMobileMenu()"
          class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-400 hover:text-[#4B3FA8] hover:bg-[#F3F1FA] transition-all duration-200">
         <img src="./assets/icons/assessment.svg" class="w-5 h-5 opacity-60" width="20" height="20">
         Assessment

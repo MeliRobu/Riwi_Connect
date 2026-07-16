@@ -64,7 +64,7 @@ export const routes = {
     render: assessment,
     admin:false
   },
-  "/assesment-result" : {
+  "/assessment-result" : {
     isPrivate: true,
     setup: () => {},
     render: assessment_result,

@@ -9,6 +9,3 @@ dist/
 build/
 frontend_dist/
 cookies.txt
-.idea/
-__pycache__/
-*.pyc

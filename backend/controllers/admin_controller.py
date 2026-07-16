@@ -1,13 +1,12 @@
 from flask import request, jsonify, session
 from services import admin_service
 
-
-def check_admin_permissions():
 """
     Validates that there is an active session AND that the logged-in user
     has the ADMINISTRATOR role. Returns None if everything is OK,
     or a (response, status_code) tuple if the request should be blocked.
 """
+def check_admin_permissions():
 
     # Check if there's an active session at all (user is logged in)
     if 'user_id' not in session:
@@ -19,11 +18,10 @@ def check_admin_permissions():
 
     # No error: the request is allowed to continue
     return None
-
-
 #   Question bank
+
 def get_questions():
-    """Handles GET /admin/questions"""
+    #Handles GET /admin/questions
 
     # Block the request early if the user isn't an authenticated admin
     permission_error = check_admin_permissions()
@@ -38,7 +36,7 @@ def get_questions():
 
 
 def create_question():
-    """Handles POST /admin/questions"""
+    #Handles POST /admin/questions
 
     permission_error = check_admin_permissions()
     if permission_error:
@@ -58,7 +56,7 @@ def create_question():
 
 
 def update_question(question_id):
-    """Handles PUT /admin/questions/{question_id}"""
+    #Handles PUT /admin/questions/{question_id}
 
     permission_error = check_admin_permissions()
     if permission_error:
@@ -96,7 +94,7 @@ def update_question_status(question_id):
 # ASSESSMENT CONFIGURATION
 
 def get_assessment_configuration():
-    """Handles GET /admin/assessment/configuration"""
+    #Handles GET /admin/assessment/configuration
 
     permission_error = check_admin_permissions()
     if permission_error:
@@ -121,7 +119,7 @@ def update_assessment_configuration():
 #Teams
 
 def get_teams():
-    """Handles GET /admin/teams"""
+    #Handles GET /admin/teams
 
     permission_error = check_admin_permissions()
     if permission_error:
@@ -132,21 +130,24 @@ def get_teams():
 
 
 def get_team_detail(team_id):
-    """Handles GET /admin/teams/{team_id}"""
-
+    #Handles GET /admin/teams/{team_id}
     permission_error = check_admin_permissions()
+    
     if permission_error:
         return permission_error
 
-    team = admin_service.get_team_detail(team_id)
-
+    try:
+        team = admin_service.get_team_detail(team_id)
     # If the service returned None, the team_id doesn't exist
-    if not team:
-        return jsonify({'error': 'Equipo no encontrado'}), 404
+        if not team:
+            return jsonify({'error': 'Equipo no encontrado'}), 404
 
-    return jsonify(team), 200
+        return jsonify(team), 200
 
-
+    except Exception as error:
+        # ANY unexpected error in the service layer will be caught here 
+        return jsonify({'error': 'Error al obtener el equipo'}), 500
+    
 #Statistics
 
 def get_statistics():
