@@ -2,6 +2,7 @@ from flask import request, session
 from services.user_service import register_user, get_user_by_id
 from services.assessment_service import retry_smart_profile_if_needed
 from services.auth_service import login_user, logout_user
+from services.compatibility_service import get_team_recommendations
 
 # HU: US-001 — Registro de Usuario (EP-001 — User Management)
 
@@ -51,3 +52,10 @@ def profile():
     if user is None:
         return {"error": "User not found"}, 404
     return user, 200
+
+# HU: US-025 — Consultar Compatibilidad (Estudiante → Equipos)
+def get_team_recommendations_route():
+    if "user_id" not in session:
+        return {"error": "Unauthorized"}, 401
+    result, status_code = get_team_recommendations(session["user_id"])
+    return result, status_code
