@@ -87,9 +87,10 @@ function renderStatistics(data) {
                     className: 'p-6 flex flex-col gap-4 md:col-span-2',
                     width: 'w-full',
                     content: `
+                    <span class="flex flex-col gap-1">
                         <span class="text-lg font-bold">Comparación de registro</span>
                         <span class="text-xs text-gray-400 -mt-2">Fuente institucional vs usuarios registrados</span>
-
+                    </span>   
                         <div class="flex flex-col gap-3 mt-2">
                             <div class="flex flex-col gap-1">
                                 <div class="flex justify-between text-sm">
@@ -134,9 +135,10 @@ function renderStatistics(data) {
                     className: 'p-6 flex flex-col gap-4 md:col-span-2',
                     width: 'w-full',
                     content: `
+                    <span class="flex flex-col gap-1">
                         <span class="text-lg font-bold">Distribución de estudiantes</span>
                         <span class="text-xs text-gray-400 -mt-2">Disponibles vs en equipo</span>
-
+                    </span>    
                         <div class="w-full h-4 rounded-full overflow-hidden flex mt-2 bg-gray-100">
                             <div class="h-full bg-emerald-400" style="width: ${availablePercent}%"></div>
                             <div class="h-full bg-[#4B3FA8]" style="width: ${inTeamPercent}%"></div>
@@ -159,10 +161,12 @@ function renderStatistics(data) {
                     className: 'p-6 flex flex-col items-center justify-center gap-2',
                     width: 'w-full',
                     content: `
+                    <div class="flex flex-col gap-2 items-center justify-center">
                         <span class="text-sm font-semibold text-gray-400 text-center">Equipos conformados</span>
                         <span class="text-5xl font-black text-[#4B3FA8]">${data.totalTeams}</span>
                         <span class="text-xs text-gray-400">equipos activos</span>
-                    `
+                    </div>
+                        `
                 })}
             </div>
 
@@ -173,9 +177,10 @@ function renderStatistics(data) {
                     className: 'p-6 flex flex-col gap-4 md:col-span-2',
                     width: 'w-full',
                     content: `
+                    <span class=" flex flex-col gap-1 ">
                         <span class="text-lg font-bold">Promedio de desempeño por tecnología</span>
                         <span class="text-xs text-gray-400 -mt-2">Toda la cohorte</span>
-
+                    </span>
                         <div class="flex flex-col gap-3 mt-2">
                             ${sortedTech.map(tech => `
                                 <div class="flex flex-col gap-1">
@@ -195,20 +200,24 @@ function renderStatistics(data) {
                         className: 'p-6 flex flex-col items-center justify-center gap-2',
                         width: 'w-full',
                         content: `
+                        <div class="flex flex-col items-center justify-center gap-2">
                             <span class="text-xs font-semibold text-gray-400 text-center">Mayor promedio</span>
                             <span class="text-lg font-bold text-emerald-600">${highestTech.name}</span>
                             <span class="text-3xl font-black text-emerald-600">${highestTech.average}%</span>
-                        `
+                        </div>
+                            `
                     })}
 
                     ${card({
                         className: 'p-6 flex flex-col items-center justify-center gap-2',
                         width: 'w-full',
                         content: `
+                        <div class="flex flex-col items-center justify-center gap-2">
                             <span class="text-xs font-semibold text-gray-400 text-center">Menor promedio</span>
                             <span class="text-lg font-bold text-amber-600">${lowestTech.name}</span>
                             <span class="text-3xl font-black text-amber-600">${lowestTech.average}%</span>
-                        `
+                        </div>
+                            `
                     })}
                 </div>
             </div>

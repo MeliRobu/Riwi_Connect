@@ -174,7 +174,7 @@ function renderTeamDetail(teamId) {
     return `
         <div class="flex flex-col gap-6 pt-6">
             <button onclick="backToOverview()" 
-                class="flex items-center gap-2 text-sm font-semibold text-[#4B3FA8] hover:underline w-fit">
+                class=" cursor-pointer flex items-center gap-2 text-sm font-semibold text-[#4B3FA8] hover:underline w-fit">
                 ← Volver a equipos
             </button>
 

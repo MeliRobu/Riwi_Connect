@@ -46,7 +46,7 @@ export function navbar(isAdmin = true) {
     
     <!-- Logo -->
     <div class="mb-10 flex items-center justify-center">
-      <a class="flex items-center group animate-logo-in relative">
+      <a   href="#/" data-route="/" onclick="navigate(event, '/') class="flex items-center group animate-logo-in relative">
         <div class="absolute -inset-4 bg-gradient-to-r from-[#7c3aed]/20 to-[#6366f1]/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none">
         </div>
         <span class="inline-block bg-gradient-to-br from-[#7c3aed] to-[#6A62FD] bg-clip-text text-transparent text-4xl font-black animate-pulse-414 group-hover:scale-110 transition-transform duration-300 relative z-10">{</span>
