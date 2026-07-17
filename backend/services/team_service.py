@@ -187,6 +187,52 @@ def request_join_team(user_id, team_id):
     finally:
         cursor.close()
         conn.close()
+# HU: US-009 — Cancel_request
+def cancel_request(user_id, request_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            """
+            SELECT sender_user_id, status
+            FROM team_requests
+            WHERE id_team_request = %s
+            """,
+            (request_id,)
+        )
+
+        request = cursor.fetchone()
+
+        if not request:
+            return {"message": "Request not found"}, 404
+
+        if request[0] != user_id:
+            return {"message": "Unauthorized"}, 403
+        
+        if request[1] != "PENDING":
+            return {"message": "Request cannot be cancelled"}, 409
+        
+        cursor.execute(
+            """
+            UPDATE team_requests
+            SET status = 'CANCELLED'
+            WHERE id_team_request = %s
+            """,
+            (request_id,)
+        )
+
+        conn.commit()
+        
+        return {"message": "Request cancelled successfully"}, 200
+    
+    except Exception as e:
+        conn.rollback()
+        return {"message": str(e)}, 500
+
+    finally:
+        cursor.close()
+        conn.close()
 
 # HU: US-010 — Send Invitation
 # A team Leader invites an AVAILABLE student to join their team.

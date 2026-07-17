@@ -5,6 +5,8 @@ from controllers.team_controller import send_invitation
 from controllers.team_controller import send_request
 from controllers.team_controller import accept_invitation_route
 from controllers.team_controller import reject_invitation_route
+from controllers.team_controller import send_request
+from controllers.team_controller import cancel
 from controllers.team_controller import remove_member_route
 from controllers.team_controller import transfer_leader_route
 from controllers.team_controller import reject_request_route
@@ -21,6 +23,12 @@ methods=["POST"])
 team_routes.add_url_rule("/teams/<int:team_id>/requests",
 view_func=send_request,
 methods=["POST"])
+
+# HU: US-009 — Cancel Request
+team_routes.add_url_rule("/teams/<int:team_id>/requests/<int:request_id>",
+view_func=cancel,
+methods=["DELETE"]
+)
 
 # HU: US-010 — Send Invitation
 team_routes.add_url_rule("/teams/<int:team_id>/invitations",

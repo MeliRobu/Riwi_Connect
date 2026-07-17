@@ -9,7 +9,7 @@ from services.team_service import is_team_leader
 from services.team_service import remove_member
 from services.team_service import transfer_leadership
 from services.team_service import is_team_member
-
+from services.team_service import cancel_request
 from services.team_service import reject_team_request
 
 # HU: US-007 — Create Team (EP-002 - Team Management)
@@ -19,7 +19,7 @@ def create():
 
     if "user_id" not in session:
         return {"error": "Unauthorized"}, 401
-
+    
     data = request.get_json()
 
     team_name = data.get("team_name")
@@ -36,6 +36,16 @@ def send_request(team_id):
         return {"error": "Unauthorized"}, 401
     result, status_code = request_join_team(session["user_id"], team_id)
     return result, status_code
+
+# HU: US-009 — Cancel Request
+def cancel(team_id, request_id):
+    if "user_id" not in session:
+        return {"error": "Unauthorized"}, 401
+
+    result, status_code = cancel_request(session["user_id"], request_id)
+
+    return result, status_code
+
 
 # HU: US-010 — Send Invitation (EP-004 - Team Management)
 def send_invitation(team_id):
