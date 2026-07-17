@@ -1,5 +1,6 @@
 from database.connection import get_connection
 
+# HU: US-019 — Consultar Banco de Preguntas
 def list_questions():
     """GET /admin/questions - Lists all questions in the question bank, including their answer options."""
 
@@ -67,7 +68,7 @@ def list_questions():
         # Always close the connection, whether the query succeeded or failed
         connection.close()
 
-##This one represents US-19. 
+# HU: US-019 — Crear Pregunta
 def create_question(data):
     """POST /admin/questions - Creates a new question along with its 4 answer options."""
 
@@ -125,7 +126,7 @@ def create_question(data):
         # close the CONNECTION (this closes the cursor along with it)
         connection.close()
 
-##This one represents US-20
+# HU: US-020 — Editar Pregunta
 def update_question(question_id, data):
     """PUT /admin/questions/{question_id} - Edits an existing question's statement, category and difficulty."""
 
@@ -166,8 +167,7 @@ def update_question(question_id, data):
     finally:
         connection.close()
 
-##This one represents US-20
-
+# HU: US-020 — Editar Pregunta (opciones de respuesta)
 def update_answer_options(question_id, options):
     """
     PUT /admin/questions/{question_id} - Updates the 4 answer options of an existing question.
@@ -218,8 +218,7 @@ def update_answer_options(question_id, options):
     finally:
         connection.close()
 
-
-##This one represents US-21-22
+# HU: US-021 / US-022 — Activar / Desactivar Pregunta
 def update_question_status(question_id, status):
     """PATCH /admin/questions/{question_id}/status - Activates or deactivates a question."""
 
@@ -257,8 +256,7 @@ def update_question_status(question_id, status):
     finally:
         connection.close()
 
-
-##This one represents US-23
+# HU: US-023 — Consultar Configuración del Assessment
 def get_assessment_configuration():
     """GET /admin/assessment/configuration - Reads the single configuration row."""
 
@@ -295,8 +293,7 @@ def get_assessment_configuration():
         # Always close the connection
         connection.close()
 
-
-##This one represents US-24
+# HU: US-024 — Actualizar Configuración del Assessment
 def update_assessment_configuration(data):
     """PUT /admin/assessment/configuration - Updates the single existing configuration row."""
 
@@ -328,130 +325,7 @@ def update_assessment_configuration(data):
         # Always close the connection
         connection.close()
 
-
-##This one represents US-27
-def list_teams():
-    """GET /admin/teams - Lists all teams with their member count."""
-
-    # Open a new connection to PostgreSQL
-    connection = get_connection()
-
-    try:
-        # Create a cursor to run SQL commands
-        read_teams_sql = connection.cursor()
-
-        # LEFT JOIN so teams with 0 members still show up (with count = 0)
-        # GROUP BY is required because we're using COUNT()
-        read_teams_sql.execute("""
-            SELECT t.id_team, t.team_name, t.created_at, COUNT(tm.id_team_member) AS member_count
-            FROM teams t
-            LEFT JOIN team_members tm ON tm.team_id = t.id_team
-            GROUP BY t.id_team, t.team_name, t.created_at
-            ORDER BY t.id_team
-        """)
-
-        # Fetch all team rows
-        rows_fetched = read_teams_sql.fetchall()
-
-        # Empty list where we'll collect the converted dictionaries
-        team_list = []
-
-        # Loop through each row and convert it to a dictionary
-        for row in rows_fetched:
-            team = {
-                'id_team': row[0],
-                'team_name': row[1],
-                # created_at comes back as a Python datetime object,
-                # so we convert it to a string with isoformat() for JSON
-                'created_at': row[2].isoformat(),
-                'member_count': row[3]
-            }
-            team_list.append(team)
-
-        return team_list
-
-    finally:
-        # Always close the connection
-        connection.close()
-
-
-##This one represents US-27
-def get_team_detail(team_id):
-    """GET /admin/teams/{team_id} - Returns one team plus its members' scores and Gemini interpretation."""
-
-    # Open a new connection to PostgreSQL
-    connection = get_connection()
-
-    try:
-        # Create a cursor to run SQL commands
-        read_team_sql = connection.cursor()
-
-        # Step 1: check the team exists and get its basic info
-        read_team_sql.execute(
-            "SELECT id_team, team_name, created_at FROM teams WHERE id_team = %s",
-            (team_id,)
-        )
-        team_row = read_team_sql.fetchone()
-
-        # If the team doesn't exist, return None so the controller can respond 404
-        if not team_row:
-            return None
-
-        # Step 2: get every member of this team, joined with their user info,
-        # their institutional full_name, and their latest assessment scores.
-        # LEFT JOIN on assessments/assessment_results because a member might
-        # not have completed the assessment yet (scores would be NULL).
-        read_team_sql.execute("""
-            SELECT
-                u.id_user, isrc.full_name, u.status, tm.is_leader,
-                ar.overall_score, ar.python_score, ar.sql_score,
-                ar.javascript_score, ar.html_score, ar.css_score,
-                ar.profile_description
-            FROM team_members tm
-            JOIN users u ON u.id_user = tm.user_id
-            JOIN institutional_sources isrc ON isrc.id_institutional_source = u.id_institutional_source
-            LEFT JOIN assessments a ON a.user_id = u.id_user
-            LEFT JOIN assessment_results ar ON ar.assessment_id = a.id_assessment
-            WHERE tm.team_id = %s
-            ORDER BY tm.is_leader DESC
-        """, (team_id,))
-
-        members_rows = read_team_sql.fetchall()
-
-        # Build the list of member dictionaries
-        member_list = []
-        for row in members_rows:
-            member = {
-                'id_user': row[0],
-                'full_name': row[1],
-                'status': row[2],
-                'is_leader': row[3],
-                # Scores might be None if the student hasn't finished the assessment
-                'overall_score': float(row[4]) if row[4] is not None else None,
-                'scores_by_technology': {
-                    'python': float(row[5]) if row[5] is not None else None,
-                    'sql': float(row[6]) if row[6] is not None else None,
-                    'javascript': float(row[7]) if row[7] is not None else None,
-                    'html': float(row[8]) if row[8] is not None else None,
-                    'css': float(row[9]) if row[9] is not None else None,
-                },
-                'profile_description': row[10]
-            }
-            member_list.append(member)
-
-        # Build and return the final team detail dictionary
-        return {
-            'id_team': team_row[0],
-            'team_name': team_row[1],
-            'created_at': team_row[2].isoformat(),
-            'members': member_list
-        }
-
-    finally:
-        # Always close the connection
-        connection.close()
-
-##This one represents US-26
+# HU: US-026 — Consultar Estadísticas Administrativas
 def calculate_statistics():
     """GET /admin/statistics - Calculates administrative statistics (RN-042)."""
 
@@ -535,6 +409,127 @@ def calculate_statistics():
             'averages_by_technology': averages,
             'highest_average_technology': highest,
             'lowest_average_technology': lowest
+        }
+
+    finally:
+        # Always close the connection
+        connection.close()
+
+# HU: US-027 — Supervisar Equipos (listado)
+def list_teams():
+    """GET /admin/teams - Lists all teams with their member count."""
+
+    # Open a new connection to PostgreSQL
+    connection = get_connection()
+
+    try:
+        # Create a cursor to run SQL commands
+        read_teams_sql = connection.cursor()
+
+        # LEFT JOIN so teams with 0 members still show up (with count = 0)
+        # GROUP BY is required because we're using COUNT()
+        read_teams_sql.execute("""
+            SELECT t.id_team, t.team_name, t.created_at, COUNT(tm.id_team_member) AS member_count
+            FROM teams t
+            LEFT JOIN team_members tm ON tm.team_id = t.id_team
+            GROUP BY t.id_team, t.team_name, t.created_at
+            ORDER BY t.id_team
+        """)
+
+        # Fetch all team rows
+        rows_fetched = read_teams_sql.fetchall()
+
+        # Empty list where we'll collect the converted dictionaries
+        team_list = []
+
+        # Loop through each row and convert it to a dictionary
+        for row in rows_fetched:
+            team = {
+                'id_team': row[0],
+                'team_name': row[1],
+                # created_at comes back as a Python datetime object,
+                # so we convert it to a string with isoformat() for JSON
+                'created_at': row[2].isoformat(),
+                'member_count': row[3]
+            }
+            team_list.append(team)
+
+        return team_list
+
+    finally:
+        # Always close the connection
+        connection.close()
+
+# HU: US-027 — Supervisar Equipos (detalle)
+def get_team_detail(team_id):
+    """GET /admin/teams/{team_id} - Returns one team plus its members' scores and Gemini interpretation."""
+
+    # Open a new connection to PostgreSQL
+    connection = get_connection()
+
+    try:
+        # Create a cursor to run SQL commands
+        read_team_sql = connection.cursor()
+
+        # Step 1: check the team exists and get its basic info
+        read_team_sql.execute(
+            "SELECT id_team, team_name, created_at FROM teams WHERE id_team = %s",
+            (team_id,)
+        )
+        team_row = read_team_sql.fetchone()
+
+        # If the team doesn't exist, return None so the controller can respond 404
+        if not team_row:
+            return None
+
+        # Step 2: get every member of this team, joined with their user info,
+        # their institutional full_name, and their latest assessment scores.
+        # LEFT JOIN on assessments/assessment_results because a member might
+        # not have completed the assessment yet (scores would be NULL).
+        read_team_sql.execute("""
+            SELECT
+                u.id_user, isrc.full_name, u.status, tm.is_leader,
+                ar.overall_score, ar.python_score, ar.sql_score,
+                ar.javascript_score, ar.html_score, ar.css_score,
+                ar.profile_description
+            FROM team_members tm
+            JOIN users u ON u.id_user = tm.user_id
+            JOIN institutional_sources isrc ON isrc.id_institutional_source = u.id_institutional_source
+            LEFT JOIN assessments a ON a.user_id = u.id_user
+            LEFT JOIN assessment_results ar ON ar.assessment_id = a.id_assessment
+            WHERE tm.team_id = %s
+            ORDER BY tm.is_leader DESC
+        """, (team_id,))
+
+        members_rows = read_team_sql.fetchall()
+
+        # Build the list of member dictionaries
+        member_list = []
+        for row in members_rows:
+            member = {
+                'id_user': row[0],
+                'full_name': row[1],
+                'status': row[2],
+                'is_leader': row[3],
+                # Scores might be None if the student hasn't finished the assessment
+                'overall_score': float(row[4]) if row[4] is not None else None,
+                'scores_by_technology': {
+                    'python': float(row[5]) if row[5] is not None else None,
+                    'sql': float(row[6]) if row[6] is not None else None,
+                    'javascript': float(row[7]) if row[7] is not None else None,
+                    'html': float(row[8]) if row[8] is not None else None,
+                    'css': float(row[9]) if row[9] is not None else None,
+                },
+                'profile_description': row[10]
+            }
+            member_list.append(member)
+
+        # Build and return the final team detail dictionary
+        return {
+            'id_team': team_row[0],
+            'team_name': team_row[1],
+            'created_at': team_row[2].isoformat(),
+            'members': member_list
         }
 
     finally:
