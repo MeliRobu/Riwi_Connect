@@ -1,3 +1,4 @@
+import { card } from "../components/card.js";
 /**
  * Reusable Sidebar Navigation Component
  * Generates the main vertical navigation sidebar as an HTML string for the SPA layout.
