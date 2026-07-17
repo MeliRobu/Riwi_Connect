@@ -1,13 +1,12 @@
 from flask import request, jsonify, session
 from services import admin_service
 
-
-def check_admin_permissions():
 """
     Validates that there is an active session AND that the logged-in user
     has the ADMINISTRATOR role. Returns None if everything is OK,
     or a (response, status_code) tuple if the request should be blocked.
 """
+def check_admin_permissions():
 
     # Check if there's an active session at all (user is logged in)
     if 'user_id' not in session:
@@ -19,11 +18,10 @@ def check_admin_permissions():
 
     # No error: the request is allowed to continue
     return None
-
-
 #   Question bank
+
 def get_questions():
-    """Handles GET /admin/questions"""
+    #Handles GET /admin/questions
 
     # Block the request early if the user isn't an authenticated admin
     permission_error = check_admin_permissions()
@@ -38,7 +36,7 @@ def get_questions():
 
 
 def create_question():
-    """Handles POST /admin/questions"""
+    #Handles POST /admin/questions
 
     permission_error = check_admin_permissions()
     if permission_error:
@@ -56,10 +54,8 @@ def create_question():
         # (e.g. "must have exactly 4 options")
         return jsonify({'error': str(validation_error)}), 400
 
-
 def update_question(question_id):
-    """Handles PUT /admin/questions/{question_id}"""
-
+    """Handles PUT /admin/questions/{question_id} - US-020. Updates core fields, and answer_options too if provided."""
     permission_error = check_admin_permissions()
     if permission_error:
         return permission_error
@@ -68,6 +64,22 @@ def update_question(question_id):
 
     try:
         updated_question = admin_service.update_question(question_id, request_data)
+
+        # If the service returned None, the question doesn't exist
+        if updated_question is None:
+            return jsonify({'error': 'Pregunta no encontrada'}), 404
+
+        options = request_data.get('answer_options')
+        if options is not None:
+            updated_options = admin_service.update_answer_options(question_id, options)
+
+            # update_answer_options can also return None if the question was deleted
+            # between the two calls (rare, but possible)
+            if updated_options is None:
+                return jsonify({'error': 'Pregunta no encontrada'}), 404
+
+            updated_question['answer_options'] = updated_options
+
         return jsonify(updated_question), 200
 
     except ValueError as validation_error:
@@ -75,8 +87,7 @@ def update_question(question_id):
 
 
 def update_question_status(question_id):
-#Handles PATCH /admin/questions/{question_id}/status
-
+    """Handles PATCH /admin/questions/{question_id}/status"""
     permission_error = check_admin_permissions()
     if permission_error:
         return permission_error
@@ -84,19 +95,22 @@ def update_question_status(question_id):
     request_data = request.get_json()
 
     try:
-        # We only need the "status" field from the request body
         new_status = request_data.get('status')
         updated_question = admin_service.update_question_status(question_id, new_status)
+
+        # If the service returned None, the question doesn't exist
+        if updated_question is None:
+            return jsonify({'error': 'Pregunta no encontrada'}), 404
+
         return jsonify(updated_question), 200
 
     except ValueError as validation_error:
         return jsonify({'error': str(validation_error)}), 400
 
-
 # ASSESSMENT CONFIGURATION
 
 def get_assessment_configuration():
-    """Handles GET /admin/assessment/configuration"""
+    #Handles GET /admin/assessment/configuration
 
     permission_error = check_admin_permissions()
     if permission_error:
@@ -121,7 +135,7 @@ def update_assessment_configuration():
 #Teams
 
 def get_teams():
-    """Handles GET /admin/teams"""
+    #Handles GET /admin/teams
 
     permission_error = check_admin_permissions()
     if permission_error:
@@ -132,21 +146,24 @@ def get_teams():
 
 
 def get_team_detail(team_id):
-    """Handles GET /admin/teams/{team_id}"""
-
+    #Handles GET /admin/teams/{team_id}
     permission_error = check_admin_permissions()
+    
     if permission_error:
         return permission_error
 
-    team = admin_service.get_team_detail(team_id)
-
+    try:
+        team = admin_service.get_team_detail(team_id)
     # If the service returned None, the team_id doesn't exist
-    if not team:
-        return jsonify({'error': 'Equipo no encontrado'}), 404
+        if not team:
+            return jsonify({'error': 'Equipo no encontrado'}), 404
 
-    return jsonify(team), 200
+        return jsonify(team), 200
 
-
+    except Exception as error:
+        # ANY unexpected error in the service layer will be caught here 
+        return jsonify({'error': 'Error al obtener el equipo'}), 500
+    
 #Statistics
 
 def get_statistics():

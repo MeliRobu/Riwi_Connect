@@ -36,3 +36,17 @@ export function toggleSettingsSubmenu(event) {
   submenu.classList.toggle("submenu-open");
   arrow.classList.toggle("rotate-180");
 }
+
+// export const skillsData = { ... };
+
+export function renderGrafica(id, datos) {
+  const chart = new CanvasJS.Chart(id, {
+    animationEnabled: true,
+    data: [{
+      type: "pie",
+      indexLabel: "{label}: {y}%",
+      dataPoints: datos
+    }]
+  });
+  chart.render();
+}
