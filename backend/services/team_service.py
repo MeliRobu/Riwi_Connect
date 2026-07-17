@@ -850,12 +850,11 @@ def dissolve_team(user_id, team_id):
         )
         member_ids = [row[0] for row in cursor.fetchall()]
 
-        # Cancel every PENDING request/invitation tied to this team
+        # Delete every request/invitation tied to this team (any status)
         cursor.execute(
             """
-            UPDATE team_requests
-            SET status = 'CANCELLED', response_at = CURRENT_TIMESTAMP
-            WHERE team_id = %s AND status = 'PENDING'
+            DELETE FROM team_requests
+            WHERE team_id = %s
             """,
             (team_id,)
         )

@@ -152,10 +152,16 @@ def accept_request_route(team_id, request_id):
     )
     return result, status_code
 
+# HU: US-014 — Reject Request
+def reject_request_route(team_id, request_id):
+    if "user_id" not in session:
+        return {"error": "Unauthorized"}, 401
+    result, status_code = reject_team_request(session["user_id"], request_id)
+    return result, status_code
+
 # HU: US-017 — Dissolve Team
 def dissolve_team_route(team_id):
     if "user_id" not in session:
         return {"error": "Unauthorized"}, 401
     result, status_code = dissolve_team(session["user_id"], team_id)
-    return result, status_code
     return result, status_code
