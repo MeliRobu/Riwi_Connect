@@ -6,7 +6,7 @@ import { card } from "../components/card.js";
  * collapsible user settings submenu and dark mode controls.
  * * @returns {string} The raw HTML string of the sidebar navigation component.
  */
-export function navbar(isAdmin = true) {
+export function navbar(isAdmin = false) {
   // ajusta este valor según cómo llames al rol en tu app
 
   return `
@@ -70,7 +70,7 @@ export function navbar(isAdmin = true) {
         Equipos
       </a>
 
-      <a href="#/recomendations" data-route="/recomendations" onclick="navigate(event, '/recomendations'); closeMobileMenu()"
+      <a href="#/recommendations" data-route="/recommendations" onclick="navigate(event, '/recommendations'); closeMobileMenu()"
          class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-400 hover:text-[#4B3FA8] hover:bg-[#F3F1FA] transition-all duration-200">
         <img src="./assets/icons/suggestions.svg" class="w-5 h-5 opacity-60" width="20" height="20">
         Sugerencias
