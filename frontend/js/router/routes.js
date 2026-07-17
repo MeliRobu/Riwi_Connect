@@ -1,6 +1,6 @@
 import { home } from "../../pages/home";
 import { loginRegister } from "../../pages/login-register";
-import { teams } from "../../pages/teams";
+import {teams_view} from "../../pages/teams";
 import { dashboard } from "../../pages/dashboard";
 import { smart_profile } from "../../pages/smart_profile";
 import { assessment } from "../../pages/assessment";
@@ -9,8 +9,7 @@ import { page404 } from "../../pages/404";
 import { admin_home } from "../../pages/admin/admin_home";
 import { questions } from "../../pages/admin/questions";
 import { statistics } from "../../pages/admin/statistics";
-import { admin_teams } from "../../pages/admin/teams";
-
+import { adminTeams } from "../../pages/admin/admin_teams"; 
 /**
  * SPA Route Registry
  * Maps application URL hash paths to their respective view configuration objects.
@@ -48,7 +47,7 @@ export const routes = {
   "/teams" :{
     isPrivate: true,
     setup: () => {},
-    render: teams,
+    render: teams_view,
     admin:false
   },
   "/profile" : {
