@@ -96,6 +96,98 @@ def create_team(user_id, team_name):
         cursor.close()
         conn.close()
 
+def request_join_team(user_id, team_id):
+    """
+    HU: US-008 — Request to Join Team
+    Allows a user to request to join a team if they are AVAILABLE and have completed the assessment.
+    """
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Check if the user exists and is AVAILABLE
+        cursor.execute(
+            """
+            SELECT status
+            FROM users
+            WHERE id_user = %s
+            """,
+            (user_id,)
+        )
+
+        user = cursor.fetchone()
+
+        if not user:
+            return {"message": "User not found"}, 404
+
+        if user[0] != "AVAILABLE":
+            return {"message": "User is already in a team"}, 409
+
+        cursor.execute(
+            """
+            SELECT completed_at
+            FROM assessments
+            WHERE user_id = %s
+            """,
+            (user_id,)
+        )
+
+        assessment = cursor.fetchone()
+
+        if not assessment or assessment[0] is None:
+            return {"message": "Assessment not completed"}, 403
+
+        # Check if the team exists
+        cursor.execute(
+            """
+            SELECT id_team
+            FROM teams
+            WHERE id_team = %s
+            """,
+            (team_id,)
+        )
+
+        team = cursor.fetchone()
+
+        if not team :
+            return {"message": "Team not found"}, 404
+
+        cursor.execute(
+            """SELECT id_team_request
+            FROM team_requests
+            WHERE sender_user_id = %s
+            AND team_id = %s
+            AND status = 'PENDING'
+            AND type = 'REQUEST'
+            """,
+            (user_id, team_id)
+        )
+
+        request = cursor.fetchone()
+
+        if request:
+            return {"message": "Request already sent"}, 409
+
+        cursor.execute(
+            """
+            INSERT INTO team_requests (sender_user_id, receiver_user_id, team_id, status, type)
+            VALUES (%s, %s, %s, 'PENDING', 'REQUEST')
+            """,
+            (user_id, None, team_id)
+        )
+        conn.commit()
+
+        return {"message": "Request sent successfully"}, 201
+
+    except Exception as e:
+        conn.rollback()
+        return {"message": str(e)}, 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
 # HU: US-010 — Send Invitation
 # A team Leader invites an AVAILABLE student to join their team.
 def create_invitation(sender_id, team_id, receiver_id):

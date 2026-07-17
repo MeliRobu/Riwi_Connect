@@ -12,6 +12,11 @@ team_routes.add_url_rule("/teams",
 view_func=create,
 methods=["POST"])
 
+# HU: US-008 — Request to Join Team
+team_routes.add_url_rule("/teams/<int:team_id>/requests",
+view_func=send_request,
+methods=["POST"])
+
 # HU: US-010 — Send Invitation
 team_routes.add_url_rule("/teams/<int:team_id>/invitations",
 view_func=send_invitation,
