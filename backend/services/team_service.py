@@ -433,6 +433,87 @@ def reject_invitation(user_id, request_id):
         cursor.close()
         conn.close()
 
+def is_team_leader(user_id, team_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            """
+            SELECT is_leader
+            FROM team_members
+            WHERE user_id = %s
+            AND team_id = %s
+            """,
+            (user_id, team_id)
+        )
+
+        leader = cursor.fetchone()
+
+        return leader is not None and leader[0]
+
+    finally:
+        cursor.close()
+        conn.close()
+
+def remove_member(team_id, member_id):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+
+        cursor.execute(
+            """
+            SELECT id_team_member
+            FROM team_members
+            WHERE user_id=%s
+            AND team_id=%s
+            """,
+            (member_id, team_id)
+        )
+
+        member = cursor.fetchone()
+
+        if member is None:
+            return {
+                "success": False,
+                "message": "Member not found"
+            },404
+
+        cursor.execute(
+            """
+            DELETE FROM team_members
+            WHERE user_id=%s
+            AND team_id=%s
+            """,
+            (member_id, team_id)
+        )
+
+        cursor.execute(
+            """
+            UPDATE users
+            SET status='AVAILABLE'
+            WHERE id_user=%s
+            """,
+            (member_id,)
+        )
+
+        conn.commit()
+
+        return {
+            "success": True,
+            "message": "Member removed successfully"
+        },200
+
+    except Exception as e:
+
+        conn.rollback()
+        return {
+            "success": False,
+            "message": str(e)
+        },500
+
 
 # HU: US-014 — Reject Request
 # The team Leader rejects a PENDING join request from a student.
