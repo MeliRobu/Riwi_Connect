@@ -11,6 +11,7 @@ from services.team_service import transfer_leadership
 from services.team_service import is_team_member
 from services.team_service import cancel_request
 from services.team_service import reject_team_request
+from services.team_service import accept_request
 
 # HU: US-007 — Create Team (EP-002 - Team Management)
 
@@ -137,3 +138,17 @@ def transfer_leader_route(team_id):
         leader_id,
         new_leader_id
     )
+
+# HU: US-013 — Accept Join Request
+def accept_request_route(team_id, request_id):
+    # Verify that the user has an active session
+    if "user_id" not in session:
+        return {"error": "Unauthorized"}, 401
+
+    result, status_code = accept_request(
+        session["user_id"],
+        team_id,
+        request_id
+    )
+
+    return result, status_code

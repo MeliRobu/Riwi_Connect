@@ -478,6 +478,137 @@ def reject_invitation(user_id, request_id):
     finally:
         cursor.close()
         conn.close()
+# HU: US-013 Accept_Request
+def accept_request(user_id, team_id, request_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            """
+            SELECT is_leader
+            FROM team_members
+            WHERE user_id = %s
+            AND team_id = %s
+            """,
+            (user_id, team_id)
+        )
+
+        leader = cursor.fetchone()
+
+        if not leader or not leader[0]:
+            return {"message": "Only the team leader can accept requests"}, 403
+        
+        cursor.execute(
+            """
+            SELECT sender_user_id, status
+            FROM team_requests
+            WHERE id_team_request = %s
+            AND team_id = %s
+            AND type = 'REQUEST'
+            """,
+            (request_id, team_id)
+        )
+
+        team_request = cursor.fetchone()
+
+        if not team_request:
+            return {"message": "Request not found"}, 404
+        
+        if team_request[1] != "PENDING":
+            return {"message": "Request is not pending"}, 409
+
+        student_id = team_request[0]
+
+        cursor.execute(
+            """
+            SELECT status
+            FROM users
+            WHERE id_user = %s
+            """,
+            (student_id,)
+        )
+
+        student = cursor.fetchone()
+
+        if not student:
+            return {"message": "Student not found"}, 404
+
+        if student[0] != "AVAILABLE":
+            return {"message": "Student is already in a team"}, 409
+
+        cursor.execute(
+            """
+            SELECT id_clan
+            FROM institutional_sources
+            WHERE id_institutional_source = (
+                SELECT id_institutional_source
+                FROM users
+                WHERE id_user = %s
+            )
+            """,
+            (student_id,)
+        )
+
+        student_clan = cursor.fetchone()[0]
+
+        cursor.execute(
+            """
+            SELECT COUNT(*)
+            FROM team_members tm
+            JOIN users u
+                ON tm.user_id = u.id_user
+            JOIN institutional_sources i
+                ON u.id_institutional_source = i.id_institutional_source
+            WHERE tm.team_id = %s
+            AND i.id_clan = %s
+            """,
+            (team_id, student_clan)
+        )
+
+        clan_count = cursor.fetchone()[0]
+
+        if clan_count >= 3:
+            return {"message": "Team already has 3 members from this clan"}, 409
+
+        cursor.execute(
+            """
+            UPDATE team_requests
+            SET status = 'ACCEPTED',
+                response_at = CURRENT_TIMESTAMP
+            WHERE id_team_request = %s
+            """,
+            (request_id,)
+        )
+
+        cursor.execute(
+            """
+            INSERT INTO team_members (user_id, team_id, is_leader)
+            VALUES (%s, %s, FALSE)
+            """,
+            (student_id, team_id)
+        )
+
+        cursor.execute(
+            """
+            UPDATE users
+            SET status = 'IN_TEAM'
+            WHERE id_user = %s
+            """,
+            (student_id,)
+        )
+
+        conn.commit()
+
+        return {"message": "Request accepted successfully"}, 200
+
+    except Exception as e:
+        conn.rollback()
+        return {"message": str(e)}, 500
+
+    finally:
+        cursor.close()
+        conn.close()        
 
 def is_team_leader(user_id, team_id):
     conn = get_connection()
