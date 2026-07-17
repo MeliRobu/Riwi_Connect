@@ -67,6 +67,7 @@ def list_questions():
         # Always close the connection, whether the query succeeded or failed
         connection.close()
 
+##This one represents US-19. 
 def create_question(data):
     """POST /admin/questions - Creates a new question along with its 4 answer options."""
 
@@ -124,6 +125,7 @@ def create_question(data):
         # close the CONNECTION (this closes the cursor along with it)
         connection.close()
 
+##This one represents US-20
 def update_question(question_id, data):
     """PUT /admin/questions/{question_id} - Edits an existing question's statement, category and difficulty."""
 
@@ -164,6 +166,7 @@ def update_question(question_id, data):
     finally:
         connection.close()
 
+##This one represents US-20
 
 def update_answer_options(question_id, options):
     """
@@ -216,6 +219,7 @@ def update_answer_options(question_id, options):
         connection.close()
 
 
+##This one represents US-21-22
 def update_question_status(question_id, status):
     """PATCH /admin/questions/{question_id}/status - Activates or deactivates a question."""
 
@@ -252,6 +256,9 @@ def update_question_status(question_id, status):
 
     finally:
         connection.close()
+
+
+##This one represents US-23
 def get_assessment_configuration():
     """GET /admin/assessment/configuration - Reads the single configuration row."""
 
@@ -289,6 +296,7 @@ def get_assessment_configuration():
         connection.close()
 
 
+##This one represents US-24
 def update_assessment_configuration(data):
     """PUT /admin/assessment/configuration - Updates the single existing configuration row."""
 
@@ -303,7 +311,7 @@ def update_assessment_configuration(data):
         update_config_sql.execute("""
             UPDATE assessment_configurations
             SET question_count = %s, selection_method = %s, time_limit = %s
-        """, (data['question_count'], data['selection_method'], data['time_limit']))
+            """, (data['question_count'], data['selection_method'], data['time_limit']))
 
         # commit() belongs to the CONNECTION, not the cursor
         connection.commit()
@@ -321,6 +329,7 @@ def update_assessment_configuration(data):
         connection.close()
 
 
+##This one represents US-27
 def list_teams():
     """GET /admin/teams - Lists all teams with their member count."""
 
@@ -366,6 +375,7 @@ def list_teams():
         connection.close()
 
 
+##This one represents US-27
 def get_team_detail(team_id):
     """GET /admin/teams/{team_id} - Returns one team plus its members' scores and Gemini interpretation."""
 
@@ -441,6 +451,7 @@ def get_team_detail(team_id):
         # Always close the connection
         connection.close()
 
+##This one represents US-26
 def calculate_statistics():
     """GET /admin/statistics - Calculates administrative statistics (RN-042)."""
 
