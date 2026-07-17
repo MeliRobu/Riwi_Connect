@@ -7,9 +7,9 @@ import { assessment } from "../../pages/assessment";
 import { assessment_result } from "../../pages/assessment_results";
 import { page404 } from "../../pages/404";
 import { admin_home } from "../../pages/admin/admin_home";
-import { questions } from "../../pages/admin/questions";
-import { statistics } from "../../pages/admin/statistics";
-import { adminTeams } from "../../pages/admin/admin_teams";
+import {question_bank} from "../../pages/admin/questions"
+import {statistics_view} from "../../pages/admin/statistics";
+import {teams_overview} from "../../pages/admin/admin_teams";
 import { recommendations_view } from "../../pages/recomendation";
 /**
  * SPA Route Registry
@@ -84,13 +84,19 @@ export const routes = {
   "/questions" : {
     isPrivate : true,
     setup: () => {},
-    render: questions,
+    render: question_bank,
     admin: true
   },
   "/statistics" : {
     isPrivate : true,
     setup : () => {},
-    render : statistics,
+    render : statistics_view,
+    admin: true
+  },
+  "/admin_teams" : {
+    isPrivate : true,
+    setup : () => {},
+    render : teams_overview,
     admin: true
   },
   "/recommendations" : {

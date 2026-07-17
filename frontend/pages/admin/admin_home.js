@@ -48,7 +48,7 @@ export function admin_home() {
                 })}
             </a>
 
-            <a class="group max-w-[360px] w-full cursor-pointer" href="#/teams" data-route="/teams" onclick="navigate(event, '/teams')">
+            <a class="group max-w-[360px] w-full cursor-pointer" href="#/admin_teams" data-route="/admin_teams" onclick="navigate(event, '/admin_teams')">
                 ${card({
                     className:
                         "h-auto min-h-[280px] md:h-120 overflow-visible transition-all duration-300 group-hover:bg-cyan-400 group-hover:text-white",

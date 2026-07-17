@@ -31,7 +31,6 @@ export function progressBar({
   return `
     <div class="${wrapperStyles}">
       <div class="flex justify-between items-center text-xs font-semibold text-gray-500">
-        <span>Progreso</span>
         
       </div>
       <div>
