@@ -9,7 +9,8 @@ import { page404 } from "../../pages/404";
 import { admin_home } from "../../pages/admin/admin_home";
 import { questions } from "../../pages/admin/questions";
 import { statistics } from "../../pages/admin/statistics";
-import { adminTeams } from "../../pages/admin/admin_teams"; 
+import { adminTeams } from "../../pages/admin/admin_teams";
+import { recommendations_view } from "../../pages/recomendation";
 /**
  * SPA Route Registry
  * Maps application URL hash paths to their respective view configuration objects.
@@ -91,5 +92,11 @@ export const routes = {
     setup : () => {},
     render : statistics,
     admin: true
+  },
+  "/recommendations" : {
+    isPrivate: true,
+    setup: () => {},
+    render: recommendations_view,
+    admin: false
   }
 };
