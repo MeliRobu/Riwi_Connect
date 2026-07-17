@@ -1,8 +1,10 @@
 from flask import Blueprint
 from controllers.team_controller import create
 from controllers.team_controller import send_invitation
+from controllers.team_controller import send_request
 from controllers.team_controller import accept_invitation_route
 from controllers.team_controller import reject_invitation_route
+from controllers.team_controller import reject_request_route
 
 # HU: US-007 — Create Team (EP-002 - Team Management)
 team_routes = Blueprint('team_routes', __name__)
@@ -31,4 +33,10 @@ methods=["PATCH"])
 # HU: US-012 — Reject Invitation
 team_routes.add_url_rule("/teams/<int:team_id>/invitations/<int:request_id>/reject",
 view_func=reject_invitation_route,
+methods=["PATCH"])
+
+
+# HU: US-014 — Reject Request
+team_routes.add_url_rule("/teams/<int:team_id>/requests/<int:request_id>/reject",
+view_func=reject_request_route,
 methods=["PATCH"])
