@@ -264,3 +264,171 @@ def create_invitation(sender_id, team_id, receiver_id):
     finally:
         cursor.close()
         conn.close()
+
+# HU: US-011 — Accept Invitation
+# The invited student accepts a PENDING invitation, joining the team.
+# Enforces the 3-per-Clan limit (RN-047).
+def accept_invitation(user_id, request_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Fetch the invitation
+        cursor.execute(
+            """
+            SELECT receiver_user_id, team_id, status, type
+            FROM team_requests
+            WHERE id_team_request = %s
+            """,
+            (request_id,)
+        )
+        request = cursor.fetchone()
+        if request is None:
+            cursor.close()
+            conn.close()
+            return {"error": "Invitation not found"}, 404
+
+        receiver_id, team_id, status, req_type = request
+
+        # Only the invited user can accept
+        if receiver_id != user_id:
+            cursor.close()
+            conn.close()
+            return {"error": "You can only accept your own invitations"}, 403
+
+        if req_type != "INVITATION":
+            cursor.close()
+            conn.close()
+            return {"error": "This is not an invitation"}, 400
+
+        if status != "PENDING":
+            cursor.close()
+            conn.close()
+            return {"error": "Invitation is no longer pending"}, 409
+
+        # Confirm the user is still AVAILABLE
+        cursor.execute(
+            """
+            SELECT status
+            FROM users
+            WHERE id_user = %s
+            """,
+            (user_id,)
+        )
+        user = cursor.fetchone()
+        if user is None or user[0] != "AVAILABLE":
+            cursor.close()
+            conn.close()
+            return {"error": "User is not available"}, 409
+
+        # RN-047: check the 3-per-Clan limit before adding the member
+        cursor.execute(
+            """
+            SELECT COUNT(*)
+            FROM team_members tm
+            JOIN users u ON tm.user_id = u.id_user
+            JOIN institutional_sources s ON u.id_institutional_source = s.id_institutional_source
+            WHERE tm.team_id = %s
+              AND s.id_clan = (
+                  SELECT s2.id_clan
+                  FROM users u2
+                  JOIN institutional_sources s2 ON u2.id_institutional_source = s2.id_institutional_source
+                  WHERE u2.id_user = %s
+              )
+            """,
+            (team_id, user_id)
+        )
+        clan_count = cursor.fetchone()[0]
+        if clan_count >= 3:
+            cursor.close()
+            conn.close()
+            return {"error": "Clan limit reached for this team"}, 409
+
+        # All checks passed: add the member, update the request, update user status
+        cursor.execute(
+            """
+            INSERT INTO team_members (user_id, team_id, is_leader)
+            VALUES (%s, %s, FALSE)
+            """,
+            (user_id, team_id)
+        )
+        cursor.execute(
+            """
+            UPDATE team_requests
+            SET status = 'ACCEPTED', response_at = CURRENT_TIMESTAMP
+            WHERE id_team_request = %s
+            """,
+            (request_id,)
+        )
+        cursor.execute(
+            """
+            UPDATE users
+            SET status = 'IN_TEAM'
+            WHERE id_user = %s
+            """,
+            (user_id,)
+        )
+        conn.commit()
+        return {"message": "Invitation accepted successfully"}, 200
+    except Exception as e:
+        conn.rollback()
+        return {"error": str(e)}, 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# HU: US-012 — Reject Invitation
+# The invited student rejects a PENDING invitation.
+def reject_invitation(user_id, request_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Fetch the invitation
+        cursor.execute(
+            """
+            SELECT receiver_user_id, status, type
+            FROM team_requests
+            WHERE id_team_request = %s
+            """,
+            (request_id,)
+        )
+        request = cursor.fetchone()
+        if request is None:
+            cursor.close()
+            conn.close()
+            return {"error": "Invitation not found"}, 404
+
+        receiver_id, status, req_type = request
+
+        # Only the invited user can reject
+        if receiver_id != user_id:
+            cursor.close()
+            conn.close()
+            return {"error": "You can only reject your own invitations"}, 403
+
+        if req_type != "INVITATION":
+            cursor.close()
+            conn.close()
+            return {"error": "This is not an invitation"}, 400
+
+        if status != "PENDING":
+            cursor.close()
+            conn.close()
+            return {"error": "Invitation is no longer pending"}, 409
+
+        # Reject it
+        cursor.execute(
+            """
+            UPDATE team_requests
+            SET status = 'REJECTED', response_at = CURRENT_TIMESTAMP
+            WHERE id_team_request = %s
+            """,
+            (request_id,)
+        )
+        conn.commit()
+        return {"message": "Invitation rejected successfully"}, 200
+    except Exception as e:
+        conn.rollback()
+        return {"error": str(e)}, 500
+    finally:
+        cursor.close()
+        conn.close()

@@ -1,7 +1,8 @@
 from flask import request, session 
 from services.team_service import create_team
 from services.team_service import create_invitation
-from services.team_service import request_join_team
+from services.team_service import accept_invitation
+from services.team_service import reject_invitation
 
 # HU: US-007 — Create Team (EP-002 - Team Management)
 
@@ -38,4 +39,20 @@ def send_invitation(team_id):
     if not receiver_id:
         return {"error": "receiver_id is required"}, 400
     result, status_code = create_invitation(session["user_id"], team_id, receiver_id)
+    return result, status_code
+
+
+# HU: US-011 — Accept Invitation
+def accept_invitation_route(team_id, request_id):
+    if "user_id" not in session:
+        return {"error": "Unauthorized"}, 401
+    result, status_code = accept_invitation(session["user_id"], request_id)
+    return result, status_code
+
+
+# HU: US-012 — Reject Invitation
+def reject_invitation_route(team_id, request_id):
+    if "user_id" not in session:
+        return {"error": "Unauthorized"}, 401
+    result, status_code = reject_invitation(session["user_id"], request_id)
     return result, status_code

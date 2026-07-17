@@ -5,8 +5,11 @@
  * collapsible user settings submenu and dark mode controls.
  * * @returns {string} The raw HTML string of the sidebar navigation component.
  */
-export function navbar(isAdmin = true) {
-   // ajusta este valor según cómo llames al rol en tu app
+import { card } from "./card";
+export function navbar() {
+  // Determina rol desde window.role (definido en app.js), por defecto 'user'
+  const role = (typeof window !== 'undefined' && window.role) ? window.role : 'user';
+  const isAdmin = role === 'admin';
 
   return `
 <!-- Botón hamburguesa - solo visible en móvil -->
@@ -17,7 +20,7 @@ export function navbar(isAdmin = true) {
     <line x1="3" y1="12" x2="21" y2="12"></line>
     <line x1="3" y1="18" x2="21" y2="18"></line>
   </svg>
-</button>
+</button> 
 
 <!-- Overlay oscuro detrás del menú en móvil -->
 <div id="menu-overlay" onclick="closeMobileMenu()"
@@ -30,19 +33,34 @@ export function navbar(isAdmin = true) {
            -translate-x-full md:translate-x-0
            transition-transform duration-300 ease-in-out">
   <div class="p-5 flex flex-col h-full">
-    
-    <a class=" hover:scale-100 hover:scale-105 transition-transform duration-300 ease-in-out cursor-pointer text-center text-3xl font-bold tracking-wide text-[#4B3FA8] mb-8 px-2" href="#/" data-route="/" onclick="navigate(event, '/')>
-      <span class="text-pink-900 text-4xl font-bold">{</span>onnect
-    </a>
-  
+    <div class="flex  flex-col  items-center ">  
+    <a class="  py-1 hover:scale-100 hover:scale-105 transition-transform duration-300 ease-in-out cursor-pointer text-center text-3xl font-bold tracking-wide text-[#4B3FA8] mb-8 px-2" href="#/" data-route="/" onclick="navigate(event, '/')">
+        <span class="text-pink-600 text-4xl font-bold">{</span>onnect
+      </a>
+        <!-- Acá va la función de rol-->
+        <span class="py-2 flex ">
+            ${card({
+              content: "Coder",
+              bgColor: "bg-pink-500",
+              className: "text-white font-bold  py-1 text-center w-50 ",
+            })}
+        </span>
+    </div>
     <nav class="space-y-1 flex-1" >
+      ${isAdmin ? `
+      <a href="#/admin_home" data-route="/admin_home" onclick="navigate(event, '/admin_home'); closeMobileMenu()"
+         class=" nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-400 hover:text-[#4B3FA8] hover:bg-[#F3F1FA] transition-all duration-200">
+        <img src="./assets/icons/admin.svg" class="w-5 h-5 opacity-60" width="20" height="20">
+        Administrar
+      </a>
+      ` : `
       <a href="#/dashboard" data-route="/dashboard" onclick="navigate(event, '/dashboard'); closeMobileMenu()"
          class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200">
          <img src="./assets/icons/dashboard.svg" class="w-5 h-5" width="20" height="20">
         Dashboard
       </a>
 
-      <a href="#/assessment"data-route="/assessment" onclick="navigate(event, '/assessment'); closeMobileMenu()"
+      <a href="#/assessment" data-route="/assessment" onclick="navigate(event, '/assessment'); closeMobileMenu()"
          class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-400 hover:text-[#4B3FA8] hover:bg-[#F3F1FA] transition-all duration-200">
         <img src="./assets/icons/assessment.svg" class="w-5 h-5 opacity-60" width="20" height="20">
         Assessment
@@ -59,14 +77,7 @@ export function navbar(isAdmin = true) {
         <img src="./assets/icons/suggestions.svg" class="w-5 h-5 opacity-60" width="20" height="20">
         Sugerencias
       </a>
-
-      ${isAdmin ? `
-      <a href="#/admin_home" data-route="/admin_home" onclick="navigate(event, '/admin_home'); closeMobileMenu()"
-         class=" nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-400 hover:text-[#4B3FA8] hover:bg-[#F3F1FA] transition-all duration-200">
-        <img src="./assets/icons/admin.svg" class="w-5 h-5 opacity-60" width="20" height="20">
-        Administrar
-      </a>
-      ` : ''}
+      `}
     </nav>
 
     <div class="relative">

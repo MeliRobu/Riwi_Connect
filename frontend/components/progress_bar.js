@@ -40,7 +40,6 @@ export function progressBar({
             value="${value}" 
             max="100">
         </progress>
-        <span>${value}%</span> 
       </div>
     </div>
   `;

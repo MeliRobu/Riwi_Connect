@@ -1,7 +1,7 @@
-from backend.database.connection import get_connection
+from database.connection import get_connection
 
 def list_questions():
-    """GET /admin/questions - Lists all questions in the question bank."""
+    """GET /admin/questions - Lists all questions in the question bank, including their answer options."""
 
     # Open a new connection to PostgreSQL
     connection = get_connection()
@@ -25,14 +25,37 @@ def list_questions():
 
         # Loop through each row (tuple) returned from the database
         for row in rows_fetched:
-            # Convert the tuple into a dictionary with named keys.
-            # IMPORTANT: index order must match the SELECT column order above.
+            # Save the question_id so we can use it in the next query below
+            question_id = row[0]
+
+            # For this question, fetch its 4 answer options
+            read_sql_questions.execute("""
+                SELECT id_answer_option, content, is_correct
+                FROM answer_options
+                WHERE question_id = %s
+                ORDER BY id_answer_option
+            """, (question_id,))
+
+            options_rows = read_sql_questions.fetchall()
+
+            # Convert each option tuple into a dictionary
+            options_list = []
+            for opt_row in options_rows:
+                option = {
+                    'id_answer_option': opt_row[0],
+                    'content': opt_row[1],
+                    'is_correct': opt_row[2]
+                }
+                options_list.append(option)
+
+            # Convert the question tuple into a dictionary, now including its options
             question = {
-                'id_question': row[0],       # 1st column -> id_question
-                'statement': row[1],         # 2nd column -> statement
-                'category': row[2],          # 3rd column -> category
-                'difficulty_level': row[3],  # 4th column -> difficulty_level
-                'status': row[4]             # 5th column -> status
+                'id_question': question_id,       # 1st column -> id_question
+                'statement': row[1],               # 2nd column -> statement
+                'category': row[2],                # 3rd column -> category
+                'difficulty_level': row[3],        # 4th column -> difficulty_level
+                'status': row[4],                  # 5th column -> status
+                'answer_options': options_list     # options fetched separately above
             }
             # Add this dictionary to the results list
             question_list.append(question)
@@ -44,6 +67,7 @@ def list_questions():
         # Always close the connection, whether the query succeeded or failed
         connection.close()
 
+##This one represents US-19. 
 def create_question(data):
     """POST /admin/questions - Creates a new question along with its 4 answer options."""
 
@@ -101,39 +125,33 @@ def create_question(data):
         # close the CONNECTION (this closes the cursor along with it)
         connection.close()
 
-
+##This one represents US-20
 def update_question(question_id, data):
     """PUT /admin/questions/{question_id} - Edits an existing question's statement, category and difficulty."""
 
-    # Open a new connection to PostgreSQL
     connection = get_connection()
 
     try:
-        # Create a cursor to run SQL commands
         update_question_sql = connection.cursor()
 
-        # First, check that the question actually exists before trying to update it
         update_question_sql.execute(
             "SELECT id_question FROM questions WHERE id_question = %s",
             (question_id,)
         )
 
-        # fetchone() returns None if no row matched the WHERE clause
         existing_question = update_question_sql.fetchone()
         if not existing_question:
-            raise ValueError('Pregunta no encontrada')
+            # Question doesn't exist: return None so the controller can respond 404
+            return None
 
-        # Update the question's fields with the new values sent by the client
         update_question_sql.execute("""
             UPDATE questions
             SET statement = %s, category = %s, difficulty_level = %s
             WHERE id_question = %s
         """, (data['statement'], data['category'], data['difficulty_level'], question_id))
 
-        # commit() belongs to the CONNECTION, not the cursor
         connection.commit()
 
-        # Build and return a dictionary representing the updated question
         return {
             'id_question': question_id,
             'statement': data['statement'],
@@ -142,61 +160,105 @@ def update_question(question_id, data):
         }
 
     except Exception:
-        # rollback() also belongs to the CONNECTION, not the cursor
         connection.rollback()
-        raise  # re-raise so the controller can catch it and respond with the right status code
+        raise
 
     finally:
-        # close the CONNECTION (this closes the cursor along with it)
         connection.close()
 
+##This one represents US-20
 
-def update_question_status(question_id, status):
-    """PATCH /admin/questions/{question_id}/status - Activates or deactivates a question."""
+def update_answer_options(question_id, options):
+    """
+    PUT /admin/questions/{question_id} - Updates the 4 answer options of an existing question.
+    Called from the controller only when 'answer_options' is present in the request body.
+    """
 
-    # Business rule: status can only be one of these two values
-    if status not in ('ACTIVE', 'INACTIVE'):
-        raise ValueError("status debe ser 'ACTIVE' o 'INACTIVE'")
+    if len(options) != 4:
+        raise ValueError('Cada pregunta debe tener exactamente 4 opciones')
 
-    # Open a new connection to PostgreSQL
+    correct_count = 0
+    for opt in options:
+        if opt.get('is_correct'):
+            correct_count += 1
+
+    if correct_count != 1:
+        raise ValueError('Debe haber exactamente 1 opción marcada como correcta')
+
     connection = get_connection()
 
     try:
-        # Create a cursor to run SQL commands
+        update_options_sql = connection.cursor()
+
+        update_options_sql.execute(
+            "SELECT id_question FROM questions WHERE id_question = %s",
+            (question_id,)
+        )
+
+        existing_question = update_options_sql.fetchone()
+        if not existing_question:
+            # Question doesn't exist: return None so the controller can respond 404
+            return None
+
+        for opt in options:
+            update_options_sql.execute("""
+                UPDATE answer_options
+                SET content = %s, is_correct = %s
+                WHERE id_answer_option = %s AND question_id = %s
+            """, (opt['content'], opt['is_correct'], opt['id_answer_option'], question_id))
+
+        connection.commit()
+
+        return options
+
+    except Exception:
+        connection.rollback()
+        raise
+
+    finally:
+        connection.close()
+
+
+##This one represents US-21-22
+def update_question_status(question_id, status):
+    """PATCH /admin/questions/{question_id}/status - Activates or deactivates a question."""
+
+    if status not in ('ACTIVE', 'INACTIVE'):
+        raise ValueError("status debe ser 'ACTIVE' o 'INACTIVE'")
+
+    connection = get_connection()
+
+    try:
         update_status_sql = connection.cursor()
 
-        # Check that the question exists before trying to update it
         update_status_sql.execute(
             "SELECT id_question FROM questions WHERE id_question = %s",
             (question_id,)
         )
 
-        # fetchone() returns None if no row matched
         existing_question = update_status_sql.fetchone()
         if not existing_question:
-            raise ValueError('Pregunta no encontrada')
+            # Question doesn't exist: return None so the controller can respond 404
+            return None
 
-        # Update only the status column for this question
         update_status_sql.execute(
             "UPDATE questions SET status = %s WHERE id_question = %s",
             (status, question_id)
         )
 
-        # commit() belongs to the CONNECTION, not the cursor
         connection.commit()
 
-        # Return a simple confirmation dictionary
         return {'id_question': question_id, 'status': status}
 
     except Exception:
-        # rollback() also belongs to the CONNECTION, not the cursor
         connection.rollback()
-        raise  # re-raise so the controller can catch it and respond with the right status code
+        raise
 
     finally:
-        # close the CONNECTION (this closes the cursor along with it)
         connection.close()
 
+
+##This one represents US-23
 def get_assessment_configuration():
     """GET /admin/assessment/configuration - Reads the single configuration row."""
 
@@ -234,6 +296,7 @@ def get_assessment_configuration():
         connection.close()
 
 
+##This one represents US-24
 def update_assessment_configuration(data):
     """PUT /admin/assessment/configuration - Updates the single existing configuration row."""
 
@@ -248,7 +311,7 @@ def update_assessment_configuration(data):
         update_config_sql.execute("""
             UPDATE assessment_configurations
             SET question_count = %s, selection_method = %s, time_limit = %s
-        """, (data['question_count'], data['selection_method'], data['time_limit']))
+            """, (data['question_count'], data['selection_method'], data['time_limit']))
 
         # commit() belongs to the CONNECTION, not the cursor
         connection.commit()
@@ -266,6 +329,7 @@ def update_assessment_configuration(data):
         connection.close()
 
 
+##This one represents US-27
 def list_teams():
     """GET /admin/teams - Lists all teams with their member count."""
 
@@ -311,6 +375,7 @@ def list_teams():
         connection.close()
 
 
+##This one represents US-27
 def get_team_detail(team_id):
     """GET /admin/teams/{team_id} - Returns one team plus its members' scores and Gemini interpretation."""
 
@@ -386,6 +451,7 @@ def get_team_detail(team_id):
         # Always close the connection
         connection.close()
 
+##This one represents US-26
 def calculate_statistics():
     """GET /admin/statistics - Calculates administrative statistics (RN-042)."""
 
