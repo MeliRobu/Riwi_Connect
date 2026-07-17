@@ -11,6 +11,7 @@ from controllers.team_controller import remove_member_route
 from controllers.team_controller import transfer_leader_route
 from controllers.team_controller import reject_request_route
 from controllers.team_controller import accept_request_route
+from controllers.team_controller import dissolve_team_route
 
 # HU: US-007 — Create Team (EP-002 - Team Management)
 team_routes = Blueprint('team_routes', __name__)
@@ -77,3 +78,9 @@ team_routes.add_url_rule(
 team_routes.add_url_rule("/teams/<int:team_id>/requests/<int:request_id>/reject",
 view_func=reject_request_route,
 methods=["PATCH"])
+
+
+# HU: US-017 — Dissolve Team
+team_routes.add_url_rule("/teams/<int:team_id>",
+view_func=dissolve_team_route,
+methods=["DELETE"])
