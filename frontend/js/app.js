@@ -1,7 +1,12 @@
 import '../css/styles.css';
 import {navbar} from '../components/navbar';
 import { router } from './router/router';
+import { smart_profile } from '../pages/smart_profile.js';
 import { toggleUserMenu,initUserMenuListener, toggleSettingsSubmenu  } from './utils';
+
+
+// Asegura que exista un rol global; por defecto 'user'. Cambiar desde el login cuando corresponda.
+window.role = window.role || 'user';
 
 document.getElementById("sidebar-container").innerHTML = navbar();
 
@@ -15,7 +20,7 @@ router();
 
 function toggleMobileMenu() {
   const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('menu-overlay');
+  const overlay = document.getElementById('menu-overlay');  
   const isOpen = sidebar.classList.contains('translate-x-0');
 
   if (isOpen) {
@@ -52,3 +57,6 @@ function handleResize() {
 window.addEventListener('resize', handleResize);
 window.toggleMobileMenu = toggleMobileMenu;
 window.closeMobileMenu = closeMobileMenu;
+
+const appContainer = document.getElementById("app");
+
