@@ -227,10 +227,10 @@ export function home() {
       <!-- Desktop Nav -->
       <nav id="desktop-nav" class="hidden md:flex nav-pill relative">
         <div class="nav-pill-indicator" id="nav-indicator"></div>
-        <a href="/#como-funciona" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:300ms] active">Cómo funciona</a>
-        <a href="/#caracteristicas" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:400ms]">Características</a>
-        <a href="/#testimonios" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:500ms]">Testimonios</a>
-        <a href="/#faq" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:700ms]">FAQ</a>
+        <a href="#como-funciona" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:300ms] active">Cómo funciona</a>
+        <a href="#caracteristicas" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:400ms]">Características</a>
+        <a href="#testimonios" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:500ms]">Testimonios</a>
+        <a href="#faq" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:700ms]">FAQ</a>
       </nav>
 
       <!-- Nav Actions -->
