@@ -1,4 +1,8 @@
+import threading
 from database.connection import get_connection
+import json
+import requests
+from config import GEMINI_API_KEY
 
 # HU: US-004 — Presentar Assessment (EP-002 — Assessment Management)
 # Covers: question selection per AssessmentConfiguration, answer registration,
@@ -191,13 +195,14 @@ def save_assessment_result(assessment_id, scores):
 
 
 def get_assessment_result(user_id):
+    # HU: US-006 — Consultar Smart Professional Profile
     # strengths, improvement_opportunities and profile_description
-    # may still be NULL here if Gemini hasn't generated them yet.
+    # may still be NULL here if Gemini hasn't generated them yet (RN-041).
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
         """
-        SELECT ar.overall_score, ar.python_score, ar.sql_score,
+        SELECT a.id_assessment, ar.overall_score, ar.python_score, ar.sql_score,
             ar.javascript_score, ar.html_score, ar.css_score,
             ar.strengths, ar.improvement_opportunities, ar.profile_description
         FROM assessment_results ar
@@ -209,4 +214,93 @@ def get_assessment_result(user_id):
     row = cursor.fetchone()
     cursor.close()
     conn.close()
-    return row
+    if row is None:
+        return None
+    assessment_id = row[0]
+    profile_description = row[9]
+    if profile_description is None:
+        # RN-041: non-blocking retry, doesn't delay this response
+        threading.Thread(target=generate_smart_profile, args=(assessment_id,)).start()
+    return row[1:]
+
+# HU: US-005 — Generar Smart Professional Profile (EP-003)
+# Builds the Gemini prompt from scores only (no personal data), calls the
+# API, and stores the interpretation. Any failure (connection, auth,
+# invalid response, timeout) leaves profile_description as NULL for a
+# later retry (RN-041) — it never raises, so it never blocks the caller.
+def generate_smart_profile(assessment_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            SELECT overall_score, python_score, sql_score, javascript_score, html_score, css_score
+            FROM assessment_results
+            WHERE assessment_id = %s
+            """,
+            (assessment_id,)
+        )
+        row = cursor.fetchone()
+        if row is None:
+            return
+        overall, python_s, sql_s, js_s, html_s, css_s = row
+
+        prompt = (
+            "Eres un analista de talento tecnológico.\n"
+            "Analiza los resultados obtenidos por el siguiente estudiante.\n"
+            f"Puntaje General: {overall}\n"
+            "Resultados por tecnología:\n"
+            f"Python: {python_s}\n"
+            f"HTML: {html_s}\n"
+            f"CSS: {css_s}\n"
+            f"JavaScript: {js_s}\n"
+            f"SQL: {sql_s}\n"
+            "Genera únicamente:\n"
+            "1. Tres fortalezas técnicas del estudiante, basadas en los puntajes más altos.\n"
+            "2. Tres oportunidades de mejora, basadas en los puntajes más bajos.\n"
+            "3. Una interpretación profesional breve (máximo un párrafo) que resuma el desempeño general.\n"
+            "No incluyas información que no haya sido solicitada. No emitas juicios de valor "
+            "ni recomendaciones sobre la conformación de equipos.\n"
+            "Responde únicamente con un JSON exacto, sin texto adicional, con esta forma:\n"
+            '{"strengths": "...", "improvement_opportunities": "...", "profile_description": "..."}'
+        )
+
+        url = (
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+            f"gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+        )
+
+        try:
+            response = requests.post(
+                url,
+                json={"contents": [{"parts": [{"text": prompt}]}]},
+                timeout=10
+            )
+            if response.status_code != 200:
+                # Auth error, quota, or any non-2xx: leave NULL for retry
+                return
+            data = response.json()
+            text = data["candidates"][0]["content"]["parts"][0]["text"]
+            parsed = json.loads(text)
+            strengths = parsed.get("strengths")
+            improvement = parsed.get("improvement_opportunities")
+            description = parsed.get("profile_description")
+        except (requests.RequestException, ValueError, KeyError, json.JSONDecodeError):
+            # Connection error, timeout, or malformed response: leave NULL for retry
+            return
+
+        if not strengths or not improvement or not description:
+            return
+
+        cursor.execute(
+            """
+            UPDATE assessment_results
+            SET strengths = %s, improvement_opportunities = %s, profile_description = %s
+            WHERE assessment_id = %s
+            """,
+            (strengths, improvement, description, assessment_id)
+        )
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()

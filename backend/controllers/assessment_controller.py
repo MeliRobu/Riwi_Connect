@@ -1,3 +1,4 @@
+import threading
 # controllers/assessment_controller.py
 from flask import session, jsonify, request
 from services import assessment_service
@@ -67,6 +68,8 @@ def submit_assessment():
     # Score it right away and store the result.
     scores = assessment_service.calculate_scores(assessment_id)
     assessment_service.save_assessment_result(assessment_id, scores)
+    # HU: US-005 — trigger Gemini in the background, never blocks this response
+    threading.Thread(target=assessment_service.generate_smart_profile, args=(assessment_id,)).start()
 
     return jsonify({'message': 'Assessment submitted', 'scores': scores}), 201
 
