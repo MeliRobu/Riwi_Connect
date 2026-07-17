@@ -2,11 +2,13 @@ from flask import request, session
 from services.team_service import create_team
 from services.team_service import request_join_team
 from services.team_service import create_invitation
+from services.team_service import request_join_team
 from services.team_service import accept_invitation
 from services.team_service import reject_invitation
 from services.team_service import is_team_leader
 from services.team_service import remove_member
 
+from services.team_service import reject_team_request
 
 # HU: US-007 — Create Team (EP-002 - Team Management)
 
@@ -85,3 +87,10 @@ def remove_member_route(team_id, user_id):
         },403
 
     return remove_member(team_id, user_id)
+
+# HU: US-014 — Reject Request
+def reject_request_route(team_id, request_id):
+    if "user_id" not in session:
+        return {"error": "Unauthorized"}, 401
+    result, status_code = reject_team_request(session["user_id"], request_id)
+    return result, status_code
