@@ -581,3 +581,22 @@ def reject_team_request(user_id, request_id):
     finally:
         cursor.close()
         conn.close()
+
+def is_team_member(user_id, team_id):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT 1
+            FROM team_members
+            WHERE user_id = %s
+            AND team_id = %s
+        """, (user_id, team_id))
+
+        return cursor.fetchone() is not None
+
+    finally:
+        cursor.close()
+        conn.close()

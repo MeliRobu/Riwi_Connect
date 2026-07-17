@@ -7,6 +7,8 @@ from services.team_service import accept_invitation
 from services.team_service import reject_invitation
 from services.team_service import is_team_leader
 from services.team_service import remove_member
+from services.team_service import transfer_leadership
+from services.team_service import is_team_member
 
 from services.team_service import reject_team_request
 
@@ -88,9 +90,40 @@ def remove_member_route(team_id, user_id):
 
     return remove_member(team_id, user_id)
 
-# HU: US-014 — Reject Request
-def reject_request_route(team_id, request_id):
+def transfer_leader_route(team_id):
+
     if "user_id" not in session:
-        return {"error": "Unauthorized"}, 401
-    result, status_code = reject_team_request(session["user_id"], request_id)
-    return result, status_code
+        return {
+            "success": False,
+            "message": "Unauthorized"
+        }, 401
+
+    leader_id = session["user_id"]
+
+    if not is_team_leader(leader_id, team_id):
+        return {
+            "success": False,
+            "message": "Only the team leader can transfer leadership."
+        }, 403
+
+    data = request.get_json()
+
+    new_leader_id = data.get("new_leader_id")
+
+    if not new_leader_id:
+        return {
+            "success": False,
+            "message": "new_leader_id is required."
+        }, 400
+
+    if not is_team_member(new_leader_id, team_id):
+        return {
+            "success": False,
+            "message": "The selected user does not belong to this team."
+        }, 404
+
+    return transfer_leadership(
+        team_id,
+        leader_id,
+        new_leader_id
+    )
