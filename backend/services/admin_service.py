@@ -1,4 +1,4 @@
-from backend.database.connection import get_connection
+from database.connection import get_connection
 
 def list_questions():
     """GET /admin/questions - Lists all questions in the question bank, including their answer options."""
