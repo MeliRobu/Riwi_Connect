@@ -5,11 +5,8 @@
  * collapsible user settings submenu and dark mode controls.
  * * @returns {string} The raw HTML string of the sidebar navigation component.
  */
-import { card } from "./card";
-export function navbar() {
-  // Determina rol desde window.role (definido en app.js), por defecto 'user'
-  const role = (typeof window !== 'undefined' && window.role) ? window.role : 'user';
-  const isAdmin = role === 'admin';
+export function navbar(isAdmin = true) {
+  // ajusta este valor según cómo llames al rol en tu app
 
   return `
 <!-- Botón hamburguesa - solo visible en móvil -->

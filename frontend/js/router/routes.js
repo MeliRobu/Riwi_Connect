@@ -1,16 +1,16 @@
 import { home } from "../../pages/home";
-import { login } from "../../pages/login";
-import { register } from "../../pages/register";
-import {teams_view} from "../../pages/teams";
+import { loginRegister } from "../../pages/login-register";
+import { teams } from "../../pages/teams";
 import { dashboard } from "../../pages/dashboard";
 import { smart_profile } from "../../pages/smart_profile";
 import { assessment } from "../../pages/assessment";
 import { assessment_result } from "../../pages/assessment_results";
-import { not_found } from "../../pages/not_found";
+import { page404 } from "../../pages/404";
 import { admin_home } from "../../pages/admin/admin_home";
 import { questions } from "../../pages/admin/questions";
 import { statistics } from "../../pages/admin/statistics";
-import { recommendations_view } from "../../pages/recomendation";
+import { admin_teams } from "../../pages/admin/teams";
+
 /**
  * SPA Route Registry
  * Maps application URL hash paths to their respective view configuration objects.
@@ -29,13 +29,13 @@ export const routes = {
   "/login":{
     isPrivate: false,
     setup: () => {},
-    render: login,
+    render: loginRegister,
     admin: false
   },
   "/register": {
     isPrivate: false,
     setup: () => {},
-    render: register,
+    render: loginRegister,
     admin:false
   }, 
 
@@ -48,7 +48,7 @@ export const routes = {
   "/teams" :{
     isPrivate: true,
     setup: () => {},
-    render: teams_view,
+    render: teams,
     admin:false
   },
   "/profile" : {
@@ -63,7 +63,7 @@ export const routes = {
     render: assessment,
     admin:false
   },
-  "/assessment-result" : {
+  "/assesment-result" : {
     isPrivate: true,
     setup: () => {},
     render: assessment_result,
@@ -72,7 +72,7 @@ export const routes = {
   "/not-found" : {
     isPrivate: false,
     setup: () => {},
-    render: not_found,
+    render: page404,
     admin : false
   },
   "/admin_home":{
@@ -92,11 +92,5 @@ export const routes = {
     setup : () => {},
     render : statistics,
     admin: true
-  },
-  "/recomendations" : {
-    isPrivate : true,
-    setup: () =>{},
-    render : recommendations_view,
-    admin: false
   }
 };

@@ -1,5 +1,5 @@
 import '../css/home.css';
-import {button} from '../components/button'
+import { button } from '../components/button'
 export function home() {
   setTimeout(() => {
     const header = document.getElementById('site-header');
@@ -54,7 +54,7 @@ export function home() {
         const activeLink = desktopNav.querySelector('.nav-link.active');
         if (activeLink) moveIndicatorToLink(activeLink);
       });
-      
+
       window.moveIndicatorToLink = moveIndicatorToLink;
     }
 
@@ -169,8 +169,8 @@ export function home() {
         document.querySelectorAll('.faq-answer').forEach(a => {
           a.classList.remove('open');
           a.style.maxHeight = '0';
-          if(a.closest('.faq-item').querySelector('.faq-btn-icon')) {
-              a.closest('.faq-item').querySelector('.faq-btn-icon').classList.remove('rotated');
+          if (a.closest('.faq-item').querySelector('.faq-btn-icon')) {
+            a.closest('.faq-item').querySelector('.faq-btn-icon').classList.remove('rotated');
           }
         });
 
@@ -212,26 +212,30 @@ export function home() {
 
   <!-- ===== HEADER / NAVEGACIÓN PRINCIPAL ===== -->
   <header id="site-header" class="fixed top-0 left-0 right-0 z-50 header-glass animate-navbar-in">
-    <div class="w-full max-w-7xl mx-auto px-5 sm:px-6 py-3 flex items-center justify-between">
+    <div class="w-full max-w-5xl mx-auto px-5 sm:px-6 py-3 flex items-center justify-between">
       <!-- Logo -->
       <a href="#hero" class="flex items-center group animate-logo-in relative">
-        <div class="absolute -inset-4 bg-gradient-to-r from-[#7c3aed]/20 to-[#6366f1]/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"></div>
-        <span class="inline-block bg-gradient-to-br from-[#7c3aed] to-[#6366f1] bg-clip-text text-transparent text-4xl font-black animate-pulse-414 group-hover:scale-110 transition-transform duration-300 relative z-10">{</span>
-        <span class="text-slate-900 font-extrabold text-2xl tracking-tight -ml-0.5 logo-text relative z-10">onnect</span>
+        <div
+          class="absolute -inset-4 bg-gradient-to-r from-[#7c3aed]/20 to-[#6366f1]/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none">
+        </div>
+        <span
+          class="inline-block bg-gradient-to-br from-[#7c3aed] to-[#6366f1] bg-clip-text text-transparent text-4xl font-black animate-pulse-414 group-hover:scale-110 transition-transform duration-300 relative z-10">{</span>
+        <span
+          class="text-slate-900 font-extrabold text-2xl tracking-tight -ml-0.5 logo-text relative z-10 [text-shadow:0_0_12px_rgba(255,255,255,0.8)] group-hover:text-[#7c3aed] transition-colors duration-300">onnect</span>
       </a>
 
       <!-- Desktop Nav -->
       <nav id="desktop-nav" class="hidden md:flex nav-pill relative">
         <div class="nav-pill-indicator" id="nav-indicator"></div>
-        <a href="/#como-funciona" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:300ms] active">Cómo funciona</a>
-        <a href="/#caracteristicas" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:400ms]">Características</a>
-        <a href="/#testimonios" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:500ms]">Testimonios</a>
-        <a href="/#faq" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:700ms]">FAQ</a>
+        <a href="#como-funciona" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:300ms] active">Cómo funciona</a>
+        <a href="#caracteristicas" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:400ms]">Características</a>
+        <a href="#testimonios" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:500ms]">Testimonios</a>
+        <a href="#faq" class="magnetic-link nav-link opacity-0 animate-nav-in [animation-delay:700ms]">FAQ</a>
       </nav>
 
       <!-- Nav Actions -->
       <div class="hidden md:flex nav-actions opacity-0 animate-nav-in [animation-delay:800ms]">
-        <a href="#/login" data-route="/login" onclick="navigate(event, '/login')" class="btn-signin rounded">Iniciar sesión</a>
+        <a href="#/login" data-route="/login" onclick="navigate(event, '/login')" class="btn-signin rounded text-black [text-shadow:0_0_12px_rgba(255,255,255,0.8)] hover:text-[#7c3aed] transition-colors duration-300">Iniciar sesión</a>
         <a href="#/register" data-route="/register" onclick="navigate(event, '/register')" class="btn-cta">
           <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
             <line x1="7" y1="17" x2="17" y2="7"></line>
@@ -673,7 +677,7 @@ export function home() {
       <p class="text-slate-400 text-lg mb-10 max-w-2xl mx-auto">Únete a miles de desarrolladores que ya encontraron su equipo ideal. Empieza en segundos, es completamente gratis.</p>
 
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="#/register" data-route="/register" onclick="navigate(event, '/register')" class=" cursor-pointerpx-8 py-4 bg-white text-slate-900 font-bold rounded-full hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_rgba(255,255,255,0.2)]">Crear cuenta gratis</a>
+        <a href="#/register" data-route="/register" onclick="navigate(event, '/register')" class=" cursor-pointer px-8 py-4 bg-white text-slate-900 font-bold rounded-full hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_rgba(255,255,255,0.2)]">Crear cuenta gratis</a>
         <a href="#/login" data-route="/login" onclick="navigate(event, '/login')" class=" cursor-pointer px-8 py-4 bg-white/10 text-white font-bold rounded-full hover:bg-white/20 transition-colors border border-white/20">Iniciar sesion</a>
       </div>
     </div>
