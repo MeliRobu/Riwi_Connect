@@ -1,5 +1,6 @@
 from flask import Blueprint
 from controllers.team_controller import create
+from controllers.team_controller import send_request
 from controllers.team_controller import send_invitation
 from controllers.team_controller import accept_invitation_route
 from controllers.team_controller import reject_invitation_route
@@ -42,6 +43,13 @@ team_routes.add_url_rule(
     methods=["DELETE"]
 )
 
+team_routes.add_url_rule(
+    "/teams/<int:team_id>/leader",
+    view_func=transfer_leader_route,
+    methods=["PATCH"]
+)
+
+# HU: US-016 — Transfer Leadership
 team_routes.add_url_rule(
     "/teams/<int:team_id>/leader",
     view_func=transfer_leader_route,
