@@ -37,7 +37,7 @@ export function page404() {
         }
 
         animate();
-        
+
         // Cleanup function for SPA router if needed later
         window.cleanup404 = () => {
             document.removeEventListener('mousemove', mouseMoveHandler);
@@ -117,9 +117,9 @@ export function page404() {
         </div>
 
         <!-- Contenido Principal -->
-        <main class="relative z-20 flex-1 flex flex-col items-center justify-center w-full max-w-6xl mx-auto px-5 py-10">
+        <main class="relative z-20 flex-1 flex flex-col items-center justify-center w-full max-w-5xl mx-auto px-5 py-10">
 
-            <div class="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24 w-full">
+            <div class="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16 w-full">
 
                 <!-- Textos y Botones (Izquierda en Desktop) -->
                 <div class="w-full lg:w-1/2 text-center lg:text-left order-2 lg:order-1">
@@ -174,7 +174,7 @@ export function page404() {
                 </div>
 
                 <!-- Número 404 Visual: Diseño ultra-creativo -->
-                <div class="relative group w-full max-w-lg lg:w-1/2 flex justify-center order-1 lg:order-2 animate-fade-in-up"
+                <div class="relative group w-full max-w-lg lg:w-5/12 flex justify-center order-1 lg:order-2 animate-fade-in-up"
                     style="animation-delay: 200ms;">
 
                     <!-- Resplandor de fondo interactivo -->
