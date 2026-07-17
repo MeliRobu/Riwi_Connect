@@ -9,7 +9,7 @@ VALUES
 -- Initial password: admin123 (pre-hashed manually with werkzeug, see DO-003 pendiente)
 INSERT INTO users (password_hash, id_institutional_source, status, role)
 SELECT
-    'scrypt:32768:8:1$xpcx80vAcmiolKsC$4bf53ce9b5f8d74d3d991b66641bfee2998c260993661271a78459442e39d5c6f043584e4bbc8eac9016d347f751a3aa93dbc4d414738fb41b4729961f4492ac',
+    'admin1234',
     id_institutional_source,
     'AVAILABLE',
     'ADMINISTRATOR'
@@ -22,7 +22,7 @@ INSERT INTO users
 (password_hash, id_institutional_source, status, role)
 VALUES
 (
-    'scrypt:32768:8:1$xpcx80vAcmiolKsC$4bf53ce9b5f8d74d3d991b66641bfee2998c260993661271a78459442e39d5c6f043584e4bbc8eac9016d347f751a3aa93dbc4d414738fb41b4729961f4492ac',
+    'admin1234',
     (
         SELECT id_institutional_source
         FROM institutional_sources
