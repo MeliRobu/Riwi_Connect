@@ -6,7 +6,7 @@
  * * @returns {string} The raw HTML string of the sidebar navigation component.
  */
 export function navbar(isAdmin = true) {
-   // ajusta este valor según cómo llames al rol en tu app
+  // ajusta este valor según cómo llames al rol en tu app
 
   return `
 <!-- Botón hamburguesa - solo visible en móvil -->

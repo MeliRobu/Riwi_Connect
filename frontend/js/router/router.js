@@ -1,6 +1,6 @@
 import { routes } from "./routes";
 import { updateActiveNavLink } from "../utils";
-import { not_found } from "../../pages/not_found";
+import { page404 } from "../../pages/404";
 
 // Placeholders representing simulated authentication states
 const isLogged = true;
@@ -32,7 +32,7 @@ export async function router() {
   let view = routes[currentPath];
 
   /** Array of route paths that should omit the sidebar display */
-  const routesWithoutNav = ["/login", "/register", "/"];
+  const routesWithoutNav = ["/login", "/register", "/", "/not-found", "/404"];
   const root = document.getElementById("root");
   const shouldShowNav = !routesWithoutNav.includes(currentPath);
 
@@ -42,8 +42,15 @@ export async function router() {
     ? "grid grid-cols-[clamp(220px,16vw,300px)_1fr] h-full w-full"
     : "grid grid-cols-1 h-full w-full";
 
+  if (window.cleanup404) {
+      window.cleanup404();
+      window.cleanup404 = null;
+  }
+
   if (!view) {
-    document.getElementById("app").innerHTML = not_found();
+    document.body.classList.toggle("no-nav", true);
+    root.className = "grid grid-cols-1 h-full w-full";
+    document.getElementById("app").innerHTML = page404();
     return;
   }
 

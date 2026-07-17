@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-delay: float 6s ease-in-out 3s infinite;
+  --animate-float-fast: float 4s ease-in-out infinite;
+  --animate-float-slow: float 8s ease-in-out infinite;
+  --animate-pulse-slow: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-bounce-slow: bounce 3s infinite;
+  --animate-fade-in-up: fade_in_up 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-spin-slow: spin 12s linear infinite;
+  --animate-spin-reverse: spin_reverse 15s linear infinite;
+  --animate-shimmer: shimmer 2s infinite;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+  @keyframes fade_in_up {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin_reverse {
+    0% { transform: rotate(360deg); }
+    100% { transform: rotate(0deg); }
+  }
+  @keyframes shimmer {
+    100% { transform: translateX(100%); }
+  }
+}
+
+.dot-grid {
+  background-image: radial-gradient(circle, rgba(148, 163, 184, 0.15) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.glass-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.3) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}

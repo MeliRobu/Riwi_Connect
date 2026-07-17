@@ -1,5 +1,41 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-heading: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  --color-brand-50: #f5f3ff;
+  --color-brand-100: #ede9fe;
+  --color-brand-200: #ddd6fe;
+  --color-brand-300: #c4b5fd;
+  --color-brand-400: #a78bfa;
+  --color-brand-500: #8b5cf6;
+  --color-brand-600: #7c3aed;
+  --color-brand-700: #6d28d9;
+  --color-brand-800: #5b21b6;
+  --color-brand-900: #4c1d95;
+
+  --animate-show-panel: showPanel 0.8s ease-in-out forwards;
+  --animate-pulse-414: pulse_414 0.8s alternate infinite ease-in-out;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-delay: float 6s ease-in-out 3s infinite;
+  --animate-float-fast: float 4s ease-in-out 1.5s infinite;
+
+  @keyframes showPanel {
+    0% { opacity: 0; z-index: 1; }
+    100% { opacity: 1; z-index: 5; }
+  }
+  @keyframes pulse_414 {
+    to { transform: scale(0.8); opacity: 0.2; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+}
+
+
 /* Change the styles of grey "off" color to a dark-purple "active-Color"*/
 .active-link {
   background: #EEEDFE !important;
