@@ -194,34 +194,6 @@ def save_assessment_result(assessment_id, scores):
     conn.close()
 
 
-def get_assessment_result(user_id):
-    # HU: US-006 — Consultar Smart Professional Profile
-    # strengths, improvement_opportunities and profile_description
-    # may still be NULL here if Gemini hasn't generated them yet (RN-041).
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        SELECT a.id_assessment, ar.overall_score, ar.python_score, ar.sql_score,
-            ar.javascript_score, ar.html_score, ar.css_score,
-            ar.strengths, ar.improvement_opportunities, ar.profile_description
-        FROM assessment_results ar
-        JOIN assessments a ON ar.assessment_id = a.id_assessment
-        WHERE a.user_id = %s;
-        """,
-        (user_id,)
-    )
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if row is None:
-        return None
-    assessment_id = row[0]
-    profile_description = row[9]
-    if profile_description is None:
-        # RN-041: non-blocking retry, doesn't delay this response
-        threading.Thread(target=generate_smart_profile, args=(assessment_id,)).start()
-    return row[1:]
 
 # HU: US-005 — Generar Smart Professional Profile (EP-003)
 # Builds the Gemini prompt from scores only (no personal data), calls the
@@ -304,3 +276,32 @@ def generate_smart_profile(assessment_id):
     finally:
         cursor.close()
         conn.close()
+
+def get_assessment_result(user_id):
+    # HU: US-006 — Consultar Smart Professional Profile
+    # strengths, improvement_opportunities and profile_description
+    # may still be NULL here if Gemini hasn't generated them yet (RN-041).
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT a.id_assessment, ar.overall_score, ar.python_score, ar.sql_score,
+            ar.javascript_score, ar.html_score, ar.css_score,
+            ar.strengths, ar.improvement_opportunities, ar.profile_description
+        FROM assessment_results ar
+        JOIN assessments a ON ar.assessment_id = a.id_assessment
+        WHERE a.user_id = %s;
+        """,
+        (user_id,)
+    )
+    row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if row is None:
+        return None
+    assessment_id = row[0]
+    profile_description = row[9]
+    if profile_description is None:
+        # RN-041: non-blocking retry, doesn't delay this response
+        threading.Thread(target=generate_smart_profile, args=(assessment_id,)).start()
+    return row[1:]
