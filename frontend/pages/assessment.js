@@ -98,14 +98,14 @@ function renderQuestion() {
             <div class="flex justify-between mt-6">
                 <button 
                     onclick="goToPreviousQuestion()"
-                    class="px-6 py-2.5 rounded-xl font-bold border border-gray-200 text-gray-500 transition-all duration-300 hover:bg-gray-100 ${isFirst ? 'opacity-0 pointer-events-none' : ''}"
+                    class=" cursor-pointer px-6 py-2.5 rounded-xl font-bold border border-gray-200 text-gray-500 transition-all duration-300 hover:bg-gray-100 ${isFirst ? 'opacity-0 pointer-events-none' : ''}"
                 >
                     Anterior
                 </button>
 
                 <button 
                     onclick="${isLast ? 'submitAssessment()' : 'goToNextQuestion()'}"
-                    class="px-6 py-2.5 rounded-xl font-bold bg-[#4B3FA8] text-white transition-all duration-300 hover:bg-pink-600 hover:scale-[1.02] active:scale-95"
+                    class="cursor-pointer px-6 py-2.5 rounded-xl font-bold bg-[#4B3FA8] text-white transition-all duration-300 hover:bg-pink-600 hover:scale-[1.02] active:scale-95"
                 >
                     ${isLast ? 'Finalizar' : 'Siguiente'}
                 </button>
