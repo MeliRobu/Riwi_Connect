@@ -12,6 +12,7 @@ from services.team_service import remove_member
 from services.team_service import is_team_member
 from services.team_service import transfer_leadership
 from services.team_service import dissolve_team
+from services.compatibility_service import get_student_recommendations
 
 # HU: US-007 — Create Team (EP-002 - Team Management)
 def create():
@@ -143,4 +144,12 @@ def dissolve_team_route(team_id):
     if "user_id" not in session:
         return {"error": "Unauthorized"}, 401
     result, status_code = dissolve_team(session["user_id"], team_id)
+    return result, status_code
+
+# HU: US-018 — Consultar Compatibilidad (Leader → Estudiantes)
+def get_recommendations_route(team_id):
+    # Verify that the user has an active session
+    if "user_id" not in session:
+        return {"error": "Unauthorized"}, 401
+    result, status_code = get_student_recommendations(session["user_id"], team_id)
     return result, status_code
