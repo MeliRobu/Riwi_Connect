@@ -90,7 +90,7 @@ export function loginRegister() {
                             </span>
                         </div>
                         <div class="relative w-full flex-1">
-                            <input type="password" id="signup-confirm-password" placeholder="Confirmar Contraseña" required
+                            <input type="password" id="signup-confirm-password" placeholder="Confirmar" required
                                 class="bg-slate-50 border-2 border-slate-200 py-3 pr-5 pl-12 md:py-3.5 md:pr-6 md:pl-12 my-2 md:my-2.5 w-full rounded-2xl outline-none transition-all duration-300 focus:border-brand-500 focus:bg-white focus:shadow-[0_0_0_4px_rgba(124,58,237,0.15)] text-sm md:text-base font-medium text-slate-700 placeholder-slate-400" />
                             <span
                                 class="absolute left-[18px] top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer text-sm md:text-base transition-colors duration-300 z-[2] py-2 px-1 hover:text-brand-500"
@@ -101,12 +101,7 @@ export function loginRegister() {
                     </div>
 
                     <!-- Input extra solicitado -->
-                                            
-                    <select id="register-role" class="bg-slate-50 border-2 border-slate-200 py-3 px-5 md:py-3.5 md:px-6 my-2 md:my-2.5 w-full rounded-2xl outline-none transition-all duration-300 focus:border-brand-500 focus:bg-white focus:shadow-[0_0_0_4px_rgba(124,58,237,0.15)] text-sm md:text-base font-medium text-slate-700">
-                        <option value="user">Usuario</option>
-                        <option value="admin">Administrador</option>
-                    </select>
-
+                    
                     <button type="submit"
                         class="mt-4 md:mt-5 rounded-2xl border-none bg-gradient-to-br from-brand-600 to-indigo-600 text-white text-xs md:text-sm font-bold py-3 px-8 md:py-3.5 md:px-[45px] tracking-wide transition-all duration-300 ease-in-out cursor-pointer shadow-[0_8px_20px_rgba(124,58,237,0.25)] hover:-translate-y-1 hover:shadow-[0_12px_25px_rgba(124,58,237,0.35)] hover:from-brand-500 hover:to-indigo-500 active:scale-95 focus:outline-none">Registrarse</button>
                 </div>
@@ -152,10 +147,6 @@ export function loginRegister() {
                         </span>
                     </div>
 
-                    <select id="login-role" class="bg-slate-50 border-2 border-slate-200 py-3 px-5 md:py-3.5 md:px-6 my-2 md:my-2.5 w-full rounded-2xl outline-none transition-all duration-300 focus:border-brand-500 focus:bg-white focus:shadow-[0_0_0_4px_rgba(124,58,237,0.15)] text-sm md:text-base font-medium text-slate-700">
-                        <option value="user">Usuario</option>
-                        <option value="admin">Administrador</option>
-                    </select>
 
                     <a href="#"
                         class="text-brand-600 text-sm font-medium my-3 md:my-5 transition-colors duration-300 hover:text-brand-700 hover:underline">¿Olvidaste
@@ -207,8 +198,7 @@ export function loginRegister() {
                                         class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-400/30">
                                         <i class="fas fa-check text-emerald-400 text-[10px]"></i>
                                     </div>
-                                    <span class="text-white font-bold text-xs md:text-sm tracking-wide">Desarrollador
-                                        Pro</span>
+                                    <span class="text-white font-bold text-xs md:text-sm tracking-wide"> ¡Destaca tus habilidades!</span>
                                 </div>
 
                                 <!-- Insignia 2: Habilidades -->
@@ -357,16 +347,64 @@ window.handleLoginSubmit = function (event) {
     navigate(null, role === 'admin' ? '/admin_home' : '/dashboard');
 };
 
-window.handleRegisterSubmit = function (event) {
+window.handleLoginSubmit = async function (event) {
     event.preventDefault();
-    const name = document.getElementById('register-name')?.value.trim();
+    const documentNumber = document.getElementById('login-email')?.value.trim(); // el input dice "Cédula" aunque el id diga login-email
+    const password = document.getElementById('signin-password')?.value.trim();
+    const errorBox = document.getElementById('login-error');
+
+    if (!documentNumber || !password) {
+        if (errorBox) {
+            errorBox.textContent = "Por favor completa todos los campos.";
+            errorBox.classList.remove('hidden');
+        }
+        return;
+    }
+
+    if (errorBox) errorBox.classList.add('hidden');
+
+    try {
+        const response = await fetch('/users/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                document_number: documentNumber,
+                password: password
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Credenciales incorrectas');
+        }
+
+        const data = await response.json();
+
+        // Ajusta esto según lo que realmente devuelva tu backend (token, user, role, etc.)
+        window.localStorage.setItem('isLogged', 'true');
+        window.localStorage.setItem('token', data.token || '');
+        window.localStorage.setItem('role', data.role || 'user');
+
+        navigate(null, data.role === 'admin' ? '/admin_home' : '/dashboard');
+
+    } catch (error) {
+        console.error(error);
+        if (errorBox) {
+            errorBox.textContent = error.message || "Error al iniciar sesión. Intenta de nuevo.";
+            errorBox.classList.remove('hidden');
+        }
+    }
+};
+
+window.handleRegisterSubmit = async function (event) {
+    event.preventDefault();
+    const documentNumber = document.getElementById('register-cc')?.value.trim();
     const email = document.getElementById('register-email')?.value.trim();
     const password = document.getElementById('signup-password')?.value.trim();
     const passwordConfirm = document.getElementById('signup-confirm-password')?.value.trim();
-    const role = document.getElementById('register-role')?.value || 'user';
     const errorBox = document.getElementById('register-error');
 
-    if (!name || !email || !password || !passwordConfirm) {
+    if (!documentNumber || !email || !password || !passwordConfirm) {
         if (errorBox) {
             errorBox.textContent = "Por favor completa todos los campos.";
             errorBox.classList.remove('hidden');
@@ -384,8 +422,35 @@ window.handleRegisterSubmit = function (event) {
 
     if (errorBox) errorBox.classList.add('hidden');
 
-    window.localStorage.setItem('isLogged', 'true');
-    window.localStorage.setItem('role', role);
+    try {
+        const response = await fetch('/users/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                document_number: documentNumber,
+                email: email,
+                password: password
+            })
+        });
 
-    navigate(null, role === 'admin' ? '/admin_home' : '/dashboard');
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Error al registrar el usuario');
+        }
+
+        const data = await response.json();
+
+        window.localStorage.setItem('isLogged', 'true');
+        window.localStorage.setItem('token', data.token || '');
+        window.localStorage.setItem('role', data.role || 'user');
+
+        navigate(null, data.role === 'admin' ? '/admin_home' : '/dashboard');
+
+    } catch (error) {
+        console.error(error);
+        if (errorBox) {
+            errorBox.textContent = error.message || "Error al registrar. Intenta de nuevo.";
+            errorBox.classList.remove('hidden');
+        }
+    }
 };
