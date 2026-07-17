@@ -2,6 +2,7 @@ from flask import request, session
 from services.team_service import create_team
 from services.team_service import request_join_team
 from services.team_service import create_invitation
+from services.team_service import request_join_team
 from services.team_service import accept_invitation
 from services.team_service import reject_invitation
 from services.team_service import is_team_leader
@@ -9,6 +10,7 @@ from services.team_service import remove_member
 from services.team_service import transfer_leadership
 from services.team_service import is_team_member
 
+from services.team_service import reject_team_request
 
 # HU: US-007 — Create Team (EP-002 - Team Management)
 
