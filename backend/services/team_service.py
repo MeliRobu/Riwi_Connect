@@ -478,3 +478,171 @@ def reject_invitation(user_id, request_id):
     finally:
         cursor.close()
         conn.close()
+
+def is_team_leader(user_id, team_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            """
+            SELECT is_leader
+            FROM team_members
+            WHERE user_id = %s
+            AND team_id = %s
+            """,
+            (user_id, team_id)
+        )
+
+        leader = cursor.fetchone()
+
+        return leader is not None and leader[0]
+
+    finally:
+        cursor.close()
+        conn.close()
+
+def remove_member(team_id, member_id):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+
+        cursor.execute(
+            """
+            SELECT id_team_member
+            FROM team_members
+            WHERE user_id=%s
+            AND team_id=%s
+            """,
+            (member_id, team_id)
+        )
+
+        member = cursor.fetchone()
+
+        if member is None:
+            return {
+                "success": False,
+                "message": "Member not found"
+            },404
+
+        cursor.execute(
+            """
+            DELETE FROM team_members
+            WHERE user_id=%s
+            AND team_id=%s
+            """,
+            (member_id, team_id)
+        )
+
+        cursor.execute(
+            """
+            UPDATE users
+            SET status='AVAILABLE'
+            WHERE id_user=%s
+            """,
+            (member_id,)
+        )
+
+        conn.commit()
+
+        return {
+            "success": True,
+            "message": "Member removed successfully"
+        },200
+
+    except Exception as e:
+
+        conn.rollback()
+        return {
+            "success": False,
+            "message": str(e)
+        },500
+
+
+# HU: US-014 — Reject Request
+# The team Leader rejects a PENDING join request from a student.
+
+def reject_team_request(user_id, request_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Fetch the request
+        cursor.execute(
+            """
+            SELECT sender_user_id, team_id, status, type
+            FROM team_requests
+            WHERE id_team_request = %s
+            """,
+            (request_id,)
+        )
+        request = cursor.fetchone()
+        if request is None:
+            cursor.close()
+            conn.close()
+            return {"error": "Request not found"}, 404
+
+        sender_id, team_id, status, req_type = request
+
+        if req_type != "REQUEST":
+            cursor.close()
+            conn.close()
+            return {"error": "This is not a join request"}, 400
+
+        # Only the team Leader can reject
+        cursor.execute(
+            """
+            SELECT is_leader
+            FROM team_members
+            WHERE user_id = %s AND team_id = %s
+            """,
+            (user_id, team_id)
+        )
+        member = cursor.fetchone()
+        if member is None or member[0] is not True:
+            cursor.close()
+            conn.close()
+            return {"error": "Only the team Leader can reject requests"}, 403
+
+        if status != "PENDING":
+            cursor.close()
+            conn.close()
+            return {"error": "Request is no longer pending"}, 409
+
+        # Reject it
+        cursor.execute(
+            """
+            UPDATE team_requests
+            SET status = 'REJECTED', response_at = CURRENT_TIMESTAMP
+            WHERE id_team_request = %s
+            """,
+            (request_id,)
+        )
+        conn.commit()
+        return {"message": "Request rejected successfully"}, 200
+    except Exception as e:
+        conn.rollback()
+        return {"error": str(e)}, 500
+    finally:
+        cursor.close()
+        conn.close()
+
+def is_team_member(user_id, team_id):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT 1
+            FROM team_members
+            WHERE user_id = %s
+            AND team_id = %s
+        """, (user_id, team_id))
+
+        return cursor.fetchone() is not None
+
+    finally:
+        cursor.close()
+        conn.close()
