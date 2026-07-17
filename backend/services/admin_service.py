@@ -124,39 +124,32 @@ def create_question(data):
         # close the CONNECTION (this closes the cursor along with it)
         connection.close()
 
-
 def update_question(question_id, data):
     """PUT /admin/questions/{question_id} - Edits an existing question's statement, category and difficulty."""
 
-    # Open a new connection to PostgreSQL
     connection = get_connection()
 
     try:
-        # Create a cursor to run SQL commands
         update_question_sql = connection.cursor()
 
-        # First, check that the question actually exists before trying to update it
         update_question_sql.execute(
             "SELECT id_question FROM questions WHERE id_question = %s",
             (question_id,)
         )
 
-        # fetchone() returns None if no row matched the WHERE clause
         existing_question = update_question_sql.fetchone()
         if not existing_question:
-            raise ValueError('Pregunta no encontrada')
+            # Question doesn't exist: return None so the controller can respond 404
+            return None
 
-        # Update the question's fields with the new values sent by the client
         update_question_sql.execute("""
             UPDATE questions
             SET statement = %s, category = %s, difficulty_level = %s
             WHERE id_question = %s
         """, (data['statement'], data['category'], data['difficulty_level'], question_id))
 
-        # commit() belongs to the CONNECTION, not the cursor
         connection.commit()
 
-        # Build and return a dictionary representing the updated question
         return {
             'id_question': question_id,
             'statement': data['statement'],
@@ -165,13 +158,12 @@ def update_question(question_id, data):
         }
 
     except Exception:
-        # rollback() also belongs to the CONNECTION, not the cursor
         connection.rollback()
-        raise  # re-raise so the controller can catch it and respond with the right status code
+        raise
 
     finally:
-        # close the CONNECTION (this closes the cursor along with it)
         connection.close()
+
 
 def update_answer_options(question_id, options):
     """
@@ -179,11 +171,9 @@ def update_answer_options(question_id, options):
     Called from the controller only when 'answer_options' is present in the request body.
     """
 
-    # Business rule: must have exactly 4 options
     if len(options) != 4:
         raise ValueError('Cada pregunta debe tener exactamente 4 opciones')
 
-    # Business rule: exactly 1 must be marked correct
     correct_count = 0
     for opt in options:
         if opt.get('is_correct'):
@@ -192,14 +182,21 @@ def update_answer_options(question_id, options):
     if correct_count != 1:
         raise ValueError('Debe haber exactamente 1 opción marcada como correcta')
 
-    # Open a new connection to PostgreSQL
     connection = get_connection()
 
     try:
-        # Create a cursor to run SQL commands
         update_options_sql = connection.cursor()
 
-        # Loop through each of the 4 options and update it by its own id_answer_option
+        update_options_sql.execute(
+            "SELECT id_question FROM questions WHERE id_question = %s",
+            (question_id,)
+        )
+
+        existing_question = update_options_sql.fetchone()
+        if not existing_question:
+            # Question doesn't exist: return None so the controller can respond 404
+            return None
+
         for opt in options:
             update_options_sql.execute("""
                 UPDATE answer_options
@@ -207,67 +204,54 @@ def update_answer_options(question_id, options):
                 WHERE id_answer_option = %s AND question_id = %s
             """, (opt['content'], opt['is_correct'], opt['id_answer_option'], question_id))
 
-        # commit() belongs to the CONNECTION, not the cursor
         connection.commit()
 
-        # Return the same options back as confirmation
         return options
 
     except Exception:
-        # rollback() also belongs to the CONNECTION, not the cursor
         connection.rollback()
         raise
 
     finally:
-        # close the CONNECTION (this closes the cursor along with it)
         connection.close()
+
 
 def update_question_status(question_id, status):
     """PATCH /admin/questions/{question_id}/status - Activates or deactivates a question."""
 
-    # Business rule: status can only be one of these two values
     if status not in ('ACTIVE', 'INACTIVE'):
         raise ValueError("status debe ser 'ACTIVE' o 'INACTIVE'")
 
-    # Open a new connection to PostgreSQL
     connection = get_connection()
 
     try:
-        # Create a cursor to run SQL commands
         update_status_sql = connection.cursor()
 
-        # Check that the question exists before trying to update it
         update_status_sql.execute(
             "SELECT id_question FROM questions WHERE id_question = %s",
             (question_id,)
         )
 
-        # fetchone() returns None if no row matched
         existing_question = update_status_sql.fetchone()
         if not existing_question:
-            raise ValueError('Pregunta no encontrada')
+            # Question doesn't exist: return None so the controller can respond 404
+            return None
 
-        # Update only the status column for this question
         update_status_sql.execute(
             "UPDATE questions SET status = %s WHERE id_question = %s",
             (status, question_id)
         )
 
-        # commit() belongs to the CONNECTION, not the cursor
         connection.commit()
 
-        # Return a simple confirmation dictionary
         return {'id_question': question_id, 'status': status}
 
     except Exception:
-        # rollback() also belongs to the CONNECTION, not the cursor
         connection.rollback()
-        raise  # re-raise so the controller can catch it and respond with the right status code
+        raise
 
     finally:
-        # close the CONNECTION (this closes the cursor along with it)
         connection.close()
-
 def get_assessment_configuration():
     """GET /admin/assessment/configuration - Reads the single configuration row."""
 
