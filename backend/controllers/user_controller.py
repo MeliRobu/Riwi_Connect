@@ -1,5 +1,6 @@
 from flask import request, session
 from services.user_service import register_user, get_user_by_id
+from services.assessment_service import retry_smart_profile_if_needed
 from services.auth_service import login_user, logout_user
 
 # HU: US-001 — Registro de Usuario (EP-001 — User Management)
@@ -28,6 +29,7 @@ def login():
     if status_code == 200:
         session["user_id"] = result["id_user"]
         session["role"] = result["role"]
+        retry_smart_profile_if_needed(result["id_user"])
     return result, status_code
 
 
