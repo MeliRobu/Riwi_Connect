@@ -1,5 +1,6 @@
 from database.connection import get_connection
 
+# HU: US-007 — Create Team
 
 def create_team(user_id, team_name):
     """
@@ -95,6 +96,7 @@ def create_team(user_id, team_name):
     finally:
         cursor.close()
         conn.close()
+# HU: US-008 — Request to Join Team
 
 def request_join_team(user_id, team_id):
     """
@@ -633,65 +635,6 @@ def is_team_leader(user_id, team_id):
         cursor.close()
         conn.close()
 
-def remove_member(team_id, member_id):
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    try:
-
-        cursor.execute(
-            """
-            SELECT id_team_member
-            FROM team_members
-            WHERE user_id=%s
-            AND team_id=%s
-            """,
-            (member_id, team_id)
-        )
-
-        member = cursor.fetchone()
-
-        if member is None:
-            return {
-                "success": False,
-                "message": "Member not found"
-            },404
-
-        cursor.execute(
-            """
-            DELETE FROM team_members
-            WHERE user_id=%s
-            AND team_id=%s
-            """,
-            (member_id, team_id)
-        )
-
-        cursor.execute(
-            """
-            UPDATE users
-            SET status='AVAILABLE'
-            WHERE id_user=%s
-            """,
-            (member_id,)
-        )
-
-        conn.commit()
-
-        return {
-            "success": True,
-            "message": "Member removed successfully"
-        },200
-
-    except Exception as e:
-
-        conn.rollback()
-        return {
-            "success": False,
-            "message": str(e)
-        },500
-
-
 # HU: US-014 — Reject Request
 # The team Leader rejects a PENDING join request from a student.
 
@@ -758,6 +701,66 @@ def reject_team_request(user_id, request_id):
     finally:
         cursor.close()
         conn.close()
+# HU: US-015 — Remove Team Member
+
+def remove_member(team_id, member_id):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+
+        cursor.execute(
+            """
+            SELECT id_team_member
+            FROM team_members
+            WHERE user_id=%s
+            AND team_id=%s
+            """,
+            (member_id, team_id)
+        )
+
+        member = cursor.fetchone()
+
+        if member is None:
+            return {
+                "success": False,
+                "message": "Member not found"
+            },404
+
+        cursor.execute(
+            """
+            DELETE FROM team_members
+            WHERE user_id=%s
+            AND team_id=%s
+            """,
+            (member_id, team_id)
+        )
+
+        cursor.execute(
+            """
+            UPDATE users
+            SET status='AVAILABLE'
+            WHERE id_user=%s
+            """,
+            (member_id,)
+        )
+
+        conn.commit()
+
+        return {
+            "success": True,
+            "message": "Member removed successfully"
+        },200
+
+    except Exception as e:
+
+        conn.rollback()
+        return {
+            "success": False,
+            "message": str(e)
+        },500
+
 
 def is_team_member(user_id, team_id):
 
