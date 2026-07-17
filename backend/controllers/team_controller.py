@@ -6,6 +6,8 @@ from services.team_service import accept_invitation
 from services.team_service import reject_invitation
 from services.team_service import is_team_leader
 from services.team_service import remove_member
+from services.team_service import transfer_leadership
+from services.team_service import is_team_member
 
 
 # HU: US-007 — Create Team (EP-002 - Team Management)
@@ -85,3 +87,41 @@ def remove_member_route(team_id, user_id):
         },403
 
     return remove_member(team_id, user_id)
+
+def transfer_leader_route(team_id):
+
+    if "user_id" not in session:
+        return {
+            "success": False,
+            "message": "Unauthorized"
+        }, 401
+
+    leader_id = session["user_id"]
+
+    if not is_team_leader(leader_id, team_id):
+        return {
+            "success": False,
+            "message": "Only the team leader can transfer leadership."
+        }, 403
+
+    data = request.get_json()
+
+    new_leader_id = data.get("new_leader_id")
+
+    if not new_leader_id:
+        return {
+            "success": False,
+            "message": "new_leader_id is required."
+        }, 400
+
+    if not is_team_member(new_leader_id, team_id):
+        return {
+            "success": False,
+            "message": "The selected user does not belong to this team."
+        }, 404
+
+    return transfer_leadership(
+        team_id,
+        leader_id,
+        new_leader_id
+    )
