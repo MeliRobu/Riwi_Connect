@@ -277,10 +277,36 @@ def generate_smart_profile(assessment_id):
         cursor.close()
         conn.close()
 
+# HU: US-005 — Retry helper (RN-041)
+# Shared by login and get_assessment_result: checks if this user has a
+# completed assessment with profile_description still NULL, and if so,
+# dispatches the retry in a background thread without blocking the caller.
+def retry_smart_profile_if_needed(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT a.id_assessment, ar.profile_description
+        FROM assessment_results ar
+        JOIN assessments a ON ar.assessment_id = a.id_assessment
+        WHERE a.user_id = %s;
+        """,
+        (user_id,)
+    )
+    row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if row is None:
+        return
+    assessment_id, profile_description = row
+    if profile_description is None:
+        threading.Thread(target=generate_smart_profile, args=(assessment_id,)).start()    
+
+
+# HU: US-006 — Consultar Smart Professional Profile
+# strengths, improvement_opportunities and profile_description
+# may still be NULL here if Gemini hasn't generated them yet (RN-041).
 def get_assessment_result(user_id):
-    # HU: US-006 — Consultar Smart Professional Profile
-    # strengths, improvement_opportunities and profile_description
-    # may still be NULL here if Gemini hasn't generated them yet (RN-041).
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
