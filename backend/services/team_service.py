@@ -283,3 +283,60 @@ def accept_invitation(user_id, request_id):
     finally:
         cursor.close()
         conn.close()
+
+# HU: US-012 — Reject Invitation
+# The invited student rejects a PENDING invitation.
+def reject_invitation(user_id, request_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Fetch the invitation
+        cursor.execute(
+            """
+            SELECT receiver_user_id, status, type
+            FROM team_requests
+            WHERE id_team_request = %s
+            """,
+            (request_id,)
+        )
+        request = cursor.fetchone()
+        if request is None:
+            cursor.close()
+            conn.close()
+            return {"error": "Invitation not found"}, 404
+
+        receiver_id, status, req_type = request
+
+        # Only the invited user can reject
+        if receiver_id != user_id:
+            cursor.close()
+            conn.close()
+            return {"error": "You can only reject your own invitations"}, 403
+
+        if req_type != "INVITATION":
+            cursor.close()
+            conn.close()
+            return {"error": "This is not an invitation"}, 400
+
+        if status != "PENDING":
+            cursor.close()
+            conn.close()
+            return {"error": "Invitation is no longer pending"}, 409
+
+        # Reject it
+        cursor.execute(
+            """
+            UPDATE team_requests
+            SET status = 'REJECTED', response_at = CURRENT_TIMESTAMP
+            WHERE id_team_request = %s
+            """,
+            (request_id,)
+        )
+        conn.commit()
+        return {"message": "Invitation rejected successfully"}, 200
+    except Exception as e:
+        conn.rollback()
+        return {"error": str(e)}, 500
+    finally:
+        cursor.close()
+        conn.close()
