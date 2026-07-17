@@ -777,3 +777,119 @@ def is_team_member(user_id, team_id):
     finally:
         cursor.close()
         conn.close()
+
+# HU: US-016 — Transfer Leadership
+# Changes which team member holds the Leader role. The Controller has
+# already validated that the caller is the current Leader and that the
+# new leader belongs to the team.
+def transfer_leadership(team_id, leader_id, new_leader_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            UPDATE team_members
+            SET is_leader = FALSE
+            WHERE team_id = %s AND user_id = %s
+            """,
+            (team_id, leader_id)
+        )
+        cursor.execute(
+            """
+            UPDATE team_members
+            SET is_leader = TRUE
+            WHERE team_id = %s AND user_id = %s
+            """,
+            (team_id, new_leader_id)
+        )
+        conn.commit()
+        return {"success": True, "message": "Leadership transferred successfully"}, 200
+    except Exception as e:
+        conn.rollback()
+        return {"success": False, "message": str(e)}, 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# HU: US-017 — Dissolve Team
+# The team Leader dissolves the team entirely. All members return to
+# AVAILABLE, all PENDING requests/invitations for this team are cancelled,
+# and the team is deleted (RN-039).
+
+def dissolve_team(user_id, team_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Confirm the team exists and the user is its Leader
+        cursor.execute(
+            """
+            SELECT is_leader
+            FROM team_members
+            WHERE user_id = %s AND team_id = %s
+            """,
+            (user_id, team_id)
+        )
+        member = cursor.fetchone()
+        if member is None:
+            cursor.close()
+            conn.close()
+            return {"error": "Team not found"}, 404
+        if member[0] is not True:
+            cursor.close()
+            conn.close()
+            return {"error": "Only the team Leader can dissolve the team"}, 403
+
+        # Get all current member ids, to set them back to AVAILABLE
+        cursor.execute(
+            """
+            SELECT user_id
+            FROM team_members
+            WHERE team_id = %s
+            """,
+            (team_id,)
+        )
+        member_ids = [row[0] for row in cursor.fetchall()]
+
+        # Delete every request/invitation tied to this team (any status)
+        cursor.execute(
+            """
+            DELETE FROM team_requests
+            WHERE team_id = %s
+            """,
+            (team_id,)
+        )
+
+        # Return every member to AVAILABLE
+        cursor.execute(
+            """
+            UPDATE users
+            SET status = 'AVAILABLE'
+            WHERE id_user = ANY(%s)
+            """,
+            (member_ids,)
+        )
+
+        # Remove the members, then the team itself
+        cursor.execute(
+            """
+            DELETE FROM team_members
+            WHERE team_id = %s
+            """,
+            (team_id,)
+        )
+        cursor.execute(
+            """
+            DELETE FROM teams
+            WHERE id_team = %s
+            """,
+            (team_id,)
+        )
+
+        conn.commit()
+        return {"message": "Team dissolved successfully"}, 200
+    except Exception as e:
+        conn.rollback()
+        return {"error": str(e)}, 500
+    finally:
+        cursor.close()
+        conn.close()
