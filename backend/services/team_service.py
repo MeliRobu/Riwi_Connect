@@ -523,50 +523,16 @@ def is_team_member(user_id, team_id):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT 1
-        FROM team_members
-        WHERE user_id = %s
-        AND team_id = %s
-    """, (user_id, team_id))
-
-    exists = cursor.fetchone() is not None
-
-    conn.close()
-
-    return exists
-
-def transfer_leadership(team_id, current_leader_id, new_leader_id):
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
     try:
-
         cursor.execute("""
-            UPDATE team_members
-            SET is_leader = FALSE
-            WHERE team_id = %s
-            AND user_id = %s
-        """, (team_id, current_leader_id))
+            SELECT 1
+            FROM team_members
+            WHERE user_id = %s
+            AND team_id = %s
+        """, (user_id, team_id))
 
-        cursor.execute("""
-            UPDATE team_members
-            SET is_leader = TRUE
-            WHERE team_id = %s
-            AND user_id = %s
-        """, (team_id, new_leader_id))
-
-        conn.commit()
-
-        return {
-            "success": True,
-            "message": "Leadership transferred successfully."
-        }, 200
-
-    except Exception:
-        conn.rollback()
-        raise
+        return cursor.fetchone() is not None
 
     finally:
+        cursor.close()
         conn.close()
