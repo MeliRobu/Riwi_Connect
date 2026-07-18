@@ -896,3 +896,26 @@ def dissolve_team(user_id, team_id):
     finally:
         cursor.close()
         conn.close()
+# HU: (vacío documental) — Consultar Equipos Disponibles (DT-007 8.3, GI-004 Fase 9)
+def list_available_teams():
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            SELECT t.id_team, t.team_name, COUNT(tm.user_id) AS member_count
+            FROM teams t
+            LEFT JOIN team_members tm ON tm.team_id = t.id_team
+            GROUP BY t.id_team, t.team_name
+            HAVING COUNT(tm.user_id) < 6
+            ORDER BY t.created_at DESC
+            """
+        )
+        rows = cursor.fetchall()
+        return [
+            {"id_team": id_team, "team_name": team_name, "member_count": member_count}
+            for id_team, team_name, member_count in rows
+        ]
+    finally:
+        cursor.close()
+        conn.close()
