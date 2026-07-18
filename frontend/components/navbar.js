@@ -170,8 +170,8 @@ export function navbar() {
           class="flex items-center gap-3 bg-white/50 border border-gray-200 p-3 rounded-2xl hover:bg-white hover:border-gray-300 hover:shadow-sm transition-all duration-300 cursor-pointer group">
          <div class="w-9 h-9 rounded-full bg-[#4B3FA8] overflow-hidden flex items-center justify-center shrink-0"> <img src="./assets/default-profile.png" width="20" height="20"> </div> 
         <div class="flex-1 min-w-0 hide-on-collapse">
-          <p class="text-sm font-bold text-gray-800 truncate font-heading group-hover:text-gray-900 transition-colors">Usuario</p>
-          <p class="text-[11px] font-medium text-gray-500 truncate uppercase tracking-wider">Frontend Developer</p>
+          <p id="navbar-user-name" class="text-sm font-bold text-gray-800 truncate font-heading group-hover:text-gray-900 transition-colors">Usuario</p>
+          <p id="navbar-user-role" class="text-[11px] font-medium text-gray-500 truncate uppercase tracking-wider">Coder</p>
         </div>
         <svg id="user-menu-arrow" class="w-4 h-4 text-gray-400 group-hover:text-gray-800 transition-transform duration-300 shrink-0 hide-on-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="18 15 12 9 6 15"></polyline>

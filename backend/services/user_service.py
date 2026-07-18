@@ -68,10 +68,14 @@ def get_user_by_id(id_user):
         """
         SELECT u.id_user, u.role, u.status, u.profile_image,
             s.full_name, s.document_number, s.email,
-            tm.team_id, tm.is_leader
+            tm.team_id, tm.is_leader,
+            c.campus_name, j.journey_time, cl.clan_name
         FROM users u
         JOIN institutional_sources s ON u.id_institutional_source = s.id_institutional_source
         LEFT JOIN team_members tm ON tm.user_id = u.id_user
+        LEFT JOIN campus c ON s.id_campus = c.id_campus
+        LEFT JOIN journeys j ON s.id_journey = j.id_journey
+        LEFT JOIN clan cl ON s.id_clan = cl.id_clan
         WHERE u.id_user = %s
         """,
         (id_user,)
@@ -84,7 +88,8 @@ def get_user_by_id(id_user):
         return None
     # Build a dictionary with readable keys, easier to convert to JSON later.
     # team_id/is_leader come from a LEFT JOIN, so they're None if the user
-    # isn't in any team yet (Frontend uses this to render the Teams page)
+    # isn't in any team yet (Frontend uses this to render the Teams page).
+    # clan_name is None for administrators, who don't belong to a clan.
     return {
         "id_user": user_row[0],
         "role": user_row[1],
@@ -94,5 +99,8 @@ def get_user_by_id(id_user):
         "document_number": user_row[5],
         "email": user_row[6],
         "team_id": user_row[7],
-        "is_leader": user_row[8] if user_row[8] is not None else False
+        "is_leader": user_row[8] if user_row[8] is not None else False,
+        "campus_name": user_row[9],
+        "journey_time": user_row[10],
+        "clan_name": user_row[11]
     }
