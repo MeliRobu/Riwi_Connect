@@ -6,6 +6,13 @@ let userAnswers = {}; // { id_question: id_answer_option }
 let questions = [];
 let loadError = null;
 
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 async function loadQuestions() {
     try {
         const response = await fetch('/assessments');
@@ -80,7 +87,7 @@ function renderQuestion() {
     return `
         <div class="flex flex-col gap-4">
             <span class="text-xs font-semibold text-gray-400">Pregunta ${currentQuestionIndex + 1} de ${questions.length}</span>
-            <span class="text-xl font-bold">${question.statement}</span>
+            <span class="text-xl font-bold">${escapeHtml(question.statement)}</span>
             <div class="flex flex-col gap-3 mt-2">
                 ${question.options.map(opt => {
                     const isChecked = selectedAnswer === opt.id_answer_option;
@@ -94,7 +101,7 @@ function renderQuestion() {
                             onchange="handleAnswerChange(${question.id_question}, ${opt.id_answer_option})"
                             class="w-4 h-4 accent-[#4B3FA8]"
                         >
-                        <span class="text-sm font-medium ${isChecked ? 'text-[#4B3FA8] font-semibold' : 'text-gray-700'}">${opt.content}</span>
+                        <span class="text-sm font-medium ${isChecked ? 'text-[#4B3FA8] font-semibold' : 'text-gray-700'}">${escapeHtml(opt.content)}</span>
                     </label>
                     `;
                 }).join('')}

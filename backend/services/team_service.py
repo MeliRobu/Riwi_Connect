@@ -919,3 +919,162 @@ def list_available_teams():
     finally:
         cursor.close()
         conn.close()
+
+
+# HU: (vacío documental) — Consultar Mis Solicitudes Enviadas
+def list_my_requests(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            SELECT tr.id_team_request, t.team_name, tr.status, tr.team_id
+            FROM team_requests tr
+            JOIN teams t ON tr.team_id = t.id_team
+            WHERE tr.sender_user_id = %s AND tr.type = 'REQUEST'
+            ORDER BY tr.id_team_request DESC
+            """,
+            (user_id,)
+        )
+        rows = cursor.fetchall()
+        return [
+            {"id_team_request": r[0], "team_name": r[1], "status": r[2], "team_id": r[3]}
+            for r in rows
+        ]
+    finally:
+        cursor.close()
+        conn.close()
+
+# HU: (vacío documental) — Consultar Solicitudes Recibidas por mi Equipo
+def list_received_requests(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Only the Leader of a team can see requests sent to it
+        cursor.execute(
+            "SELECT team_id FROM team_members WHERE user_id = %s AND is_leader = TRUE",
+            (user_id,)
+        )
+        row = cursor.fetchone()
+        if row is None:
+            return []
+        team_id = row[0]
+        cursor.execute(
+            """
+            SELECT tr.id_team_request, s.full_name, tr.status
+            FROM team_requests tr
+            JOIN users u ON tr.sender_user_id = u.id_user
+            JOIN institutional_sources s ON u.id_institutional_source = s.id_institutional_source
+            WHERE tr.team_id = %s AND tr.type = 'REQUEST' AND tr.status = 'PENDING'
+            ORDER BY tr.id_team_request DESC
+            """,
+            (team_id,)
+        )
+        rows = cursor.fetchall()
+        return [
+            {"id_team_request": r[0], "full_name": r[1], "status": r[2], "team_id": team_id}
+            for r in rows
+        ]
+    finally:
+        cursor.close()
+        conn.close()
+
+# HU: (vacío documental) — Consultar Invitaciones Enviadas por mi Equipo
+def list_sent_invitations(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "SELECT team_id FROM team_members WHERE user_id = %s AND is_leader = TRUE",
+            (user_id,)
+        )
+        row = cursor.fetchone()
+        if row is None:
+            return []
+        team_id = row[0]
+        cursor.execute(
+            """
+            WHERE tr.team_id = %s AND tr.type = 'INVITATION' AND tr.status = 'PENDING'
+            ORDER BY tr.id_team_request DESC
+            """,
+            (team_id,)
+        )
+        rows = cursor.fetchall()
+        return [
+            {"id_team_request": r[0], "full_name": r[1], "status": r[2], "team_id": team_id}
+            for r in rows
+        ]
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# HU: (vacío documental) — Consultar Mis Invitaciones Recibidas
+def list_received_invitations(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            SELECT tr.id_team_request, t.team_name, tr.status, tr.team_id
+            FROM team_requests tr
+            JOIN teams t ON tr.team_id = t.id_team
+            WHERE tr.receiver_user_id = %s AND tr.type = 'INVITATION' AND tr.status = 'PENDING'
+            ORDER BY tr.id_team_request DESC
+            """,
+            (user_id,)
+        )
+        rows = cursor.fetchall()
+        return [
+            {"id_team_request": r[0], "team_name": r[1], "status": r[2], "team_id": r[3]}
+            for r in rows
+        ]
+    finally:
+        cursor.close()
+        conn.close()
+
+# HU: (vacío documental) — Buscar Estudiantes para Invitar
+def search_students_to_invite(user_id, query):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Only the Leader can search candidates to invite
+        cursor.execute(
+            "SELECT team_id FROM team_members WHERE user_id = %s AND is_leader = TRUE",
+            (user_id,)
+        )
+        row = cursor.fetchone()
+        if row is None:
+            return []
+        team_id = row[0]
+
+        # Team's Campus/Journey come from the Leader, same as elsewhere in this file
+        cursor.execute(
+            """
+            SELECT s.id_campus, s.id_journey
+            FROM users u
+            JOIN institutional_sources s ON u.id_institutional_source = s.id_institutional_source
+            WHERE u.id_user = %s
+            """,
+            (user_id,)
+        )
+        team_campus, team_journey = cursor.fetchone()
+
+        cursor.execute(
+            """
+            SELECT u.id_user, s.full_name
+            FROM users u
+            JOIN institutional_sources s ON u.id_institutional_source = s.id_institutional_source
+            WHERE u.status = 'AVAILABLE'
+              AND s.id_campus = %s
+              AND s.id_journey = %s
+              AND s.full_name ILIKE %s
+            LIMIT 10
+            """,
+            (team_campus, team_journey, f"%{query}%")
+        )
+        rows = cursor.fetchall()
+        return [{"user_id": r[0], "full_name": r[1]} for r in rows]
+    finally:
+        cursor.close()
+        conn.close()
