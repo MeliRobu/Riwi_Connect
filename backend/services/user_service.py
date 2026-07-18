@@ -67,23 +67,24 @@ def get_user_by_id(id_user):
     cursor.execute(
         """
         SELECT u.id_user, u.role, u.status, u.profile_image,
-            s.full_name, s.document_number, s.email
+            s.full_name, s.document_number, s.email,
+            tm.team_id, tm.is_leader
         FROM users u
         JOIN institutional_sources s ON u.id_institutional_source = s.id_institutional_source
+        LEFT JOIN team_members tm ON tm.user_id = u.id_user
         WHERE u.id_user = %s
         """,
         (id_user,)
     )
     user_row = cursor.fetchone()
-
     cursor.close()
     conn.close()
-
     # If no row was found, the user doesn't exist
     if user_row is None:
         return None
-
-    # Build a dictionary with readable keys, easier to convert to JSON later
+    # Build a dictionary with readable keys, easier to convert to JSON later.
+    # team_id/is_leader come from a LEFT JOIN, so they're None if the user
+    # isn't in any team yet (Frontend uses this to render the Teams page)
     return {
         "id_user": user_row[0],
         "role": user_row[1],
@@ -91,5 +92,7 @@ def get_user_by_id(id_user):
         "profile_image": user_row[3],
         "full_name": user_row[4],
         "document_number": user_row[5],
-        "email": user_row[6]
+        "email": user_row[6],
+        "team_id": user_row[7],
+        "is_leader": user_row[8] if user_row[8] is not None else False
     }
