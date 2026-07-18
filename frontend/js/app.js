@@ -9,6 +9,7 @@ import { toggleUserMenu,initUserMenuListener, toggleSettingsSubmenu, logout } fr
 
 document.getElementById("sidebar-container").innerHTML = navbar();
 loadNavbarProfile();
+window.addEventListener("hashchange", loadNavbarProfile);
 
 async function loadNavbarProfile() {
   try {
