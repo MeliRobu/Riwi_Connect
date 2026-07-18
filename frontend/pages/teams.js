@@ -421,7 +421,7 @@ window.expelMember = function(memberId) {
 };
 
 window.transferLeadership = function(memberId) {
-    if (!confirm('¿Seguro que quieres transferir el liderazgo a este integrante? Perderás tus permisos de líder.')) return;
+    if (!confirm('a.')) return;
     const myTeam = teams.find(t => t.id === currentUser.teamId);
     myTeam.leaderId = memberId;
     currentUser.isLeader = false;
@@ -468,23 +468,61 @@ window.rejectInvitation = function(invId) {
     document.getElementById('tab-content').innerHTML = renderTabContent();
 };
 
-// ===== TAB: MI EQUIPO (expulsar, transferir liderazgo, disolver) =====
+window.expelMember = async function(memberId) {
+    const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: '¿Seguro que quieres expulsar a este integrante?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#4B3FA8',
+        cancelButtonColor: '#F63E9F',
+        confirmButtonText: 'Sí, expulsar',
+        cancelButtonText: 'Cancelar'
+    });
 
+    if (!result.isConfirmed) return;
 
-
-window.expelMember = function(memberId) {
-    if (!confirm('¿Seguro que quieres expulsar a este integrante?')) return;
     const myTeam = teams.find(t => t.id === currentUser.teamId);
     myTeam.members = myTeam.members.filter(m => m !== memberId);
+
+    await Swal.fire({
+        title: '¡Expulsado!',
+        text: 'El integrante ha sido expulsado del equipo.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+    });
+
     document.getElementById('tab-content').innerHTML = renderTabContent();
 };
 
-window.transferLeadership = function(memberId) {
-    if (!confirm('¿Seguro que quieres transferir el liderazgo a este integrante? Perderás tus permisos de líder.')) return;
+
+window.transferLeadership = async function(memberId) {
+    const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: '¿Seguro que quieres transferir el liderazgo a este integrante? Perderás tus permisos de líder.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#4B3FA8',
+        cancelButtonColor: '#F63E9F',
+        confirmButtonText: 'Sí, transferir',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (!result.isConfirmed) return;
+
     const myTeam = teams.find(t => t.id === currentUser.teamId);
     myTeam.leaderId = memberId;
     currentUser.isLeader = false;
-    alert('Liderazgo transferido.');
+
+    await Swal.fire({
+        title: '¡Transferido!',
+        text: 'Liderazgo transferido correctamente.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+    });
+
     document.getElementById('tab-content').innerHTML = renderTabContent();
 };
 
