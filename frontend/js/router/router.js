@@ -76,10 +76,10 @@ export async function router() {
     return;
   }
 
-if (view.isPrivate && view.requiresAssessment) {
+if (view.isPrivate && view.blockIfAssessmentCompleted) {
     const hasCompletedAssessment = await checkAssessmentCompleted();
-    if (!hasCompletedAssessment) {
-      window.location.hash = "/assessment";
+    if (hasCompletedAssessment) {
+      window.location.hash = "/profile";
       return;
     }
   }

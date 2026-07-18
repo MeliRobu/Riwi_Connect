@@ -62,7 +62,8 @@ export const routes = {
     isPrivate: true,
     setup: () => {},
     render: assessment,
-    admin:false
+    admin:false,
+    blockIfAssessmentCompleted: true
   },
   "/assesment-result" : {
     isPrivate: true,
