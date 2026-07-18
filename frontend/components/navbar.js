@@ -5,9 +5,9 @@
  * collapsible user settings submenu and dark mode controls.
  * @returns {string} The raw HTML string of the sidebar navigation component.
  */
-export function navbar(isAdmin = true) {
+export function navbar() {
   // Ajusta este valor según cómo llames al rol en tu app
-
+ const isAdmin =false;
   return `
 <!-- Botón hamburguesa - solo visible en móvil -->
 <button id="menu-toggle" onclick="toggleMobileMenu()"
@@ -154,13 +154,15 @@ export function navbar(isAdmin = true) {
           </div>
         </div>
 
-        <button onclick="logout()"
-          class="w-full cursor-pointer flex items-center gap-3 px-5 py-4 text-sm font-semibold text-gray-700 hover:text-rose-600 hover:bg-rose-50 transition-all duration-200 group border-t border-gray-100">
-          <svg class="w-5 h-5 text-gray-400 group-hover:text-rose-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          Cerrar sesión
-        </button>
+<a href="#/" data-route="/" onclick="logout(); navigate(event, '/'); closeMobileMenu()" title="Cerrar sesión"
+   class="nav-link group flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 hover:bg-rose-50 hover:text-rose-600 text-gray-600 hover:shadow-[0_0_15px_rgba(244,63,94,0.1)] border-t border-gray-100 mt-2">
+  <div class="w-8 h-8 rounded-xl bg-gray-100/50 group-hover:bg-white flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-sm border border-gray-200/50 shrink-0">
+    <svg class="w-4 h-4 text-gray-400 group-hover:text-rose-500 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17 16l4-4m0 0l-4-4m4 4H9m11-4a3 3 0 00-3-3H7a3 3 0 00-3 3v8a3 3 0 003 3h7a3 3 0 003-3" />
+    </svg>
+  </div>
+  <span class="hide-on-collapse whitespace-nowrap">Cerrar sesión</span>
+</a>
       </div>
 
       <!-- Trigger del menú de usuario -->

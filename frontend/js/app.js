@@ -6,7 +6,6 @@ import { toggleUserMenu,initUserMenuListener, toggleSettingsSubmenu  } from './u
 
 
 // Asegura que exista un rol global; por defecto 'user'. Cambiar desde el login cuando corresponda.
-window.role = window.role || 'user';
 
 document.getElementById("sidebar-container").innerHTML = navbar();
 
