@@ -49,7 +49,8 @@ export const routes = {
     isPrivate: true,
     setup: () => {},
     render: teams_view,
-    admin:false
+    admin:false,
+    requiresAssessment: true
   },
   "/profile" : {
     isPrivate: true,
@@ -103,6 +104,7 @@ export const routes = {
     isPrivate: true,
     setup: () => {},
     render: recommendations_view,
-    admin: false
+    admin: false,
+    requiresAssessment: true
   }
 };

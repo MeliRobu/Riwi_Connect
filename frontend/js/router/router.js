@@ -3,8 +3,24 @@ import { updateActiveNavLink } from "../utils";
 import { page404 } from "../../pages/404";
 
 // Placeholders representing simulated authentication states
-const isLogged = true;
-const role = "admin";
+// Read the real session state, set by login-register.js on successful login
+function getAuthState() {
+  return {
+    isLogged: window.localStorage.getItem('isLogged') === 'true',
+    role: window.localStorage.getItem('role') || 'user'
+  };
+}
+
+// RN-011: checks with the Backend whether the Assessment is completed,
+// before allowing access to a route that depends on it (e.g. /teams)
+async function checkAssessmentCompleted() {
+  try {
+    const response = await fetch('/assessments/result');
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
+}
 
 function resolveCurrentPath(hash = window.location.hash) {
   const rawHash = hash.startsWith("#") ? hash.slice(1) : hash;
@@ -29,6 +45,7 @@ function resolveCurrentPath(hash = window.location.hash) {
  */
 export async function router() {
   const currentPath = resolveCurrentPath();
+  const { isLogged, role } = getAuthState();
   let view = routes[currentPath];
 
   /** Array of route paths that should omit the sidebar display */
@@ -59,9 +76,12 @@ export async function router() {
     return;
   }
 
-  if (view.isPrivate && view.admin && role !== "admin") {
-    window.location.hash = "/login";
-    return;
+if (view.isPrivate && view.requiresAssessment) {
+    const hasCompletedAssessment = await checkAssessmentCompleted();
+    if (!hasCompletedAssessment) {
+      window.location.hash = "/assessment";
+      return;
+    }
   }
 
   const container = document.getElementById("app");
