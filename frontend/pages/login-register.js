@@ -188,7 +188,7 @@ export function loginRegister() {
 
                             <div class="relative transform transition-transform duration-700 group-hover:rotate-y-[10deg] group-hover:scale-[1.02] group-hover:-translate-y-2 bg-transparent z-10"
                                 style="transform-style: preserve-3d;">
-                                <img src="./assets/uno.png" onerror="this.src='img/uno.png'" alt="Tech"
+                                <img src="./assets/uno.png" onerror="this.onerror=null; this.style.display='none';" alt="Tech"
                                     class="w-full object-contain aspect-[4/5] bg-transparent drop-shadow-[0_20px_40px_rgba(0,0,0,0.3)]" />
 
                                 <!-- Insignia 1: Desarrollador Pro -->
@@ -252,7 +252,7 @@ export function loginRegister() {
 
                             <div class="relative transform transition-transform duration-700 group-hover:rotate-y-[-5deg] group-hover:scale-[1.03] group-hover:-translate-y-3 bg-transparent z-10"
                                 style="transform-style: preserve-3d;">
-                                <img src="./assets/grupo.png" onerror="this.src='img/grupo.png'" alt="Connect Dashboard"
+                                <img src="./assets/grupo.png" onerror="this.onerror=null; this.style.display='none';" alt="Connect Dashboard"
                                     class="w-full object-contain aspect-[4/3] bg-transparent drop-shadow-[0_30px_60px_rgba(0,0,0,0.5)]" />
 
                                 <!-- Insignia 1: Corona Top Team (Arriba a la izquierda) -->

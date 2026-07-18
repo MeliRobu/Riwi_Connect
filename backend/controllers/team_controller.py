@@ -13,6 +13,7 @@ from services.team_service import is_team_member
 from services.team_service import transfer_leadership
 from services.team_service import dissolve_team
 from services.compatibility_service import get_student_recommendations
+from services.team_service import list_available_teams
 
 # HU: US-007 — Create Team (EP-002 - Team Management)
 def create():
@@ -158,3 +159,16 @@ def get_recommendations_route(team_id):
         return {"error": "Unauthorized"}, 401
     result, status_code = get_student_recommendations(session["user_id"], team_id)
     return result, status_code
+
+# HU: (vacío documental) — Consultar Equipos Disponibles
+def list_teams_route():
+    if "user_id" not in session:
+        return {"error": "Unauthorized"}, 401
+    # RN-011/RN-012: restricted until the Assessment is completed
+    if session.get("role") != "STUDENT":
+        return {"error": "Only Students can view available teams"}, 403
+    from services.assessment_service import get_assessment_by_user
+    assessment = get_assessment_by_user(session["user_id"])
+    if assessment is None or assessment[1] is None:
+        return {"error": "Assessment not completed"}, 403
+    return list_available_teams(), 200
