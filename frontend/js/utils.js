@@ -50,3 +50,14 @@ export function renderGrafica(id, datos) {
   });
   chart.render();
 }
+
+export async function logout() {
+  try {
+    await fetch('/users/logout', { method: 'POST' });
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error);
+  }
+  window.localStorage.removeItem('isLogged');
+  window.localStorage.removeItem('role');
+  window.localStorage.removeItem('token');
+}

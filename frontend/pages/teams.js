@@ -19,10 +19,8 @@ let sentInvitations = [
 let receivedInvitations = [
     { id: 'ri1', teamId: 't3', teamName: 'Clan Nova', status: 'pending' }
 ];
-let recommendations = [
-    { id: 'u10', name: 'Juan Pérez', matchScore: 91, topSkill: 'JavaScript' },
-    { id: 'u11', name: 'Valentina Ríos', matchScore: 87, topSkill: 'Node.js' }
-];
+let recommendationsData = [];
+let recommendationsLoaded = false;
 
 let activeTab = 'equipos';
 
@@ -415,17 +413,52 @@ window.expelMember = function(memberId) {};
 window.transferLeadership = function(memberId) {};
 window.dissolveTeam = async () => {};
 
+async function loadRecommendations() {
+    if (!currentUser?.team_id) {
+        recommendationsLoaded = true;
+        return;
+    }
+    try {
+        const response = await fetch(`/teams/${currentUser.team_id}/recommendations`);
+        if (!response.ok) {
+            recommendationsData = [];
+            recommendationsLoaded = true;
+            return;
+        }
+        const data = await response.json();
+        recommendationsData = data.recommendations || [];
+        recommendationsLoaded = true;
+    } catch (error) {
+        console.error('Error cargando recomendaciones:', error);
+        recommendationsData = [];
+        recommendationsLoaded = true;
+    }
+}
+
 function renderRecomendacionesTab() {
+    if (!currentUser?.team_id) {
+        return emptyState('No perteneces a ningún equipo todavía.');
+    }
+    if (!recommendationsLoaded) {
+        loadRecommendations().then(() => {
+            if (activeTab === 'recomendaciones') {
+                document.getElementById('tab-content').innerHTML = renderTabContent();
+            }
+        });
+        return emptyState('Cargando recomendaciones...');
+    }
+    if (recommendationsData.length === 0) {
+        return emptyState('No hay candidatos recomendados en este momento.');
+    }
     return `
         <div class="flex flex-col gap-4 pt-4">
             <span class="text-lg font-bold">Recomendaciones de estudiantes para tu equipo</span>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                ${recommendations.map(rec => `
+                ${recommendationsData.map(rec => `
                     <div class="border border-gray-100 rounded-2xl p-5 flex flex-col gap-2 shadow-sm hover:shadow-md transition-all duration-300">
-                        <span class="font-bold">${rec.name}</span>
-                        <span class="text-sm text-gray-500">Fortaleza: ${rec.topSkill}</span>
-                        <span class="text-sm font-semibold text-[#4B3FA8]">${rec.matchScore}% de match</span>
-                        <button onclick="sendInvitationTo('${rec.name}')" 
+                        <span class="font-bold">${rec.full_name}</span>
+                        <span class="text-sm font-semibold text-[#4B3FA8]">${rec.compatibility}% de compatibilidad</span>
+                        <button onclick="sendInvitationTo(${rec.user_id}, '${rec.full_name.replace(/'/g, "\\'")}')" 
                             class=" cursor-pointer mt-2 border border-[#4B3FA8] text-[#4B3FA8] font-bold py-2 rounded-xl hover:bg-[#4B3FA8] hover:text-white transition-all duration-300">
                             Invitar al equipo
                         </button>
@@ -435,15 +468,42 @@ function renderRecomendacionesTab() {
         </div>
     `;
 }
-window.sendInvitationTo = function(name) {
-    sentInvitations.push({ id: 'i' + (sentInvitations.length + 1), userId: 'u' + Date.now(), userName: name, status: 'pending' });
-    Swal.fire({
-        title: '¡Invitación enviada!',
-        text: `Invitación enviada a ${name}`,
-        icon: 'success',
-        confirmButtonText: 'Genial',
-        confirmButtonColor: '#4B3FA8'
-    });
+
+window.sendInvitationTo = async function(userId, name) {
+    try {
+        const response = await fetch(`/teams/${currentUser.team_id}/invitations`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ receiver_id: userId })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({
+                title: 'No se pudo enviar la invitación',
+                text: data.error || data.message || 'Ocurrió un error inesperado.',
+                icon: 'error',
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#4B3FA8'
+            });
+            return;
+        }
+        Swal.fire({
+            title: '¡Invitación enviada!',
+            text: `Invitación enviada a ${name}`,
+            icon: 'success',
+            confirmButtonText: 'Genial',
+            confirmButtonColor: '#4B3FA8'
+        });
+    } catch (error) {
+        console.error(error);
+        Swal.fire({
+            title: 'Error de conexión',
+            text: 'No se pudo conectar con el servidor.',
+            icon: 'error',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#4B3FA8'
+        });
+    }
 };
 
 function emptyState(message) {
