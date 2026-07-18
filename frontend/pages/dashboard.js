@@ -11,7 +11,23 @@ export function getFormattedDate() {
   });
 }
 
+async function loadDashboardProfile() {
+  try {
+    const response = await fetch('/users/profile');
+    if (!response.ok) return;
+    const data = await response.json();
+    const firstName = (data.full_name || '').trim().split(' ')[0];
+    const welcomeEl = document.getElementById('welcome-name');
+    if (welcomeEl && firstName) {
+      welcomeEl.textContent = `Bienvenido, ${firstName}`;
+    }
+  } catch (error) {
+    console.error('Error cargando perfil del dashboard:', error);
+  }
+}
+
 export function dashboard() {
+  setTimeout(() => { loadDashboardProfile(); }, 0);
   return `
     <main class="flex flex-col gap-4 px-5 h-screen py-10">
         <div class="relative flex flex-col overflow-hidden rounded-lg h-60 ">
@@ -24,7 +40,7 @@ export function dashboard() {
             <div class="absolute inset-0 bg-black/30"></div>
 
             <div class="relative z-10 flex flex-col p-8 md:p-12">
-                <span class="text-5xl font-bold text-white">Bienvenido, usuario</span>
+                <span id="welcome-name" class="text-5xl font-bold text-white">Bienvenido, usuario</span>
                 <span class="mt-2 text-lg text-gray-100">Empieza a crear tus futuros proyectos</span>
                 <span class="  text-l py-12 text-sm font-semibold text-gray-200 mb-1">${getFormattedDate()}</span>
             </div>
