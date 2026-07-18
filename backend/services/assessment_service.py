@@ -228,11 +228,15 @@ def generate_smart_profile(assessment_id):
             f"JavaScript: {js_s}\n"
             f"SQL: {sql_s}\n"
             "Genera únicamente:\n"
-            "1. Tres fortalezas técnicas del estudiante, basadas en los puntajes más altos.\n"
-            "2. Tres oportunidades de mejora, basadas en los puntajes más bajos.\n"
+            "1. Tres fortalezas técnicas del estudiante, basadas en los puntajes más altos, "
+            "redactadas en prosa (una o dos oraciones completas), NUNCA como lista ni con numeración "
+            "ni con los puntajes entre paréntesis.\n"
+            "2. Tres oportunidades de mejora, basadas en los puntajes más bajos, con el mismo formato "
+            "de prosa descrita arriba.\n"
             "3. Una interpretación profesional breve (máximo un párrafo) que resuma el desempeño general.\n"
             "No incluyas información que no haya sido solicitada. No emitas juicios de valor "
-            "ni recomendaciones sobre la conformación de equipos.\n"
+            "ni recomendaciones sobre la conformación de equipos. Los tres campos deben ser texto "
+            "narrativo natural, como si un analista humano los estuviera redactando.\n"
             "Responde únicamente con un JSON exacto, sin texto adicional, con esta forma:\n"
             '{"strengths": "...", "improvement_opportunities": "...", "profile_description": "..."}'
         )
