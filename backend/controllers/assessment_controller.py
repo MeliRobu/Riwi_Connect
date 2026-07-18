@@ -17,7 +17,7 @@ def get_assessment():
         return jsonify({'error': 'Assessment already exists for this user'}), 400
     config = assessment_service.get_active_configuration()
     question_count, selection_method = config
-    questions = assessment_service.get_active_questions(question_count)
+    questions = assessment_service.get_active_questions(question_count, selection_method)   
     # Attach the answer options to each question before sending it back.
     result = []
     for id_question, statement, category, difficulty_level, status in questions:

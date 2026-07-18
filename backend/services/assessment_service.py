@@ -22,16 +22,20 @@ def get_active_configuration():
     return row
 
 
-def get_active_questions(limit):
-    # Random selection, only active questions, capped at the configured count.
+def get_active_questions(limit, selection_method='RANDOM'):
+    # RN: selection_method 'RANDOM' shuffles the question bank; any other
+    # value (e.g. 'FIXED') returns a deterministic order (by id), so the
+    # same questions appear in the same order every time -- otherwise
+    # AssessmentConfiguration.selection_method would be stored but ignored.
+    order_clause = "RANDOM()" if selection_method == 'RANDOM' else "id_question"
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        """
+        f"""
         SELECT id_question, statement, category, difficulty_level, status
         FROM questions
         WHERE status = 'ACTIVE'
-        ORDER BY RANDOM()
+        ORDER BY {order_clause}
         LIMIT %s;
         """,
         (limit,)
