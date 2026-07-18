@@ -8,6 +8,23 @@ import { toggleUserMenu,initUserMenuListener, toggleSettingsSubmenu  } from './u
 // Asegura que exista un rol global; por defecto 'user'. Cambiar desde el login cuando corresponda.
 
 document.getElementById("sidebar-container").innerHTML = navbar();
+loadNavbarProfile();
+
+async function loadNavbarProfile() {
+  try {
+    const response = await fetch('/users/profile');
+    if (!response.ok) return; // not logged in (e.g. on /login), leave defaults
+    const data = await response.json();
+    const firstName = (data.full_name || '').trim().split(' ')[0];
+    const roleLabels = { STUDENT: 'Coder', ADMINISTRATOR: 'Administrador' };
+    const nameEl = document.getElementById('navbar-user-name');
+    const roleEl = document.getElementById('navbar-user-role');
+    if (nameEl && firstName) nameEl.textContent = firstName;
+    if (roleEl) roleEl.textContent = roleLabels[data.role] || data.role;
+  } catch (error) {
+    console.error('Error cargando perfil del navbar:', error);
+  }
+}
 
 window.toggleUserMenu = toggleUserMenu;
 
