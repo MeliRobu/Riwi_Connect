@@ -108,8 +108,10 @@ html, body {
   width: 100%;
 }
 
-body:not(.no-nav) #root {
-  grid-template-columns: clamp(220px, 16vw, 300px) minmax(0, 1fr);
+@media (min-width: 767px) {
+  body:not(.no-nav) #root {
+    grid-template-columns: clamp(220px, 16vw, 300px) minmax(0, 1fr);
+  }
 }
 
 .typewriter h1 {
