@@ -5,20 +5,14 @@ import Swal from "sweetalert2";
 let currentUser = null;
 let teams = [];
 let teamsLoaded = false;
-
-let sentRequests = [
-    { id: 'r1', teamId: 't2', teamName: 'Clan Titán', status: 'pending' }
-];
-let receivedRequests = [
-    { id: 'rr1', userId: 'u7', userName: 'Camila Ruiz', status: 'pending' },
-    { id: 'rr2', userId: 'u8', userName: 'Andrés Gómez', status: 'pending' }
-];
-let sentInvitations = [
-    { id: 'i1', userId: 'u9', userName: 'Sofía Londoño', status: 'pending' }
-];
-let receivedInvitations = [
-    { id: 'ri1', teamId: 't3', teamName: 'Clan Nova', status: 'pending' }
-];
+let myRequestsData = [];
+let myRequestsLoaded = false;
+let receivedRequestsData = [];
+let receivedRequestsLoaded = false;
+let sentInvitationsData = [];
+let sentInvitationsLoaded = false;
+let receivedInvitationsData = [];
+let receivedInvitationsLoaded = false;
 let recommendationsData = [];
 let recommendationsLoaded = false;
 
@@ -64,6 +58,11 @@ async function initTeamsPage() {
 export function teams_view() {
     activeTab = 'equipos';
     teamsLoaded = false;
+    myRequestsLoaded = false;
+    receivedRequestsLoaded = false;
+    sentInvitationsLoaded = false;
+    receivedInvitationsLoaded = false;
+    recommendationsLoaded = false;
     setTimeout(() => { initTeamsPage(); }, 0);
     return `
     <main class="flex flex-col gap-6 px-5 pb-10 h-screen overflow-y-auto">
@@ -127,6 +126,7 @@ function renderTabContent() {
     }
 }
 
+// ===== TAB: EQUIPOS =====
 function renderEquiposTab() {
     if (!teamsLoaded) {
         return `<div class="flex flex-col gap-6 pt-4">${emptyState('Cargando equipos...')}</div>`;
@@ -175,13 +175,7 @@ window.createTeam = async function() {
     const nameInput = document.getElementById('new-team-name');
     const name = nameInput.value.trim();
     if (!name) {
-        Swal.fire({
-            title: '¡Atención!',
-            text: 'Escribe un nombre para el equipo.',
-            icon: 'warning',
-            confirmButtonText: 'Entendido',
-            confirmButtonColor: '#4B3FA8'
-        });
+        Swal.fire({ title: '¡Atención!', text: 'Escribe un nombre para el equipo.', icon: 'warning', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
         return;
     }
     try {
@@ -192,86 +186,64 @@ window.createTeam = async function() {
         });
         const data = await response.json();
         if (!response.ok) {
-            Swal.fire({
-                title: 'No se pudo crear el equipo',
-                text: data.error || 'Ocurrió un error inesperado.',
-                icon: 'error',
-                confirmButtonText: 'Entendido',
-                confirmButtonColor: '#4B3FA8'
-            });
+            Swal.fire({ title: 'No se pudo crear el equipo', text: data.error || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
             return;
         }
-        Swal.fire({
-            title: '¡Equipo creado!',
-            text: `El equipo "${name}" fue creado correctamente.`,
-            icon: 'success',
-            confirmButtonText: 'Aceptar',
-            confirmButtonColor: '#4B3FA8'
-        });
+        Swal.fire({ title: '¡Equipo creado!', text: `El equipo "${name}" fue creado correctamente.`, icon: 'success', confirmButtonText: 'Aceptar', confirmButtonColor: '#4B3FA8' });
         await initTeamsPage();
     } catch (error) {
         console.error(error);
-        Swal.fire({
-            title: 'Error de conexión',
-            text: 'No se pudo conectar con el servidor.',
-            icon: 'error',
-            confirmButtonText: 'Entendido',
-            confirmButtonColor: '#4B3FA8'
-        });
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
     }
 };
 
 window.requestToJoin = async function(teamId, teamName) {
     try {
-        const response = await fetch(`/teams/${teamId}/requests`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        });
+        const response = await fetch(`/teams/${teamId}/requests`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
         const data = await response.json();
         if (!response.ok) {
-            Swal.fire({
-                title: 'No se pudo enviar la solicitud',
-                text: data.message || data.error || 'Ocurrió un error inesperado.',
-                icon: 'info',
-                confirmButtonText: 'Entendido',
-                confirmButtonColor: '#4B3FA8'
-            });
+            Swal.fire({ title: 'No se pudo enviar la solicitud', text: data.message || data.error || 'Ocurrió un error inesperado.', icon: 'info', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
             return;
         }
-        Swal.fire({
-            title: '¡Solicitud enviada!',
-            text: `Solicitud enviada a ${teamName}`,
-            icon: 'success',
-            confirmButtonText: 'Aceptar',
-            confirmButtonColor: '#4B3FA8'
-        });
+        Swal.fire({ title: '¡Solicitud enviada!', text: `Solicitud enviada a ${teamName}`, icon: 'success', confirmButtonText: 'Aceptar', confirmButtonColor: '#4B3FA8' });
     } catch (error) {
         console.error(error);
-        Swal.fire({
-            title: 'Error de conexión',
-            text: 'No se pudo conectar con el servidor.',
-            icon: 'error',
-            confirmButtonText: 'Entendido',
-            confirmButtonColor: '#4B3FA8'
-        });
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
     }
 };
 
+// ===== TAB: MIS SOLICITUDES (REAL) =====
+async function loadMyRequests() {
+    try {
+        const response = await fetch('/users/requests');
+        myRequestsData = response.ok ? await response.json() : [];
+    } catch (error) {
+        console.error('Error cargando mis solicitudes:', error);
+        myRequestsData = [];
+    }
+    myRequestsLoaded = true;
+}
+
 function renderMisSolicitudesTab() {
-    const pending = sentRequests.filter(r => r.status === 'pending');
+    if (!myRequestsLoaded) {
+        loadMyRequests().then(() => {
+            if (activeTab === 'mis-solicitudes') document.getElementById('tab-content').innerHTML = renderTabContent();
+        });
+        return `<div class="flex flex-col gap-4 pt-4">${emptyState('Cargando tus solicitudes...')}</div>`;
+    }
     return `
         <div class="flex flex-col gap-4 pt-4">
             <span class="text-lg font-bold">Solicitudes que he enviado</span>
-            ${pending.length === 0 ? emptyState('No tienes solicitudes pendientes.') : `
+            ${myRequestsData.length === 0 ? emptyState('No tienes solicitudes pendientes.') : `
                 <div class="flex flex-col gap-3">
-                    ${pending.map(req => `
+                    ${myRequestsData.map(req => `
                         <div class="flex items-center justify-between border border-gray-100 rounded-xl p-4 shadow-sm">
                             <div class="flex flex-col">
-                                <span class="font-semibold">${req.teamName}</span>
+                                <span class="font-semibold">${req.team_name}</span>
                                 <span class="text-xs text-amber-500 font-semibold">Pendiente</span>
                             </div>
                             <button 
-                                onclick="cancelRequest('${req.id}')"
+                                onclick="cancelRequest(${req.team_id}, ${req.id_team_request})"
                                 class=" cursor-pointer text-red-500 border border-red-200 font-semibold text-sm px-4 py-2 rounded-xl hover:bg-red-50 transition-all duration-200"
                             >
                                 Cancelar
@@ -283,27 +255,56 @@ function renderMisSolicitudesTab() {
         </div>
     `;
 }
-window.cancelRequest = function(reqId) {
-    sentRequests = sentRequests.filter(r => r.id !== reqId);
-    document.getElementById('tab-content').innerHTML = renderTabContent();
+
+window.cancelRequest = async function(teamId, requestId) {
+    try {
+        const response = await fetch(`/teams/${teamId}/requests/${requestId}`, { method: 'DELETE' });
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({ title: 'No se pudo cancelar', text: data.message || data.error || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+            return;
+        }
+        myRequestsLoaded = false;
+        document.getElementById('tab-content').innerHTML = renderTabContent();
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+    }
 };
 
+// ===== TAB: SOLICITUDES RECIBIDAS (REAL) =====
+async function loadReceivedRequests() {
+    try {
+        const response = await fetch('/teams/requests/received');
+        receivedRequestsData = response.ok ? await response.json() : [];
+    } catch (error) {
+        console.error('Error cargando solicitudes recibidas:', error);
+        receivedRequestsData = [];
+    }
+    receivedRequestsLoaded = true;
+}
+
 function renderSolicitudesRecibidasTab() {
-    const pending = receivedRequests.filter(r => r.status === 'pending');
+    if (!receivedRequestsLoaded) {
+        loadReceivedRequests().then(() => {
+            if (activeTab === 'solicitudes-recibidas') document.getElementById('tab-content').innerHTML = renderTabContent();
+        });
+        return `<div class="flex flex-col gap-4 pt-4">${emptyState('Cargando solicitudes...')}</div>`;
+    }
     return `
         <div class="flex flex-col gap-4 pt-4">
             <span class="text-lg font-bold">Solicitudes recibidas por tu equipo</span>
-            ${pending.length === 0 ? emptyState('No tienes solicitudes recibidas.') : `
+            ${receivedRequestsData.length === 0 ? emptyState('No tienes solicitudes recibidas.') : `
                 <div class="flex flex-col gap-3">
-                    ${pending.map(req => `
+                    ${receivedRequestsData.map(req => `
                         <div class="flex items-center justify-between border border-gray-100 rounded-xl p-4 shadow-sm">
-                            <span class="font-semibold">${req.userName}</span>
+                            <span class="font-semibold">${req.full_name}</span>
                             <div class="flex gap-2">
-                                <button onclick="acceptRequest('${req.id}')" 
+                                <button onclick="acceptRequest(${req.team_id}, ${req.id_team_request})" 
                                     class=" cursor-pointer bg-emerald-500 text-white font-semibold text-sm px-4 py-2 rounded-xl hover:bg-emerald-600 transition-all duration-200">
                                     Aceptar
                                 </button>
-                                <button onclick="rejectRequest('${req.id}')" 
+                                <button onclick="rejectRequest(${req.team_id}, ${req.id_team_request})" 
                                     class=" cursor-pointer border border-red-200 text-red-500 font-semibold text-sm px-4 py-2 rounded-xl hover:bg-red-50 transition-all duration-200">
                                     Rechazar
                                 </button>
@@ -315,17 +316,71 @@ function renderSolicitudesRecibidasTab() {
         </div>
     `;
 }
-window.acceptRequest = function(reqId) {
-    receivedRequests = receivedRequests.filter(r => r.id !== reqId);
-    document.getElementById('tab-content').innerHTML = renderTabContent();
+
+window.acceptRequest = async function(teamId, requestId) {
+    try {
+        const response = await fetch(`/teams/${teamId}/requests/${requestId}/accept`, { method: 'PATCH' });
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({ title: 'No se pudo aceptar', text: data.message || data.error || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+            return;
+        }
+        receivedRequestsLoaded = false;
+        document.getElementById('tab-content').innerHTML = renderTabContent();
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+    }
 };
-window.rejectRequest = function(reqId) {
-    receivedRequests = receivedRequests.filter(r => r.id !== reqId);
-    document.getElementById('tab-content').innerHTML = renderTabContent();
+
+window.rejectRequest = async function(teamId, requestId) {
+    try {
+        const response = await fetch(`/teams/${teamId}/requests/${requestId}/reject`, { method: 'PATCH' });
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({ title: 'No se pudo rechazar', text: data.message || data.error || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+            return;
+        }
+        receivedRequestsLoaded = false;
+        document.getElementById('tab-content').innerHTML = renderTabContent();
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+    }
 };
+
+// ===== TAB: INVITACIONES (REAL) =====
+async function loadSentInvitations() {
+    if (!currentUser?.is_leader) { sentInvitationsLoaded = true; return; }
+    try {
+        const response = await fetch('/teams/invitations/sent');
+        sentInvitationsData = response.ok ? await response.json() : [];
+    } catch (error) {
+        console.error('Error cargando invitaciones enviadas:', error);
+        sentInvitationsData = [];
+    }
+    sentInvitationsLoaded = true;
+}
+
+async function loadReceivedInvitations() {
+    try {
+        const response = await fetch('/users/invitations');
+        receivedInvitationsData = response.ok ? await response.json() : [];
+    } catch (error) {
+        console.error('Error cargando invitaciones recibidas:', error);
+        receivedInvitationsData = [];
+    }
+    receivedInvitationsLoaded = true;
+}
 
 function renderInvitacionesTab() {
     const isLeader = currentUser && currentUser.is_leader;
+    if (!sentInvitationsLoaded || !receivedInvitationsLoaded) {
+        Promise.all([loadSentInvitations(), loadReceivedInvitations()]).then(() => {
+            if (activeTab === 'invitaciones') document.getElementById('tab-content').innerHTML = renderTabContent();
+        });
+        return `<div class="flex flex-col gap-4 pt-4">${emptyState('Cargando invitaciones...')}</div>`;
+    }
     return `
         <div class="flex flex-col gap-8 pt-4">
             ${isLeader ? `
@@ -335,20 +390,20 @@ function renderInvitacionesTab() {
                     className: 'p-6 flex flex-col md:flex-row gap-3',
                     width: 'w-full',
                     content: `
-                        <input id="invite-username" type="text" placeholder="Nombre o ID del estudiante" 
-                            class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-[#4B3FA8]">
-                        <button onclick="sendInvitation()" 
-                            class=" cursor-pointer bg-[#4B3FA8] text-white font-bold px-6 py-2.5 rounded-xl transition-all duration-300 hover:bg-pink-600">
-                            Enviar invitación
-                        </button>
+                        <div class="relative flex-1">
+                            <input id="invite-search" type="text" placeholder="Buscar estudiante por nombre..." autocomplete="off"
+                                oninput="handleInviteSearch()"
+                                class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#4B3FA8]">
+                            <div id="invite-search-results" class="absolute z-10 bg-white border border-gray-200 rounded-xl mt-1 w-full shadow-lg hidden"></div>
+                        </div>
                     `
                 })}
                 <span class="text-lg font-bold mt-2">Invitaciones enviadas por tu equipo</span>
-                ${sentInvitations.length === 0 ? emptyState('No has enviado invitaciones.') : `
+                ${sentInvitationsData.length === 0 ? emptyState('No has enviado invitaciones.') : `
                     <div class="flex flex-col gap-3">
-                        ${sentInvitations.map(inv => `
+                        ${sentInvitationsData.map(inv => `
                             <div class="flex items-center justify-between border border-gray-100 rounded-xl p-4 shadow-sm">
-                                <span class="font-semibold">${inv.userName}</span>
+                                <span class="font-semibold">${inv.full_name}</span>
                                 <span class="text-xs text-amber-500 font-semibold">Pendiente</span>
                             </div>
                         `).join('')}
@@ -358,17 +413,17 @@ function renderInvitacionesTab() {
             ` : ''}
             <div class="flex flex-col gap-4">
                 <span class="text-lg font-bold">Mis invitaciones recibidas</span>
-                ${receivedInvitations.length === 0 ? emptyState('No tienes invitaciones recibidas.') : `
+                ${receivedInvitationsData.length === 0 ? emptyState('No tienes invitaciones recibidas.') : `
                     <div class="flex flex-col gap-3">
-                        ${receivedInvitations.map(inv => `
+                        ${receivedInvitationsData.map(inv => `
                             <div class="flex items-center justify-between border border-gray-100 rounded-xl p-4 shadow-sm">
-                                <span class="font-semibold">${inv.teamName}</span>
+                                <span class="font-semibold">${inv.team_name}</span>
                                 <div class="flex gap-2">
-                                    <button onclick="acceptInvitation('${inv.id}')" 
+                                    <button onclick="acceptInvitation(${inv.team_id}, ${inv.id_team_request})" 
                                         class="  cursor-pointer bg-emerald-500 text-white font-semibold text-sm px-4 py-2 rounded-xl hover:bg-emerald-600 transition-all duration-200">
                                         Aceptar
                                     </button>
-                                    <button onclick="rejectInvitation('${inv.id}')" 
+                                    <button onclick="rejectInvitation(${inv.team_id}, ${inv.id_team_request})" 
                                         class=" cursor-pointer border border-red-200 text-red-500 font-semibold text-sm px-4 py-2 rounded-xl hover:bg-red-50 transition-all duration-200">
                                         Rechazar
                                     </button>
@@ -381,31 +436,114 @@ function renderInvitacionesTab() {
         </div>
     `;
 }
-window.sendInvitation = function() {
-    const input = document.getElementById('invite-username');
-    const name = input.value.trim();
-    if (!name) {
-        Swal.fire({
-            title: 'Campo obligatorio',
-            text: 'Escribe el nombre del estudiante a invitar.',
-            icon: 'warning',
-            confirmButtonText: 'Entendido',
-            confirmButtonColor: '#4B3FA8'
-        });
+
+let inviteSearchTimeout = null;
+
+window.handleInviteSearch = function() {
+    const input = document.getElementById('invite-search');
+    const resultsBox = document.getElementById('invite-search-results');
+    const query = input.value.trim();
+
+    clearTimeout(inviteSearchTimeout);
+
+    if (query.length < 2) {
+        resultsBox.classList.add('hidden');
+        resultsBox.innerHTML = '';
         return;
     }
-    sentInvitations.push({ id: 'i' + (sentInvitations.length + 1), userId: 'u' + Date.now(), userName: name, status: 'pending' });
-    document.getElementById('tab-content').innerHTML = renderTabContent();
-};
-window.acceptInvitation = function(invId) {
-    receivedInvitations = receivedInvitations.filter(i => i.id !== invId);
-    document.getElementById('tab-content').innerHTML = renderTabContent();
-};
-window.rejectInvitation = function(invId) {
-    receivedInvitations = receivedInvitations.filter(i => i.id !== invId);
-    document.getElementById('tab-content').innerHTML = renderTabContent();
+
+    // Espera un poco antes de buscar, para no disparar una petición por cada letra
+    inviteSearchTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch(`/teams/students/search?q=${encodeURIComponent(query)}`);
+            const students = response.ok ? await response.json() : [];
+            if (students.length === 0) {
+                resultsBox.innerHTML = `<div class="px-4 py-2.5 text-sm text-gray-400">Sin resultados</div>`;
+            } else {
+                resultsBox.innerHTML = students.map(s => `
+                    <div onclick="selectInviteCandidate(${s.user_id}, '${s.full_name.replace(/'/g, "\\'")}')"
+                        class="px-4 py-2.5 text-sm cursor-pointer hover:bg-[#F3F1FA]">
+                        ${s.full_name}
+                    </div>
+                `).join('');
+            }
+            resultsBox.classList.remove('hidden');
+        } catch (error) {
+            console.error(error);
+        }
+    }, 300);
 };
 
+let selectedInviteCandidate = null;
+
+window.selectInviteCandidate = function(userId, fullName) {
+    selectedInviteCandidate = { userId, fullName };
+    const input = document.getElementById('invite-search');
+    const resultsBox = document.getElementById('invite-search-results');
+    input.value = fullName;
+    resultsBox.classList.add('hidden');
+    resultsBox.innerHTML = '';
+};
+
+window.sendInvitation = async function() {
+    if (!selectedInviteCandidate) {
+        Swal.fire({ title: 'Selecciona un estudiante', text: 'Busca y haz clic en un estudiante de la lista antes de invitar.', icon: 'warning', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+        return;
+    }
+    const receiverId = selectedInviteCandidate.userId;
+    try {
+        const response = await fetch(`/teams/${currentUser.team_id}/invitations`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ receiver_id: receiverId })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({ title: 'No se pudo enviar la invitación', text: data.error || data.message || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+            return;
+        }
+        Swal.fire({ title: '¡Invitación enviada!', icon: 'success', confirmButtonText: 'Genial', confirmButtonColor: '#4B3FA8' });
+        sentInvitationsLoaded = false;
+        document.getElementById('tab-content').innerHTML = renderTabContent();
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+    }
+};
+
+window.acceptInvitation = async function(teamId, requestId) {
+    try {
+        const response = await fetch(`/teams/${teamId}/invitations/${requestId}/accept`, { method: 'PATCH' });
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({ title: 'No se pudo aceptar', text: data.error || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+            return;
+        }
+        receivedInvitationsLoaded = false;
+        document.getElementById('tab-content').innerHTML = renderTabContent();
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+    }
+};
+
+window.rejectInvitation = async function(teamId, requestId) {
+    try {
+        const response = await fetch(`/teams/${teamId}/invitations/${requestId}/reject`, { method: 'PATCH' });
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({ title: 'No se pudo rechazar', text: data.error || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+            return;
+        }
+        receivedInvitationsLoaded = false;
+        document.getElementById('tab-content').innerHTML = renderTabContent();
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+    }
+};
+
+// ===== TAB: MI EQUIPO (todavía pendiente) =====
 function renderMiEquipoTab() {
     return emptyState('Esta pestaña todavía está en construcción (pendiente conectar con el Backend).');
 }
@@ -413,18 +551,12 @@ window.expelMember = function(memberId) {};
 window.transferLeadership = function(memberId) {};
 window.dissolveTeam = async () => {};
 
+// ===== TAB: RECOMENDACIONES =====
 async function loadRecommendations() {
-    if (!currentUser?.team_id) {
-        recommendationsLoaded = true;
-        return;
-    }
+    if (!currentUser?.team_id) { recommendationsLoaded = true; return; }
     try {
         const response = await fetch(`/teams/${currentUser.team_id}/recommendations`);
-        if (!response.ok) {
-            recommendationsData = [];
-            recommendationsLoaded = true;
-            return;
-        }
+        if (!response.ok) { recommendationsData = []; recommendationsLoaded = true; return; }
         const data = await response.json();
         recommendationsData = data.recommendations || [];
         recommendationsLoaded = true;
@@ -436,20 +568,14 @@ async function loadRecommendations() {
 }
 
 function renderRecomendacionesTab() {
-    if (!currentUser?.team_id) {
-        return emptyState('No perteneces a ningún equipo todavía.');
-    }
+    if (!currentUser?.team_id) return emptyState('No perteneces a ningún equipo todavía.');
     if (!recommendationsLoaded) {
         loadRecommendations().then(() => {
-            if (activeTab === 'recomendaciones') {
-                document.getElementById('tab-content').innerHTML = renderTabContent();
-            }
+            if (activeTab === 'recomendaciones') document.getElementById('tab-content').innerHTML = renderTabContent();
         });
         return emptyState('Cargando recomendaciones...');
     }
-    if (recommendationsData.length === 0) {
-        return emptyState('No hay candidatos recomendados en este momento.');
-    }
+    if (recommendationsData.length === 0) return emptyState('No hay candidatos recomendados en este momento.');
     return `
         <div class="flex flex-col gap-4 pt-4">
             <span class="text-lg font-bold">Recomendaciones de estudiantes para tu equipo</span>
@@ -478,31 +604,13 @@ window.sendInvitationTo = async function(userId, name) {
         });
         const data = await response.json();
         if (!response.ok) {
-            Swal.fire({
-                title: 'No se pudo enviar la invitación',
-                text: data.error || data.message || 'Ocurrió un error inesperado.',
-                icon: 'error',
-                confirmButtonText: 'Entendido',
-                confirmButtonColor: '#4B3FA8'
-            });
+            Swal.fire({ title: 'No se pudo enviar la invitación', text: data.error || data.message || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
             return;
         }
-        Swal.fire({
-            title: '¡Invitación enviada!',
-            text: `Invitación enviada a ${name}`,
-            icon: 'success',
-            confirmButtonText: 'Genial',
-            confirmButtonColor: '#4B3FA8'
-        });
+        Swal.fire({ title: '¡Invitación enviada!', text: `Invitación enviada a ${name}`, icon: 'success', confirmButtonText: 'Genial', confirmButtonColor: '#4B3FA8' });
     } catch (error) {
         console.error(error);
-        Swal.fire({
-            title: 'Error de conexión',
-            text: 'No se pudo conectar con el servidor.',
-            icon: 'error',
-            confirmButtonText: 'Entendido',
-            confirmButtonColor: '#4B3FA8'
-        });
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
     }
 };
 

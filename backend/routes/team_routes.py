@@ -12,6 +12,11 @@ from controllers.team_controller import transfer_leader_route
 from controllers.team_controller import dissolve_team_route
 from controllers.team_controller import get_recommendations_route
 from controllers.team_controller import list_teams_route
+from controllers.team_controller import get_my_requests_route
+from controllers.team_controller import get_received_requests_route
+from controllers.team_controller import get_sent_invitations_route
+from controllers.team_controller import get_received_invitations_route
+from controllers.team_controller import search_students_route
 
 # HU: US-007 — Create Team (EP-002 - Team Management)
 team_routes = Blueprint('team_routes', __name__)
@@ -86,4 +91,29 @@ methods=["GET"])
 # HU: (vacío documental) — Consultar Equipos Disponibles
 team_routes.add_url_rule("/teams",
 view_func=list_teams_route,
+methods=["GET"])
+
+# HU: (vacío documental) — Consultar Mis Solicitudes Enviadas
+team_routes.add_url_rule("/users/requests",
+view_func=get_my_requests_route,
+methods=["GET"])
+
+# HU: (vacío documental) — Consultar Solicitudes Recibidas por mi Equipo
+team_routes.add_url_rule("/teams/requests/received",
+view_func=get_received_requests_route,
+methods=["GET"])
+
+# HU: (vacío documental) — Consultar Invitaciones Enviadas por mi Equipo
+team_routes.add_url_rule("/teams/invitations/sent",
+view_func=get_sent_invitations_route,
+methods=["GET"])
+
+# HU: (vacío documental) — Consultar Mis Invitaciones Recibidas
+team_routes.add_url_rule("/users/invitations",
+view_func=get_received_invitations_route,
+methods=["GET"])
+
+# HU: (vacío documental) — Buscar Estudiantes para Invitar
+team_routes.add_url_rule("/teams/students/search",
+view_func=search_students_route,
 methods=["GET"])
