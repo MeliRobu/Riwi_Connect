@@ -71,12 +71,22 @@ export async function router() {
     return;
   }
 
-  if (view.isPrivate && !isLogged) {
+if (view.isPrivate && !isLogged) {
     window.location.hash = "/login";
     return;
   }
-
-if (view.isPrivate && view.blockIfAssessmentCompleted) {
+  if (view.isPrivate && view.admin && role !== "admin") {
+    window.location.hash = "/login";
+    return;
+  }
+  if (view.isPrivate && view.requiresAssessment) {
+    const hasCompletedAssessment = await checkAssessmentCompleted();
+    if (!hasCompletedAssessment) {
+      window.location.hash = "/assessment";
+      return;
+    }
+  }
+  if (view.isPrivate && view.blockIfAssessmentCompleted) {
     const hasCompletedAssessment = await checkAssessmentCompleted();
     if (hasCompletedAssessment) {
       window.location.hash = "/profile";
