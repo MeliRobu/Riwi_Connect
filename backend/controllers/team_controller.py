@@ -19,7 +19,9 @@ def create():
     #Verify that the user has an  active session
     if "user_id" not in session:
         return {"error": "Unauthorized"}, 401
-
+    # RN-043: Administrators cannot create teams
+    if session.get("role") != "STUDENT":
+        return {"error": "Only Students can create teams"}, 403
     data = request.get_json()
     team_name = data.get("team_name")
     if not team_name:
@@ -32,6 +34,9 @@ def send_request(team_id):
     # Verify that the user has an active session
     if "user_id" not in session:
         return {"error": "Unauthorized"}, 401
+    # RN-043: Administrators cannot request to join teams
+    if session.get("role") != "STUDENT":
+        return {"error": "Only Students can request to join teams"}, 403
     result, status_code = request_join_team(session["user_id"], team_id)
     return result, status_code
 

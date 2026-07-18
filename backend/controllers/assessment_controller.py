@@ -34,6 +34,9 @@ def get_assessment():
 def submit_assessment():
     if 'user_id' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
+    # RN-043: only Students can present the Assessment
+    if session.get('role') != 'STUDENT':
+        return jsonify({'error': 'Only Students can present the Assessment'}), 403
     user_id = session['user_id']
     data = request.get_json()
     answers = data.get('answers')  # [{question_id, answer_option_id}, ...]
