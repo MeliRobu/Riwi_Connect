@@ -1059,7 +1059,7 @@ def list_my_requests(user_id):
             SELECT tr.id_team_request, t.team_name, tr.status, tr.team_id
             FROM team_requests tr
             JOIN teams t ON tr.team_id = t.id_team
-            WHERE tr.sender_user_id = %s AND tr.type = 'REQUEST'
+            WHERE tr.sender_user_id = %s AND tr.type = 'REQUEST' AND tr.status = 'PENDING'
             ORDER BY tr.id_team_request DESC
             """,
             (user_id,)
