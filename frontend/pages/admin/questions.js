@@ -292,6 +292,12 @@ function renderQuestionItem(q) {
                     class="cursor-pointer text-xs font-semibold ${isActive ? "text-amber-500" : "text-emerald-500"} hover:underline">
                     ${isActive ? "Desactivar" : "Activar"}
                 </button>
+                ${!isActive ? `
+                <button onclick="deleteQuestion(${q.id_question})"
+                    class="cursor-pointer text-xs font-semibold text-red-500 hover:underline">
+                    Eliminar
+                </button>
+                ` : ''}
             </div>
         </div>
     `;
@@ -402,6 +408,32 @@ window.toggleQuestionActive = async function (id, currentStatus) {
     }
 };
 
+window.deleteQuestion = async function (id) {
+    const result = await Swal.fire({
+        title: "¿Seguro que quieres eliminar esta pregunta?",
+        text: "Esta acción no se puede deshacer.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#4B3FA8",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar"
+    });
+    if (!result.isConfirmed) return;
+    try {
+        const response = await fetch(`/admin/questions/${id}`, { method: "DELETE" });
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({ title: "No se pudo eliminar", text: data.error || "Ocurrió un error inesperado.", icon: "error", confirmButtonText: "Entendido", confirmButtonColor: "#4B3FA8" });
+            return;
+        }
+        questionsLoaded = false;
+        document.getElementById("tab-content").innerHTML = renderTabContent();
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ title: "Error de conexión", text: "No se pudo conectar con el servidor.", icon: "error", confirmButtonText: "Entendido", confirmButtonColor: "#4B3FA8" });
+    }
+};
 // TAB: CONFIGURACIÓN DEL ASSESSMENT
 
 function renderConfigTab() {

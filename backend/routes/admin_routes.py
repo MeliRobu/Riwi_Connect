@@ -1,6 +1,7 @@
 from flask import Blueprint
 from controllers.admin_controller import (
     get_questions, create_question, update_question, update_question_status,
+    delete_question,
     get_assessment_configuration, update_assessment_configuration,
     get_teams, get_team_detail, get_statistics
 )
@@ -15,6 +16,8 @@ admin_bp.route('/questions', methods=['POST'])(create_question)
 admin_bp.route('/questions/<int:question_id>', methods=['PUT'])(update_question)
 # HU: US-021 / US-022 — Activar / Desactivar Pregunta
 admin_bp.route('/questions/<int:question_id>/status', methods=['PATCH'])(update_question_status)
+# HU: (vacío documental) — Eliminar Pregunta
+admin_bp.route('/questions/<int:question_id>', methods=['DELETE'])(delete_question)
 
 # HU: US-023 — Consultar Configuración del Assessment
 admin_bp.route('/assessment/configuration', methods=['GET'])(get_assessment_configuration)

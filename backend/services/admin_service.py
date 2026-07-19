@@ -1,3 +1,4 @@
+import psycopg2
 from database.connection import get_connection
 
 # HU: US-019 — Consultar Banco de Preguntas
@@ -256,6 +257,50 @@ def update_question_status(question_id, status):
     finally:
         connection.close()
 
+
+# HU: (vacío documental) — Eliminar Pregunta obsoleta y nunca respondida.
+# Solo se permite eliminar preguntas ya DESACTIVADAS. Si la pregunta (o
+# alguna de sus 4 opciones) ya fue respondida por algun estudiante, la
+# base de datos rechaza el borrado automaticamente (sin ON DELETE CASCADE
+# en student_answers -> questions/answer_options), protegiendo el
+# historial de resultados ya calculados sin necesidad de logica extra aqui.
+def delete_question(question_id):
+    """DELETE /admin/questions/{question_id} - Elimina una pregunta desactivada y sin historial."""
+    connection = get_connection()
+    try:
+        delete_sql = connection.cursor()
+        delete_sql.execute(
+            "SELECT status FROM questions WHERE id_question = %s",
+            (question_id,)
+        )
+        existing_question = delete_sql.fetchone()
+        if not existing_question:
+            return None
+        if existing_question[0] != 'INACTIVE':
+            raise ValueError("Solo se pueden eliminar preguntas desactivadas")
+        try:
+            delete_sql.execute(
+                "DELETE FROM answer_options WHERE question_id = %s",
+                (question_id,)
+            )
+            delete_sql.execute(
+                "DELETE FROM questions WHERE id_question = %s",
+                (question_id,)
+            )
+        except psycopg2.errors.ForeignKeyViolation:
+            connection.rollback()
+            raise ValueError(
+                "No se puede eliminar: esta pregunta ya tiene respuestas registradas de estudiantes"
+            )
+        connection.commit()
+        return {'id_question': question_id, 'deleted': True}
+    except ValueError:
+        raise
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
 # HU: US-023 — Consultar Configuración del Assessment
 def get_assessment_configuration():
     """GET /admin/assessment/configuration - Reads the single configuration row."""
