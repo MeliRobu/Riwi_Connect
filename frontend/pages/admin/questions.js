@@ -89,6 +89,17 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// Ordena siempre en el mismo orden fijo: por tecnologia (Python, HTML, CSS,
+// JavaScript, SQL) y dentro de cada una por nivel (Basico, Intermedio, Avanzado),
+// sin importar el orden en que se hayan creado las preguntas.
+function getSortedQuestions() {
+    return [...questions].sort((a, b) => {
+        const catDiff = CATEGORIES.indexOf(a.category) - CATEGORIES.indexOf(b.category);
+        if (catDiff !== 0) return catDiff;
+        return DIFFICULTIES.indexOf(a.difficulty_level) - DIFFICULTIES.indexOf(b.difficulty_level);
+    });
+}
+
 function emptyState(message) {
     return `<div class="text-center text-gray-400 text-sm py-8 border border-dashed border-gray-200 rounded-xl">${message}</div>`;
 }
@@ -191,23 +202,25 @@ function renderQuestionBankTab() {
                 className: "p-6 flex flex-col gap-4",
                 width: "w-full",
                 content: `
-                    <span class="text-lg font-bold">Crear nueva pregunta</span>
-                    <div class="flex flex-col gap-3">
-                        <input id="new-question-text" type="text" placeholder="Texto de la pregunta"
-                            class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#4B3FA8]">
+                    <details>
+                        <summary class="cursor-pointer text-lg font-bold select-none">Crear nueva pregunta</summary>
+                        <div class="flex flex-col gap-3 mt-4">
+                            <input id="new-question-text" type="text" placeholder="Texto de la pregunta"
+                                class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#4B3FA8]">
 
-                        <div class="flex flex-col md:flex-row gap-3">
-                            ${renderCategorySelect("new-question-category")}
-                            ${renderDifficultySelect("new-question-difficulty")}
+                            <div class="flex flex-col md:flex-row gap-3">
+                                ${renderCategorySelect("new-question-category")}
+                                ${renderDifficultySelect("new-question-difficulty")}
+                            </div>
+
+                            ${renderAnswerOptionsInputs("new-question")}
+
+                            <button onclick="createQuestion()"
+                                class="w-40 cursor-pointer bg-[#4B3FA8] text-white font-bold py-2.5 rounded-xl transition-all duration-300 hover:bg-pink-600 hover:scale-[1.02] active:scale-95">
+                                Crear pregunta
+                            </button>
                         </div>
-
-                        ${renderAnswerOptionsInputs("new-question")}
-
-                        <button onclick="createQuestion()"
-                            class="w-40 cursor-pointer bg-[#4B3FA8] text-white font-bold py-2.5 rounded-xl transition-all duration-300 hover:bg-pink-600 hover:scale-[1.02] active:scale-95">
-                            Crear pregunta
-                        </button>
-                    </div>
+                    </details>
                 `
             })}
 
@@ -218,7 +231,7 @@ function renderQuestionBankTab() {
                 </div>
 
                 <div class="flex flex-col gap-3 max-h-[600px] overflow-y-auto pr-1">
-                    ${questions.length === 0 ? emptyState("No hay preguntas registradas todavía.") : questions.map(q => renderQuestionItem(q)).join("")}
+                    ${questions.length === 0 ? emptyState("No hay preguntas registradas todavía.") : getSortedQuestions().map(q => renderQuestionItem(q)).join("")}
                 </div>
             </div>
         </div>
