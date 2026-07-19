@@ -80,13 +80,14 @@ export function teams_view() {
 
 function renderTabsNav() {
     const isLeader = currentUser && currentUser.is_leader;
+    const hasTeam = currentUser && currentUser.team_id;
     return `
     <div id="tabs-nav" class="flex gap-2 border-b border-gray-200 overflow-x-auto pb-px min-h-12">
         ${renderTabButton('equipos', 'Equipos')}
         ${renderTabButton('mis-solicitudes', 'Mis solicitudes')}
         ${isLeader ? renderTabButton('solicitudes-recibidas', 'Solicitudes recibidas') : ''}
         ${renderTabButton('invitaciones', 'Invitaciones')}
-        ${isLeader ? renderTabButton('mi-equipo', 'Mi equipo') : ''}
+        ${hasTeam ? renderTabButton('mi-equipo', 'Mi equipo') : ''}
         ${isLeader ? renderTabButton('recomendaciones', 'Recomendaciones') : ''}
     </div>
     `;
