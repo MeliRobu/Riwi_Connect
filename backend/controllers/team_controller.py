@@ -21,6 +21,7 @@ from services.team_service import list_received_requests
 from services.team_service import list_sent_invitations
 from services.team_service import list_received_invitations
 from services.team_service import search_students_to_invite
+from services.team_service import search_teams_by_name
 from services.team_service import get_my_team_detail
 
 # HU: US-007 — Create Team (EP-002 - Team Management)
@@ -227,6 +228,15 @@ def search_students_route():
     if len(query) < 2:
         return {"error": "Escribe al menos 2 caracteres para buscar"}, 400
     return search_students_to_invite(session["user_id"], query), 200
+
+# HU: (vacío documental) — Buscar equipos disponibles por nombre
+def search_teams_route():
+    if "user_id" not in session:
+        return {"error": "Unauthorized"}, 401
+    query = request.args.get("q", "").strip()
+    if len(query) < 2:
+        return {"error": "Escribe al menos 2 caracteres para buscar"}, 400
+    return search_teams_by_name(session["user_id"], query), 200
 
 # HU: (vacío documental) — Consultar Mi Equipo
 def get_my_team_route():

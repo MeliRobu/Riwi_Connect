@@ -9,6 +9,12 @@ export function recommendations_view() {
             <span class="text-3xl font-bold">Sugerencias de equipos</span>
             <span class="text-gray-500 text-sm">Equipos recomendados para ti según tu perfil técnico</span>
         </div>
+        <div class="relative">
+            <input id="team-search" type="text" placeholder="Buscar equipo por nombre..." autocomplete="off"
+                oninput="handleTeamSearch()"
+                class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#4B3FA8]">
+            <div id="team-search-results" class="absolute z-10 bg-white border border-gray-200 rounded-xl mt-1 w-full shadow-lg hidden"></div>
+        </div>
         <div id="recommendations-content">
             ${renderLoadingState()}
         </div>
@@ -170,3 +176,37 @@ function renderErrorState() {
         </div>
     `;
 }
+
+
+let teamSearchTimeout;
+window.handleTeamSearch = function() {
+    const input = document.getElementById('team-search');
+    const resultsBox = document.getElementById('team-search-results');
+    const query = input.value.trim();
+    clearTimeout(teamSearchTimeout);
+    if (query.length < 2) {
+        resultsBox.classList.add('hidden');
+        resultsBox.innerHTML = '';
+        return;
+    }
+    teamSearchTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch(`/teams/search?q=${encodeURIComponent(query)}`);
+            const teams = response.ok ? await response.json() : [];
+            if (teams.length === 0) {
+                resultsBox.innerHTML = `<div class="px-4 py-2.5 text-sm text-gray-400">Sin resultados</div>`;
+            } else {
+                resultsBox.innerHTML = teams.map(t => `
+                    <div onclick="requestToJoinTeam(${t.id_team}, '${t.team_name.replace(/'/g, "\\'")}')"
+                        class="px-4 py-2.5 text-sm cursor-pointer hover:bg-[#F3F1FA] flex items-center justify-between">
+                        <span>${t.team_name}</span>
+                        <span class="text-xs text-gray-400">${t.member_count} integrante(s)</span>
+                    </div>
+                `).join('');
+            }
+            resultsBox.classList.remove('hidden');
+        } catch (error) {
+            console.error(error);
+        }
+    }, 300);
+};
