@@ -7,7 +7,7 @@
  */
 export function navbar() {
   // Ajusta este valor según cómo llames al rol en tu app
- const isAdmin =false;
+ const isAdmin = (window.localStorage.getItem('role') || '').toUpperCase() === 'ADMINISTRATOR';
   return `
 <!-- Botón hamburguesa - solo visible en móvil -->
 <button id="menu-toggle" onclick="toggleMobileMenu()"
@@ -56,6 +56,7 @@ export function navbar() {
   
     <!-- Navegación Principal -->
     <nav class="space-y-1.5 flex-1 w-full" >
+      ${!isAdmin ? `
       <div class="hide-on-collapse text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-3">Principal</div>
       
       <a href="#/dashboard" data-route="/dashboard" onclick="navigate(event, '/dashboard'); closeMobileMenu()" title="Dashboard"
@@ -98,6 +99,7 @@ export function navbar() {
         <span class="hide-on-collapse whitespace-nowrap">Sugerencias</span>
       </a>
 
+      ` : ''}
       ${isAdmin ? `
       <div class="hide-on-collapse mt-8 mb-3 px-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Gestión</div>
       <a href="#/admin_home" data-route="/admin_home" onclick="navigate(event, '/admin_home'); closeMobileMenu()" title="Administrar"
@@ -109,6 +111,33 @@ export function navbar() {
           </svg>
         </div>
         <span class="hide-on-collapse whitespace-nowrap">Administrar</span>
+      </a>
+      <a href="#/questions" data-route="/questions" onclick="navigate(event, '/questions'); closeMobileMenu()" title="Question Bank"
+         class="nav-link group flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 hover:bg-gray-100/80 hover:text-gray-900text-gray-600 hover:shadow-[0_0_15px_rgba(0,0,0,0.05)]">
+        <div class="w-8 h-8 rounded-xl bg-gray-100/50 group-hover:bg-white flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-sm border border-gray-200/50 shrink-0">
+          <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-800 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+        </div>
+        <span class="hide-on-collapse whitespace-nowrap">Question Bank</span>
+      </a>
+      <a href="#/admin_teams" data-route="/admin_teams" onclick="navigate(event, '/admin_teams'); closeMobileMenu()" title="Teams Overview"
+         class="nav-link group flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 hover:bg-gray-100/80 hover:text-gray-900text-gray-600 hover:shadow-[0_0_15px_rgba(0,0,0,0.05)]">
+        <div class="w-8 h-8 rounded-xl bg-gray-100/50 group-hover:bg-white flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-sm border border-gray-200/50 shrink-0">
+          <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-800 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        </div>
+        <span class="hide-on-collapse whitespace-nowrap">Teams Overview</span>
+      </a>
+      <a href="#/statistics" data-route="/statistics" onclick="navigate(event, '/statistics'); closeMobileMenu()" title="Statistics"
+         class="nav-link group flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 hover:bg-gray-100/80 hover:text-gray-900text-gray-600 hover:shadow-[0_0_15px_rgba(0,0,0,0.05)]">
+        <div class="w-8 h-8 rounded-xl bg-gray-100/50 group-hover:bg-white flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-sm border border-gray-200/50 shrink-0">
+          <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-800 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2" />
+          </svg>
+        </div>
+        <span class="hide-on-collapse whitespace-nowrap">Statistics</span>
       </a>
       ` : ''}
     </nav>

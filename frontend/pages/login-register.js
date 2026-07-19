@@ -385,7 +385,7 @@ window.handleLoginSubmit = async function (event) {
         window.localStorage.setItem('token', data.token || '');
         window.localStorage.setItem('role', data.role || 'user');
 
-        navigate(null, data.role === 'admin' ? '/admin_home' : '/dashboard');
+        navigate(null, data.role === 'ADMINISTRATOR' ? '/admin_home' : '/dashboard');
 
     } catch (error) {
         console.error(error);
@@ -444,7 +444,7 @@ window.handleRegisterSubmit = async function (event) {
         window.localStorage.setItem('token', data.token || '');
         window.localStorage.setItem('role', data.role || 'user');
 
-        navigate(null, data.role === 'admin' ? '/admin_home' : '/dashboard');
+        navigate(null, data.role === 'ADMINISTRATOR' ? '/admin_home' : '/dashboard');
 
     } catch (error) {
         console.error(error);

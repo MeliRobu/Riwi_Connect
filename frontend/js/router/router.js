@@ -75,8 +75,17 @@ if (view.isPrivate && !isLogged) {
     window.location.hash = "/login";
     return;
   }
-  if (view.isPrivate && view.admin && role !== "admin") {
+  const isAdminRole = (role || "").toUpperCase() === "ADMINISTRATOR";
+  if (view.isPrivate && view.admin && !isAdminRole) {
     window.location.hash = "/login";
+    return;
+  }
+  // Un Administrator no debe poder navegar a vistas exclusivas de estudiante
+  // (Dashboard, Assessment, Teams, Profile, Recommendations) -- ver DT-006
+  // seccion 6.1: las cuatro vistas de Administration son independientes y
+  // no deben mezclarse con el contenido de Student.
+  if (view.isPrivate && view.studentOnly && isAdminRole) {
+    window.location.hash = "/admin_home";
     return;
   }
   if (view.isPrivate && view.requiresAssessment) {
