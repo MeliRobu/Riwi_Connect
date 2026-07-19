@@ -197,7 +197,7 @@ window.handleTeamSearch = function() {
                 resultsBox.innerHTML = `<div class="px-4 py-2.5 text-sm text-gray-400">Sin resultados</div>`;
             } else {
                 resultsBox.innerHTML = teams.map(t => `
-                    <div onclick="requestToJoinTeam(${t.id_team}, '${t.team_name.replace(/'/g, "\\'")}')"
+                    <div onclick="showTeamProfile(${t.id_team})"
                         class="px-4 py-2.5 text-sm cursor-pointer hover:bg-[#F3F1FA] flex items-center justify-between">
                         <span>${t.team_name}</span>
                         <span class="text-xs text-gray-400">${t.member_count} integrante(s)</span>
@@ -209,4 +209,46 @@ window.handleTeamSearch = function() {
             console.error(error);
         }
     }, 300);
+};
+
+
+window.showTeamProfile = async function(teamId) {
+    try {
+        const response = await fetch(`/teams/${teamId}`);
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({ title: 'No se pudo cargar el equipo', text: data.error || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+            return;
+        }
+        const techBadges = data.interpretation ? Object.entries(data.tech_averages).map(([tech, avg]) =>
+            `<span class="bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-0.5 rounded-full">${tech}: ${avg}%</span>`
+        ).join(' ') : '';
+        const membersHtml = data.members.map(m =>
+            `<p class="text-sm">${m.full_name}${m.is_leader ? ' (Líder)' : ''}</p>`
+        ).join('');
+
+        const result = await Swal.fire({
+            title: data.team_name,
+            html: `
+                <div class="flex flex-col gap-3 text-left">
+                    <span class="text-xs text-gray-400">${data.member_count} integrante(s)</span>
+                    <div class="flex flex-col gap-1">${membersHtml}</div>
+                    ${data.interpretation ? `
+                    <div class="flex flex-wrap gap-1 mt-2">${techBadges}</div>
+                    <p class="text-xs text-gray-600 leading-relaxed">${data.interpretation}</p>
+                    ` : ''}
+                </div>
+            `,
+            showCancelButton: true,
+            cancelButtonText: 'Solicitar ingreso',
+            cancelButtonColor: '#4B3FA8',
+            confirmButtonText: 'Cerrar', confirmButtonColor: '#9ca3af', width: '32rem'
+        });
+        if (result.dismiss === Swal.DismissReason.cancel) {
+            window.requestToJoinTeam(data.team_id, data.team_name);
+        }
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+    }
 };

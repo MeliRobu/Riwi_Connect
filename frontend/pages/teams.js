@@ -905,7 +905,7 @@ window.handleCoderSearch = function() {
                 resultsBox.innerHTML = `<div class="px-4 py-2.5 text-sm text-gray-400">Sin resultados</div>`;
             } else {
                 resultsBox.innerHTML = students.map(s => `
-                    <div onclick="sendInvitationTo(${s.user_id}, '${s.full_name.replace(/'/g, "\\'")}')"
+                    <div onclick="showMemberProfile(${s.user_id}, true)"
                         class="px-4 py-2.5 text-sm cursor-pointer hover:bg-[#F3F1FA]">
                         ${s.full_name}
                     </div>
@@ -918,7 +918,7 @@ window.handleCoderSearch = function() {
     }, 300);
 };
 
-window.showMemberProfile = async function(userId) {
+window.showMemberProfile = async function(userId, showInviteButton = false) {
     try {
         const response = await fetch(`/users/${userId}/profile`);
         const data = await response.json();
@@ -939,7 +939,7 @@ window.showMemberProfile = async function(userId) {
             ['JavaScript', data.javascript_score], ['HTML', data.html_score], ['CSS', data.css_score]
         ].map(([label, score]) => `<span class="bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-0.5 rounded-full">${label}: ${score}%</span>`).join(' ');
 
-        Swal.fire({
+        const result = await Swal.fire({
             title: data.full_name,
             html: `
                 <div class="flex flex-col gap-3 text-left">
@@ -955,8 +955,14 @@ window.showMemberProfile = async function(userId) {
                     </div>
                 </div>
             `,
-            confirmButtonText: 'Cerrar', confirmButtonColor: '#4B3FA8', width: '32rem'
+            showCancelButton: showInviteButton,
+            cancelButtonText: 'Invitar al equipo',
+            cancelButtonColor: '#4B3FA8',
+            confirmButtonText: 'Cerrar', confirmButtonColor: '#9ca3af', width: '32rem'
         });
+        if (showInviteButton && result.dismiss === Swal.DismissReason.cancel) {
+            window.sendInvitationTo(userId, data.full_name);
+        }
     } catch (error) {
         console.error(error);
         Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
