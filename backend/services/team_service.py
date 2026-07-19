@@ -1,7 +1,6 @@
 from database.connection import get_connection
 
 # HU: US-007 — Create Team
-
 def create_team(user_id, team_name):
     """
     HU: US-007 — Create Team
@@ -96,8 +95,8 @@ def create_team(user_id, team_name):
     finally:
         cursor.close()
         conn.close()
-# HU: US-008 — Request to Join Team
 
+# HU: US-008 — Request to Join Team
 def request_join_team(user_id, team_id):
     """
     HU: US-008 — Request to Join Team
@@ -189,6 +188,7 @@ def request_join_team(user_id, team_id):
     finally:
         cursor.close()
         conn.close()
+
 # HU: US-009 — Cancel_request
 def cancel_request(user_id, request_id):
     conn = get_connection()
@@ -682,7 +682,6 @@ def is_team_leader(user_id, team_id):
 
 # HU: US-014 — Reject Request
 # The team Leader rejects a PENDING join request from a student.
-
 def reject_team_request(user_id, request_id):
     conn = get_connection()
     cursor = conn.cursor()
@@ -746,8 +745,8 @@ def reject_team_request(user_id, request_id):
     finally:
         cursor.close()
         conn.close()
-# HU: US-015 — Remove Team Member
 
+# HU: US-015 — Remove Team Member
 def remove_member(team_id, member_id):
 
     conn = get_connection()
@@ -863,7 +862,6 @@ def transfer_leadership(team_id, leader_id, new_leader_id):
 # The team Leader dissolves the team entirely. All members return to
 # AVAILABLE, all PENDING requests/invitations for this team are cancelled,
 # and the team is deleted (RN-039).
-
 def dissolve_team(user_id, team_id):
     conn = get_connection()
     cursor = conn.cursor()
@@ -1165,136 +1163,46 @@ def get_my_team_detail(user_id):
             for r in cursor.fetchall()
         ]
 
-
         # Analisis tecnico del equipo (DT-009 seccion 8-9, GP-000 seccion 7:
-
-
         # "Analizar fortalezas del equipo" / "Analizar debilidades del equipo").
-
-
         # Se recalcula en cada consulta, asi que se actualiza solo con cada
-
-
         # cambio real de integrantes -- no se guarda ningun valor cacheado.
-
-
         cursor.execute(
-
-
             """
-
-
             SELECT ar.python_score, ar.sql_score, ar.javascript_score,
-
-
                    ar.html_score, ar.css_score
-
-
             FROM team_members tm
-
-
             JOIN assessments a ON a.user_id = tm.user_id
-
-
             JOIN assessment_results ar ON ar.assessment_id = a.id_assessment
-
-
             WHERE tm.team_id = %s
-
-
             """,
-
-
             (team_id,)
-
-
         )
-
-
         score_rows = cursor.fetchall()
-
-
-        
-
-
         tech_keys = ["python", "sql", "javascript", "html", "css"]
-
-
         tech_labels = {"python": "Python", "sql": "SQL", "javascript": "JavaScript", "html": "HTML", "css": "CSS"}
-
-
         averages = {}
-
-
         strengths = []
-
-
         weaknesses = []
-
-
         interpretation = None
-
-
-        
-
-
         if score_rows:
-
-
             for i, key in enumerate(tech_keys):
-
-
                 averages[key] = round(sum(float(r[i]) for r in score_rows) / len(score_rows), 1)
-
-
             sorted_techs = sorted(averages.items(), key=lambda x: x[1], reverse=True)
-
-
             strengths = [tech_labels[t] for t, _ in sorted_techs[:2]]
-
-
             weaknesses = [tech_labels[t] for t, _ in sorted_techs[-2:]]
-
-
             interpretation = (
-
-
                 f"El equipo tiene un desempeño sólido en {' y '.join(strengths)}, "
-
-
                 f"y podría fortalecer {' y '.join(weaknesses)} para lograr un perfil más equilibrado."
-
-
             )
-
-
-        
-
-
         return {
-
-
             "team_id": team_id,
-
-
             "team_name": team_name,
-
-
             "members": members,
-
-
             "tech_averages": {tech_labels[k]: v for k, v in averages.items()},
-
-
             "strengths": strengths,
-
-
             "weaknesses": weaknesses,
-
-
             "interpretation": interpretation,
-
-
         }
     finally:
         cursor.close()

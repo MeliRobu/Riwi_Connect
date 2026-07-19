@@ -1,7 +1,6 @@
 import { card } from "../../components/card";
 import { progressBar } from "../../components/progress_bar";
 
-// ===== DATOS SIMULADOS - reemplaza por fetch real cuando tengas los endpoints =====
 const statsData = {
     registrationComparison: {
         institutionalSource: 245,
