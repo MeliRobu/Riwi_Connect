@@ -327,10 +327,42 @@ def get_team_recommendations(user_id):
             result = _four_factor_score(student_scores, weights)
             top_techs = _top_weak_techs(weights)
 
+            # Integrantes del equipo candidato, para la tarjeta de vista
+            # previa en Sugerencias (mismo detalle que Equipos disponibles).
+            cursor.execute(
+                """
+                SELECT tm.user_id, s.full_name, tm.is_leader
+                FROM team_members tm
+                JOIN users u ON tm.user_id = u.id_user
+                JOIN institutional_sources s ON u.id_institutional_source = s.id_institutional_source
+                WHERE tm.team_id = %s
+                ORDER BY tm.is_leader DESC, s.full_name
+                """,
+                (team_id,)
+            )
+            members = [
+                {"user_id": r[0], "full_name": r[1], "is_leader": r[2]}
+                for r in cursor.fetchall()
+            ]
+
+            labeled_averages = {TECH_LABELS[tech]: round(avg, 1) for tech, avg in team_averages.items()}
+            sorted_labeled = sorted(labeled_averages.items(), key=lambda x: x[1], reverse=True)
+            team_strengths = [label for label, _ in sorted_labeled[:2]]
+            team_weaknesses = [label for label, _ in sorted_labeled[-2:]]
+            interpretation = (
+                f"El equipo tiene un desempeño sólido en {' y '.join(team_strengths)}, "
+                f"y podría fortalecer {' y '.join(team_weaknesses)} para lograr un perfil más equilibrado."
+            )
+
             recommendations.append({
                 "team_id": team_id,
                 "team_name": team_name,
                 "member_count": len(member_rows),
+                "members": members,
+                "tech_averages": labeled_averages,
+                "strengths": team_strengths,
+                "weaknesses": team_weaknesses,
+                "interpretation": interpretation,
                 "compatibility": result["compatibility"],
                 "strengthens": top_techs,
                 "justification": (

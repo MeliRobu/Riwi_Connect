@@ -68,14 +68,25 @@ function renderRecommendations(teams) {
                         </div>
                         <span class="text-sm text-gray-500">${team.member_count} integrante(s)</span>
                         <div class="flex flex-wrap gap-2">
-                            ${(team.strengthens || []).map(tech => `
-                                <span class="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">${tech}</span>
+                            ${Object.entries(team.tech_averages || {}).map(([tech, avg]) => `
+                                <span class="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">${tech}: ${avg}%</span>
                             `).join('')}
                         </div>
                         <div class="border-t border-gray-100 pt-4 flex flex-col gap-2">
                             <span class="text-sm font-bold text-[#4B3FA8]">Por qué te lo recomendamos</span>
                             <p class="text-sm text-gray-600 leading-relaxed">${team.justification}</p>
                         </div>
+                        <details class="text-sm">
+                            <summary class="cursor-pointer text-[#4B3FA8] font-semibold text-xs select-none">Ver integrantes</summary>
+                            <div class="flex flex-col gap-1 mt-2 pt-2 border-t border-gray-100">
+                                ${(team.members || []).map(member => `
+                                    <button onclick="showMemberProfile(${member.user_id})"
+                                        class="cursor-pointer text-left text-xs text-[#4B3FA8] hover:underline">
+                                        ${member.full_name}${member.is_leader ? ' (Líder)' : ''}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </details>
                         ${team.pending_request_id ? `
                         <div class="flex items-center justify-between mt-2">
                             <span class="text-xs text-amber-500 font-semibold">Pendiente</span>
