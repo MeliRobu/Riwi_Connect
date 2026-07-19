@@ -9,6 +9,7 @@ from controllers.team_controller import cancel_invitation_route
 from controllers.team_controller import accept_request_route
 from controllers.team_controller import reject_request_route
 from controllers.team_controller import remove_member_route
+from controllers.team_controller import leave_team_route
 from controllers.team_controller import transfer_leader_route
 from controllers.team_controller import dissolve_team_route
 from controllers.team_controller import get_recommendations_route
@@ -75,6 +76,13 @@ methods=["PATCH"])
 team_routes.add_url_rule(
     "/teams/<int:team_id>/members/<int:user_id>",
     view_func=remove_member_route,
+    methods=["DELETE"]
+)
+
+# HU: (vacío documental) — Abandonar equipo voluntariamente
+team_routes.add_url_rule(
+    "/teams/<int:team_id>/members/me",
+    view_func=leave_team_route,
     methods=["DELETE"]
 )
 
