@@ -157,6 +157,34 @@ function renderEquiposTab() {
                         <div class="border border-gray-100 rounded-2xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all duration-300">
                             <span class="text-lg font-bold">${team.team_name}</span>
                             <span class="text-xs text-gray-400">${team.member_count} integrante(s)</span>
+                            ${team.compatibility !== null ? `
+                            <div class="bg-purple-50 border border-purple-100 rounded-xl px-3 py-2">
+                                <span class="text-xs font-bold text-[#4B3FA8]">${team.compatibility}% de compatibilidad</span>
+                                <p class="text-xs text-gray-600 mt-1">${team.justification}</p>
+                            </div>
+                            ` : ''}
+                            ${team.interpretation ? `
+                            <div class="flex flex-col gap-1">
+                                <span class="text-xs font-semibold text-gray-500">Análisis técnico</span>
+                                <div class="flex flex-wrap gap-1">
+                                    ${Object.entries(team.tech_averages).map(([tech, avg]) => `
+                                        <span class="bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-0.5 rounded-full">${tech}: ${avg}%</span>
+                                    `).join('')}
+                                </div>
+                                <p class="text-xs text-gray-600 leading-relaxed">${team.interpretation}</p>
+                            </div>
+                            ` : ''}
+                            <details class="text-sm">
+                                <summary class="cursor-pointer text-[#4B3FA8] font-semibold text-xs select-none">Ver integrantes</summary>
+                                <div class="flex flex-col gap-1 mt-2 pt-2 border-t border-gray-100">
+                                    ${team.members.map(member => `
+                                        <button onclick="showMemberProfile(${member.user_id})"
+                                            class="cursor-pointer text-left text-xs text-[#4B3FA8] hover:underline">
+                                            ${member.full_name}${member.is_leader ? ' (Líder)' : ''}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </details>
                             ${team.pending_request_id ? `
                             <div class="flex items-center justify-between mt-2">
                                 <span class="text-xs text-amber-500 font-semibold">Pendiente</span>
@@ -849,6 +877,51 @@ window.sendInvitationTo = async function(userId, name) {
         sentInvitationsLoaded = false;
         recommendationsLoaded = false;
         document.getElementById('tab-content').innerHTML = renderTabContent();
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+    }
+};
+
+window.showMemberProfile = async function(userId) {
+    try {
+        const response = await fetch(`/users/${userId}/profile`);
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({ title: 'No se pudo cargar el perfil', text: data.error || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+            return;
+        }
+        if (!data.assessment_completed) {
+            Swal.fire({
+                title: data.full_name,
+                html: `<p class="text-sm text-gray-500">Este estudiante aún no ha completado su Assessment Técnico.</p>`,
+                confirmButtonText: 'Cerrar', confirmButtonColor: '#4B3FA8'
+            });
+            return;
+        }
+        const techBadges = [
+            ['Python', data.python_score], ['SQL', data.sql_score],
+            ['JavaScript', data.javascript_score], ['HTML', data.html_score], ['CSS', data.css_score]
+        ].map(([label, score]) => `<span class="bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-0.5 rounded-full">${label}: ${score}%</span>`).join(' ');
+
+        Swal.fire({
+            title: data.full_name,
+            html: `
+                <div class="flex flex-col gap-3 text-left">
+                    <img src="/${data.profile_image}" alt="${data.full_name}" class="w-16 h-16 rounded-full object-cover border-2 border-[#4B3FA8] mx-auto">
+                    <span class="text-xs text-gray-400 text-center">${data.campus_name || ''} · ${data.journey_time || ''} · ${data.clan_name || ''}</span>
+                    <span class="text-sm font-bold text-[#4B3FA8]">Puntaje general: ${data.overall_score}%</span>
+                    <div class="flex flex-wrap gap-1">${techBadges}</div>
+                    <div class="text-xs text-gray-600 leading-relaxed">
+                        <p class="font-semibold text-gray-700 mt-1">Fortalezas</p>
+                        <p>${data.strengths}</p>
+                        <p class="font-semibold text-gray-700 mt-2">Oportunidades de mejora</p>
+                        <p>${data.improvement_opportunities}</p>
+                    </div>
+                </div>
+            `,
+            confirmButtonText: 'Cerrar', confirmButtonColor: '#4B3FA8', width: '32rem'
+        });
     } catch (error) {
         console.error(error);
         Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });

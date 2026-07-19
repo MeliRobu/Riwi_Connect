@@ -1,6 +1,7 @@
 from flask import Blueprint
 from controllers.user_controller import register, login, logout, profile
 from controllers.user_controller import get_team_recommendations_route
+from controllers.user_controller import get_public_profile_route
 
 # HU: US-001, US-002, US-003 (EP-001 — User Management)
 # All four User Management endpoints from DO-003 Sprint 3
@@ -22,4 +23,9 @@ user_routes.add_url_rule("/users/profile", view_func=profile, methods=["GET"])
 # HU: US-025 — Consultar Compatibilidad (Estudiante → Equipos)
 user_routes.add_url_rule("/students/recommendations",
 view_func=get_team_recommendations_route,
+methods=["GET"])
+
+# HU: (vacío documental) — Consultar el perfil público de otro estudiante
+user_routes.add_url_rule("/users/<int:user_id>/profile",
+view_func=get_public_profile_route,
 methods=["GET"])

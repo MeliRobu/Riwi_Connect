@@ -1,4 +1,5 @@
 from database.connection import get_connection
+from services.compatibility_service import get_team_recommendations
 
 # HU: US-007 — Create Team
 def create_team(user_id, team_name):
@@ -1015,15 +1016,34 @@ def list_available_teams(user_id):
             (user_id, user_id)
         )
         rows = cursor.fetchall()
-        return [
-            {
+
+        # Reusa el motor de compatibilidad ya existente (compatibility_service)
+        # para saber cuales de estos equipos son elegibles para quien consulta,
+        # sin duplicar la logica de filtros ni de calculo (DT-009 seccion 20.8).
+        compat_result, compat_status = get_team_recommendations(user_id)
+        compat_by_team = {}
+        if compat_status == 200:
+            for rec in compat_result.get("recommendations", []):
+                compat_by_team[rec["team_id"]] = rec
+
+        teams = []
+        for id_team, team_name, member_count, pending_request_id in rows:
+            analysis = _get_team_analysis(cursor, id_team)
+            compat = compat_by_team.get(id_team)
+            teams.append({
                 "id_team": id_team,
                 "team_name": team_name,
                 "member_count": member_count,
-                "pending_request_id": pending_request_id
-            }
-            for id_team, team_name, member_count, pending_request_id in rows
-        ]
+                "pending_request_id": pending_request_id,
+                "members": analysis["members"],
+                "tech_averages": analysis["tech_averages"],
+                "strengths": analysis["strengths"],
+                "weaknesses": analysis["weaknesses"],
+                "interpretation": analysis["interpretation"],
+                "compatibility": compat["compatibility"] if compat else None,
+                "justification": compat["justification"] if compat else None,
+            })
+        return teams
     finally:
         cursor.close()
         conn.close()
@@ -1192,6 +1212,67 @@ def search_students_to_invite(user_id, query):
         conn.close()
 
 # HU: (vacío documental) — Consultar Mi Equipo
+# HU: (vacío documental) — Análisis técnico reusable de un equipo (fortalezas,
+# debilidades, interpretación e integrantes). Extraído de get_my_team_detail
+# para reusarlo también en list_available_teams sin duplicar la lógica.
+def _get_team_analysis(cursor, team_id):
+    cursor.execute(
+        """
+        SELECT tm.user_id, s.full_name, tm.is_leader
+        FROM team_members tm
+        JOIN users u ON tm.user_id = u.id_user
+        JOIN institutional_sources s ON u.id_institutional_source = s.id_institutional_source
+        WHERE tm.team_id = %s
+        ORDER BY tm.is_leader DESC, s.full_name
+        """,
+        (team_id,)
+    )
+    members = [
+        {"user_id": r[0], "full_name": r[1], "is_leader": r[2]}
+        for r in cursor.fetchall()
+    ]
+
+    # Analisis tecnico del equipo (DT-009 seccion 8-9, GP-000 seccion 7:
+    # "Analizar fortalezas del equipo" / "Analizar debilidades del equipo").
+    # Se recalcula en cada consulta, asi que se actualiza solo con cada
+    # cambio real de integrantes -- no se guarda ningun valor cacheado.
+    cursor.execute(
+        """
+        SELECT ar.python_score, ar.sql_score, ar.javascript_score,
+               ar.html_score, ar.css_score
+        FROM team_members tm
+        JOIN assessments a ON a.user_id = tm.user_id
+        JOIN assessment_results ar ON ar.assessment_id = a.id_assessment
+        WHERE tm.team_id = %s
+        """,
+        (team_id,)
+    )
+    score_rows = cursor.fetchall()
+    tech_keys = ["python", "sql", "javascript", "html", "css"]
+    tech_labels = {"python": "Python", "sql": "SQL", "javascript": "JavaScript", "html": "HTML", "css": "CSS"}
+    averages = {}
+    strengths = []
+    weaknesses = []
+    interpretation = None
+    if score_rows:
+        for i, key in enumerate(tech_keys):
+            averages[key] = round(sum(float(r[i]) for r in score_rows) / len(score_rows), 1)
+        sorted_techs = sorted(averages.items(), key=lambda x: x[1], reverse=True)
+        strengths = [tech_labels[t] for t, _ in sorted_techs[:2]]
+        weaknesses = [tech_labels[t] for t, _ in sorted_techs[-2:]]
+        interpretation = (
+            f"El equipo tiene un desempeño sólido en {' y '.join(strengths)}, "
+            f"y podría fortalecer {' y '.join(weaknesses)} para lograr un perfil más equilibrado."
+        )
+    return {
+        "members": members,
+        "tech_averages": {tech_labels[k]: v for k, v in averages.items()},
+        "strengths": strengths,
+        "weaknesses": weaknesses,
+        "interpretation": interpretation,
+    }
+
+
 def get_my_team_detail(user_id):
     conn = get_connection()
     cursor = conn.cursor()
@@ -1208,62 +1289,11 @@ def get_my_team_detail(user_id):
         cursor.execute("SELECT team_name FROM teams WHERE id_team = %s", (team_id,))
         team_name = cursor.fetchone()[0]
 
-        cursor.execute(
-            """
-            SELECT tm.user_id, s.full_name, tm.is_leader
-            FROM team_members tm
-            JOIN users u ON tm.user_id = u.id_user
-            JOIN institutional_sources s ON u.id_institutional_source = s.id_institutional_source
-            WHERE tm.team_id = %s
-            ORDER BY tm.is_leader DESC, s.full_name
-            """,
-            (team_id,)
-        )
-        members = [
-            {"user_id": r[0], "full_name": r[1], "is_leader": r[2]}
-            for r in cursor.fetchall()
-        ]
-
-        # Analisis tecnico del equipo (DT-009 seccion 8-9, GP-000 seccion 7:
-        # "Analizar fortalezas del equipo" / "Analizar debilidades del equipo").
-        # Se recalcula en cada consulta, asi que se actualiza solo con cada
-        # cambio real de integrantes -- no se guarda ningun valor cacheado.
-        cursor.execute(
-            """
-            SELECT ar.python_score, ar.sql_score, ar.javascript_score,
-                   ar.html_score, ar.css_score
-            FROM team_members tm
-            JOIN assessments a ON a.user_id = tm.user_id
-            JOIN assessment_results ar ON ar.assessment_id = a.id_assessment
-            WHERE tm.team_id = %s
-            """,
-            (team_id,)
-        )
-        score_rows = cursor.fetchall()
-        tech_keys = ["python", "sql", "javascript", "html", "css"]
-        tech_labels = {"python": "Python", "sql": "SQL", "javascript": "JavaScript", "html": "HTML", "css": "CSS"}
-        averages = {}
-        strengths = []
-        weaknesses = []
-        interpretation = None
-        if score_rows:
-            for i, key in enumerate(tech_keys):
-                averages[key] = round(sum(float(r[i]) for r in score_rows) / len(score_rows), 1)
-            sorted_techs = sorted(averages.items(), key=lambda x: x[1], reverse=True)
-            strengths = [tech_labels[t] for t, _ in sorted_techs[:2]]
-            weaknesses = [tech_labels[t] for t, _ in sorted_techs[-2:]]
-            interpretation = (
-                f"El equipo tiene un desempeño sólido en {' y '.join(strengths)}, "
-                f"y podría fortalecer {' y '.join(weaknesses)} para lograr un perfil más equilibrado."
-            )
+        analysis = _get_team_analysis(cursor, team_id)
         return {
             "team_id": team_id,
             "team_name": team_name,
-            "members": members,
-            "tech_averages": {tech_labels[k]: v for k, v in averages.items()},
-            "strengths": strengths,
-            "weaknesses": weaknesses,
-            "interpretation": interpretation,
+            **analysis,
         }
     finally:
         cursor.close()
