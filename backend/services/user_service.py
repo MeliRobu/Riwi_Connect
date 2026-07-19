@@ -1,6 +1,7 @@
 import psycopg2
 from werkzeug.security import generate_password_hash
 from database.connection import get_connection
+from services.assessment_service import get_assessment_result
 
 # HU: US-001 — Registro de Usuario (EP-001 — User Management)
 def register_user(document_number, password):
@@ -98,4 +99,58 @@ def get_user_by_id(id_user):
         "campus_name": user_row[9],
         "journey_time": user_row[10],
         "clan_name": user_row[11]
+    }
+
+
+# HU: (vacío documental) — Consultar el perfil público de cualquier estudiante
+# (nombre, Campus/Journey/Clan, puntajes y fortalezas/debilidades del Assessment),
+# usado para la tarjeta flotante al hacer clic en un integrante de un equipo.
+def get_public_profile(id_user):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT s.full_name, u.profile_image, c.campus_name, j.journey_time, cl.clan_name
+        FROM users u
+        JOIN institutional_sources s ON u.id_institutional_source = s.id_institutional_source
+        LEFT JOIN campus c ON s.id_campus = c.id_campus
+        LEFT JOIN journeys j ON s.id_journey = j.id_journey
+        LEFT JOIN clan cl ON s.id_clan = cl.id_clan
+        WHERE u.id_user = %s
+        """,
+        (id_user,)
+    )
+    row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if row is None:
+        return None
+    full_name, profile_image, campus_name, journey_time, clan_name = row
+    assessment = get_assessment_result(id_user)
+    if assessment is None:
+        return {
+            "full_name": full_name,
+            "profile_image": profile_image,
+            "campus_name": campus_name,
+            "journey_time": journey_time,
+            "clan_name": clan_name,
+            "assessment_completed": False,
+        }
+    overall, python_s, sql_s, js_s, html_s, css_s, strengths, improvements, profile = assessment
+    return {
+        "full_name": full_name,
+        "profile_image": profile_image,
+        "campus_name": campus_name,
+        "journey_time": journey_time,
+        "clan_name": clan_name,
+        "assessment_completed": True,
+        "overall_score": float(overall),
+        "python_score": float(python_s),
+        "sql_score": float(sql_s),
+        "javascript_score": float(js_s),
+        "html_score": float(html_s),
+        "css_score": float(css_s),
+        "strengths": strengths,
+        "improvement_opportunities": improvements,
+        "profile_description": profile,
     }
