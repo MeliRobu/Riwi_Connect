@@ -996,6 +996,24 @@ def list_available_teams(user_id):
     conn = get_connection()
     cursor = conn.cursor()
     try:
+        # Campus/Journey del estudiante que consulta -- se usan para limitar
+        # la lista a equipos del mismo Campus y Journey (regla de negocio
+        # ajustada por el equipo del proyecto: ver decision registrada en
+        # este commit; DT-009 20.3 aplica esta misma condicion al motor de
+        # compatibilidad, aqui se extiende tambien al listado general).
+        cursor.execute(
+            """
+            SELECT s.id_campus, s.id_journey
+            FROM users u
+            JOIN institutional_sources s ON u.id_institutional_source = s.id_institutional_source
+            WHERE u.id_user = %s
+            """,
+            (user_id,)
+        )
+        student_row = cursor.fetchone()
+        student_campus = student_row[0] if student_row else None
+        student_journey = student_row[1] if student_row else None
+
         cursor.execute(
             """
             SELECT t.id_team, t.team_name, COUNT(DISTINCT tm.user_id) AS member_count,
@@ -1009,11 +1027,20 @@ def list_available_teams(user_id):
             WHERE t.id_team NOT IN (
                 SELECT team_id FROM team_members WHERE user_id = %s
             )
+            AND EXISTS (
+                SELECT 1
+                FROM team_members tm2
+                JOIN users u2 ON tm2.user_id = u2.id_user
+                JOIN institutional_sources s2 ON u2.id_institutional_source = s2.id_institutional_source
+                WHERE tm2.team_id = t.id_team
+                  AND s2.id_campus = %s
+                  AND s2.id_journey = %s
+            )
             GROUP BY t.id_team, t.team_name, tr.id_team_request
             HAVING COUNT(DISTINCT tm.user_id) < 6
             ORDER BY t.created_at DESC
             """,
-            (user_id, user_id)
+            (user_id, user_id, student_campus, student_journey)
         )
         rows = cursor.fetchall()
 
@@ -1043,6 +1070,9 @@ def list_available_teams(user_id):
                 "compatibility": compat["compatibility"] if compat else None,
                 "justification": compat["justification"] if compat else None,
             })
+        # Los equipos con mayor compatibilidad primero; los que no tienen
+        # compatibilidad calculada (None) quedan al final del listado.
+        teams.sort(key=lambda t: (t["compatibility"] is None, -(t["compatibility"] or 0)))
         return teams
     finally:
         cursor.close()
