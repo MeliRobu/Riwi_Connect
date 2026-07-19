@@ -10,6 +10,7 @@ import { toggleUserMenu,initUserMenuListener, toggleSettingsSubmenu, logout } fr
 document.getElementById("sidebar-container").innerHTML = navbar();
 loadNavbarProfile();
 window.addEventListener("hashchange", loadNavbarProfile);
+window.loadNavbarProfile = loadNavbarProfile;
 
 async function loadNavbarProfile() {
   try {
@@ -22,6 +23,20 @@ async function loadNavbarProfile() {
     const roleEl = document.getElementById('navbar-user-role');
     if (nameEl && firstName) nameEl.textContent = firstName;
     if (roleEl) roleEl.textContent = roleLabels[data.role] || data.role;
+    const statusEl = document.getElementById('navbar-user-status');
+    const statusDot = document.getElementById('navbar-user-status-dot');
+    if (statusEl && statusDot && data.role === 'STUDENT') {
+      const statusLabels = { AVAILABLE: 'Disponible', IN_TEAM: 'En equipo' };
+      const statusColors = { AVAILABLE: ['text-green-600', 'bg-green-500'], IN_TEAM: ['text-[#4B3FA8]', 'bg-[#4B3FA8]'] };
+      const [textColor, dotColor] = statusColors[data.status] || ['text-gray-400', 'bg-gray-400'];
+      statusEl.className = `text-[11px] font-semibold truncate flex items-center gap-1 ${textColor}`;
+      statusDot.className = `w-1.5 h-1.5 rounded-full inline-block ${dotColor}`;
+      statusEl.querySelectorAll('.status-label-text').forEach(el => el.remove());
+      const statusText = document.createElement('span');
+      statusText.className = 'status-label-text';
+      statusText.textContent = statusLabels[data.status] || data.status || '';
+      statusEl.append(statusText);
+    }
   } catch (error) {
     console.error('Error cargando perfil del navbar:', error);
   }

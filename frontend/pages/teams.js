@@ -228,6 +228,7 @@ window.createTeam = async function() {
             return;
         }
         Swal.fire({ title: '¡Equipo creado!', text: `El equipo "${name}" fue creado correctamente.`, icon: 'success', confirmButtonText: 'Aceptar', confirmButtonColor: '#4B3FA8' });
+        if (window.loadNavbarProfile) window.loadNavbarProfile();
         await initTeamsPage();
     } catch (error) {
         console.error(error);
@@ -761,6 +762,7 @@ window.dissolveTeam = async function() {
             return;
         }
         Swal.fire({ title: 'Equipo disuelto', text: 'El equipo ha sido eliminado correctamente.', icon: 'success', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+        if (window.loadNavbarProfile) window.loadNavbarProfile();
         await initTeamsPage();
     } catch (error) {
         console.error(error);
@@ -786,6 +788,7 @@ window.leaveTeam = async function() {
         myTeamLoaded = false;
         teamsLoaded = false;
         activeTab = 'equipos';
+        if (window.loadNavbarProfile) window.loadNavbarProfile();
         await initTeamsPage();
     } catch (error) {
         console.error(error);
