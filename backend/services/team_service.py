@@ -806,6 +806,57 @@ def remove_member(team_id, member_id):
         },500
 
 
+# HU: (vacío documental) — Permite a un integrante regular abandonar su equipo
+# voluntariamente. El Leader no puede abandonar sin transferir liderazgo o
+# disolver el equipo primero (ver GP-001, seccion de Reglas de Team Management).
+def leave_team(user_id, team_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            SELECT is_leader
+            FROM team_members
+            WHERE user_id = %s AND team_id = %s
+            """,
+            (user_id, team_id)
+        )
+        member = cursor.fetchone()
+        if member is None:
+            return {"success": False, "message": "Member not found"}, 404
+
+        is_leader = member[0]
+        if is_leader:
+            return {
+                "success": False,
+                "message": "The Leader cannot leave the team without transferring leadership or dissolving the team first"
+            }, 409
+
+        cursor.execute(
+            """
+            DELETE FROM team_members
+            WHERE user_id = %s AND team_id = %s
+            """,
+            (user_id, team_id)
+        )
+        cursor.execute(
+            """
+            UPDATE users
+            SET status = 'AVAILABLE'
+            WHERE id_user = %s
+            """,
+            (user_id,)
+        )
+        conn.commit()
+        return {"success": True, "message": "You have left the team successfully"}, 200
+    except Exception as e:
+        conn.rollback()
+        return {"success": False, "message": str(e)}, 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
 def is_team_member(user_id, team_id):
 
     conn = get_connection()

@@ -10,6 +10,7 @@ from services.team_service import accept_request
 from services.team_service import reject_team_request
 from services.team_service import is_team_leader
 from services.team_service import remove_member
+from services.team_service import leave_team
 from services.team_service import is_team_member
 from services.team_service import transfer_leadership
 from services.team_service import dissolve_team
@@ -127,6 +128,12 @@ def remove_member_route(team_id, user_id):
             "message": "Only the team leader can remove members."
         },403
     return remove_member(team_id, user_id)
+
+# HU: (vacío documental) — Permite a un integrante abandonar su equipo voluntariamente
+def leave_team_route(team_id):
+    if "user_id" not in session:
+        return {"success": False, "message": "Unauthorized"}, 401
+    return leave_team(session["user_id"], team_id)
 
 # HU: US-016 — Transfer Leadership
 def transfer_leader_route(team_id):

@@ -658,7 +658,12 @@ function renderMiEquipoTab() {
                         class=" px-4 cursor-pointer mt-4 bg-pink-500 text-white font-bold py-2.5 rounded-xl hover:bg-pink-700 transition-all duration-200">
                         Disolver equipo
                     </button>
-                    ` : ''}
+                    ` : `
+                    <button onclick="leaveTeam()" 
+                        class=" px-4 cursor-pointer mt-4 border border-red-500 text-red-500 font-bold py-2.5 rounded-xl hover:bg-red-50 transition-all duration-200">
+                        Abandonar equipo
+                    </button>
+                    `}
                 `
             })}
         </div>
@@ -731,6 +736,31 @@ window.dissolveTeam = async function() {
             return;
         }
         Swal.fire({ title: 'Equipo disuelto', text: 'El equipo ha sido eliminado correctamente.', icon: 'success', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+        await initTeamsPage();
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+    }
+};
+
+window.leaveTeam = async function() {
+    const result = await Swal.fire({
+        title: '¿Estás seguro?', text: '¿Seguro que quieres abandonar el equipo?', icon: 'warning',
+        showCancelButton: true, confirmButtonColor: '#4B3FA8', cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, abandonar', cancelButtonText: 'Cancelar'
+    });
+    if (!result.isConfirmed) return;
+    try {
+        const response = await fetch(`/teams/${myTeamData.team_id}/members/me`, { method: 'DELETE' });
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({ title: 'No se pudo abandonar el equipo', text: data.message || data.error || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+            return;
+        }
+        Swal.fire({ title: 'Has abandonado el equipo', icon: 'success', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+        myTeamLoaded = false;
+        teamsLoaded = false;
+        activeTab = 'equipos';
         await initTeamsPage();
     } catch (error) {
         console.error(error);
