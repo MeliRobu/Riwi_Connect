@@ -236,6 +236,51 @@ def cancel_request(user_id, request_id):
         cursor.close()
         conn.close()
 
+
+# HU: (vacío documental) — Permite al Leader cancelar una invitación PENDING que envió, análogo a US-009 pero para invitaciones
+def cancel_invitation(user_id, request_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            SELECT sender_user_id, status, type
+            FROM team_requests
+            WHERE id_team_request = %s
+            """,
+            (request_id,)
+        )
+        request = cursor.fetchone()
+        if not request:
+            return {"message": "Invitation not found"}, 404
+        if request[2] != "INVITATION":
+            return {"message": "Invitation not found"}, 404
+        if request[0] != user_id:
+            return {"message": "Unauthorized"}, 403
+
+        if request[1] != "PENDING":
+            return {"message": "Invitation cannot be cancelled"}, 409
+
+        cursor.execute(
+            """
+            UPDATE team_requests
+            SET status = 'CANCELLED'
+            WHERE id_team_request = %s
+            """,
+            (request_id,)
+        )
+        conn.commit()
+
+        return {"message": "Invitation cancelled successfully"}, 200
+
+    except Exception as e:
+        conn.rollback()
+        return {"message": str(e)}, 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
 # HU: US-010 — Send Invitation
 # A team Leader invites an AVAILABLE student to join their team.
 def create_invitation(sender_id, team_id, receiver_id):

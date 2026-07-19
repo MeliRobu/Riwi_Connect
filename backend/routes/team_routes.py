@@ -5,6 +5,7 @@ from controllers.team_controller import cancel
 from controllers.team_controller import send_invitation
 from controllers.team_controller import accept_invitation_route
 from controllers.team_controller import reject_invitation_route
+from controllers.team_controller import cancel_invitation_route
 from controllers.team_controller import accept_request_route
 from controllers.team_controller import reject_request_route
 from controllers.team_controller import remove_member_route
@@ -52,6 +53,11 @@ methods=["PATCH"])
 team_routes.add_url_rule("/teams/<int:team_id>/invitations/<int:request_id>/reject",
 view_func=reject_invitation_route,
 methods=["PATCH"])
+
+# HU: (vacío documental) — Permite al Leader cancelar una invitación PENDING que envió
+team_routes.add_url_rule("/teams/<int:team_id>/invitations/<int:request_id>",
+view_func=cancel_invitation_route,
+methods=["DELETE"])
 
 # HU: US-013 — Accept Join Request
 team_routes.add_url_rule(

@@ -5,6 +5,7 @@ from services.team_service import cancel_request
 from services.team_service import create_invitation
 from services.team_service import accept_invitation
 from services.team_service import reject_invitation
+from services.team_service import cancel_invitation
 from services.team_service import accept_request
 from services.team_service import reject_team_request
 from services.team_service import is_team_leader
@@ -78,6 +79,13 @@ def reject_invitation_route(team_id, request_id):
     if "user_id" not in session:
         return {"error": "Unauthorized"}, 401
     result, status_code = reject_invitation(session["user_id"], request_id)
+    return result, status_code
+
+# HU: (vacío documental) — Permite al Leader cancelar una invitación PENDING que envió, análogo a cancel() pero para invitaciones
+def cancel_invitation_route(team_id, request_id):
+    if "user_id" not in session:
+        return {"error": "Unauthorized"}, 401
+    result, status_code = cancel_invitation(session["user_id"], request_id)
     return result, status_code
 
 # HU: US-013 — Accept Join Request
