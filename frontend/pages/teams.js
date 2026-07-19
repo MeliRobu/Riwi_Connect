@@ -1,7 +1,7 @@
 import { card } from "../components/card";
 import Swal from "sweetalert2";
 
-// ===== ESTADO REAL (se llena con datos del Backend) =====
+// ESTADO REAL (se llena con datos del Backend)
 let currentUser = null;
 let teams = [];
 let teamsLoaded = false;
@@ -126,7 +126,7 @@ function renderTabContent() {
     }
 }
 
-// ===== TAB: EQUIPOS =====
+// TAB: EQUIPOS
 function renderEquiposTab() {
     if (!teamsLoaded) {
         return `<div class="flex flex-col gap-6 pt-4">${emptyState('Cargando equipos...')}</div>`;
@@ -212,7 +212,7 @@ window.requestToJoin = async function(teamId, teamName) {
     }
 };
 
-// ===== TAB: MIS SOLICITUDES (REAL) =====
+// TAB: MIS SOLICITUDES
 async function loadMyRequests() {
     try {
         const response = await fetch('/users/requests');
@@ -271,8 +271,24 @@ window.cancelRequest = async function(teamId, requestId) {
         Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
     }
 };
+window.cancelInvitation = async function(teamId, requestId) {
+    try {
+        const response = await fetch(`/teams/${teamId}/invitations/${requestId}`, { method: 'DELETE' });
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({ title: 'No se pudo cancelar', text: data.message || data.error || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+            return;
+        }
+        sentInvitationsLoaded = false;
+        recommendationsLoaded = false;
+        document.getElementById('tab-content').innerHTML = renderTabContent();
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+    }
+};
 
-// ===== TAB: SOLICITUDES RECIBIDAS (REAL) =====
+// TAB: SOLICITUDES RECIBIDAS
 async function loadReceivedRequests() {
     try {
         const response = await fetch('/teams/requests/received');
@@ -349,7 +365,7 @@ window.rejectRequest = async function(teamId, requestId) {
     }
 };
 
-// ===== TAB: INVITACIONES (REAL) =====
+//TAB: INVITACIONES
 async function loadSentInvitations() {
     if (!currentUser?.is_leader) { sentInvitationsLoaded = true; return; }
     try {
@@ -410,7 +426,15 @@ function renderInvitacionesTab() {
                         ${sentInvitationsData.map(inv => `
                             <div class="flex items-center justify-between border border-gray-100 rounded-xl p-4 shadow-sm">
                                 <span class="font-semibold">${inv.full_name}</span>
-                                <span class="text-xs text-amber-500 font-semibold">Pendiente</span>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs text-amber-500 font-semibold">Pendiente</span>
+                                    <button
+                                        onclick="cancelInvitation(${inv.team_id}, ${inv.id_team_request})"
+                                        class=" cursor-pointer text-red-500 border border-red-200 font-semibold text-sm px-4 py-2 rounded-xl hover:bg-red-50 transition-all duration-200"
+                                    >
+                                        Cancelar
+                                    </button>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
@@ -549,7 +573,7 @@ window.rejectInvitation = async function(teamId, requestId) {
     }
 };
 
-// ===== TAB: MI EQUIPO (todavía pendiente) =====
+//TAB: MI EQUIPO 
 let myTeamData = null;
 let myTeamLoaded = false;
 
@@ -697,7 +721,7 @@ window.dissolveTeam = async function() {
     }
 };
 
-// ===== TAB: RECOMENDACIONES =====
+//TAB: RECOMENDACIONES
 let invitedUserIds = new Set();
 
 async function loadRecommendations() {
@@ -775,6 +799,9 @@ window.sendInvitationTo = async function(userId, name) {
             return;
         }
         Swal.fire({ title: '¡Invitación enviada!', text: `Invitación enviada a ${name}`, icon: 'success', confirmButtonText: 'Genial', confirmButtonColor: '#4B3FA8' });
+        sentInvitationsLoaded = false;
+        recommendationsLoaded = false;
+        document.getElementById('tab-content').innerHTML = renderTabContent();
     } catch (error) {
         console.error(error);
         Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });

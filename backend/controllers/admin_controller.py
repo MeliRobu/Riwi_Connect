@@ -106,7 +106,7 @@ def update_assessment_configuration():
 
 # HU: US-026 — Consultar Estadísticas Administrativas
 def get_statistics():
- #Handles GET /admin/statistics
+    #Handles GET /admin/statistics
     permission_error = check_admin_permissions()
     if permission_error:
         return permission_error

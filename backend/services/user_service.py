@@ -3,7 +3,6 @@ from werkzeug.security import generate_password_hash
 from database.connection import get_connection
 
 # HU: US-001 — Registro de Usuario (EP-001 — User Management)
-
 def register_user(document_number, password):
     # Open a connection to PostgreSQL
     conn = get_connection()
@@ -21,7 +20,6 @@ def register_user(document_number, password):
         cursor.close()
         conn.close()
         return {"error": "Document not authorized"}, 403
-
     id_institutional_source = institutional_source[0]
 
     # Step 2: check if a user with this institutional_source is already registered
@@ -48,15 +46,12 @@ def register_user(document_number, password):
 
     # Commit saves the changes permanently to the database
     conn.commit()
-
     cursor.close()
     conn.close()
-
     return {"message": "User registered successfully"}, 201
 
 
 # HU: US-003 — Consultar mi Perfil (EP-001 — User Management)
-
 def get_user_by_id(id_user):
     # Open a connection to PostgreSQL
     conn = get_connection()

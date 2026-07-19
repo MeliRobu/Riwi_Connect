@@ -44,11 +44,11 @@ export function loginRegister() {
     }, 100);
 
     return `
-    <!-- ============ CONTENEDOR PRINCIPAL ============ -->
+    <!--CONTENEDOR PRINCIPAr-->
     <div class="relative overflow-hidden w-screen h-screen group z-[2] bg-white shadow-[0_8px_40px_rgb(0,0,0,0.04)] m-0 font-sans antialiased text-slate-900 selection:bg-brand-500/20 selection:text-brand-900 absolute top-0 left-0"
         id="container">
 
-        <!-- ===== PANEL DE REGISTRO ===== -->
+        <!--PANEL DE REGISTRO-->
         <div
             class="absolute top-0 h-full left-0 w-full md:w-1/2 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform z-[1] opacity-0 translate-x-full md:translate-x-0 group-[.right-panel-active]:translate-x-0 group-[.right-panel-active]:opacity-100 group-[.right-panel-active]:z-[5] md:group-[.right-panel-active]:translate-x-full">
             <form action="#" id="register-form" onsubmit="handleRegisterSubmit(event)"
@@ -108,7 +108,7 @@ export function loginRegister() {
             </form>
         </div>
 
-        <!-- ===== PANEL DE INICIO DE SESIÓN ===== -->
+        <!--PANEL DE INICIO DE SESIÓN-->
         <div
             class="absolute top-0 h-full left-0 w-full md:w-1/2 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform z-[2] group-[.right-panel-active]:-translate-x-full md:group-[.right-panel-active]:translate-x-full group-[.right-panel-active]:opacity-0 md:group-[.right-panel-active]:opacity-100">
             <form action="#" id="login-form" onsubmit="handleLoginSubmit(event)"
@@ -159,7 +159,7 @@ export function loginRegister() {
             </form>
         </div>
 
-        <!-- ===== OVERLAY (Fondo exclusivo para Web "md:", oculto en móvil) ===== -->
+        <!--OVERLAY (Fondo exclusivo para Web "md:", oculto en móvil)-->
         <div
             class="hidden md:block absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-[800ms] ease-in-out z-[100] group-[.right-panel-active]:-translate-x-full">
             <div

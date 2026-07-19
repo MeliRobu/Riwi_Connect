@@ -124,12 +124,12 @@
 <body
     class="bg-slate-50 flex flex-col justify-center items-center h-screen w-screen m-0 overflow-hidden font-sans antialiased text-slate-900 selection:bg-brand-500/20 selection:text-brand-900">
 
-    <!-- ============ CONTENEDOR PRINCIPAL ============ -->
+    <!-- CONTENEDOR PRINCIPAL-->
     <div class="relative overflow-hidden w-screen h-screen group z-[2] bg-white shadow-[0_8px_40px_rgb(0,0,0,0.04)]"
         id="container">
 
-        <!-- ===== PANEL DE REGISTRO ===== -->
-        <div
+        <!-- PANEL DE REGISTRO -->
+        <di
             class="absolute top-0 h-full left-0 w-full md:w-1/2 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform z-[1] opacity-0 translate-x-full md:translate-x-0 group-[.right-panel-active]:translate-x-0 group-[.right-panel-active]:opacity-100 group-[.right-panel-active]:z-[5] md:group-[.right-panel-active]:translate-x-full">
             <form action="#"
                 class="relative overflow-hidden bg-white flex flex-col items-center justify-center px-12 sm:px-full h-full text-center w-full max-w-full mx-auto transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]">
@@ -186,9 +186,9 @@
                         class="mt-4 md:mt-5 rounded-2xl border-none bg-gradient-to-br from-brand-600 to-indigo-600 text-white text-xs md:text-sm font-bold py-3 px-8 md:py-3.5 md:px-[45px] tracking-wide transition-all duration-300 ease-in-out cursor-pointer shadow-[0_8px_20px_rgba(124,58,237,0.25)] hover:-translate-y-1 hover:shadow-[0_12px_25px_rgba(124,58,237,0.35)] hover:from-brand-500 hover:to-indigo-500 active:scale-95 focus:outline-none">Registrarse</button>
                 </div>
             </form>
-        </div>
+        </di>
 
-        <!-- ===== PANEL DE INICIO DE SESIÓN ===== -->
+        <!-- PANEL DE INICIO DE SESIÓN -->
         <div
             class="absolute top-0 h-full left-0 w-full md:w-1/2 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform z-[2] group-[.right-panel-active]:-translate-x-full md:group-[.right-panel-active]:translate-x-full group-[.right-panel-active]:opacity-0 md:group-[.right-panel-active]:opacity-100">
             <form action="#"
@@ -236,7 +236,7 @@
             </form>
         </div>
 
-        <!-- ===== OVERLAY (Fondo exclusivo para Web "md:", oculto en móvil) ===== -->
+        <!-- OVERLAY (Fondo exclusivo para Web "md:", oculto en móvil)-->
         <div
             class="hidden md:block absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-[800ms] ease-in-out z-[100] group-[.right-panel-active]:-translate-x-full">
             <div
@@ -388,7 +388,7 @@
         </div>
     </div>
 
-    <!-- ============ JAVASCRIPT CORREGIDO ============ -->
+    <!--JAVASCRIPT CORREGIdo-->
     <script>
         // Seleccionamos todos los activadores posibles utilizando selectores de clase multiplataforma
         const signUpTriggers = document.querySelectorAll('.trigger-signup');
@@ -409,7 +409,7 @@
             });
         });
 
-        // === ALTERNAR VISIBILIDAD DE CONTRASEÑA ===
+        // ALTERNAR VISIBILIDAD DE CONTRASEÑA
         function togglePassword(inputId, btn) {
             const input = document.getElementById(inputId);
             const icon = btn.querySelector('i');
@@ -425,7 +425,7 @@
 
     </script>
 
-    <!-- ============ CANVAS NODES BACKGROUND ============ -->
+    <!--CANVAS NODES BACKGROUND-->
     <script>
         (function initCanvas() {
             "use strict";
@@ -522,7 +522,7 @@
         })();
     </script>
 
-    <!-- ============ FLOATING CODE PARTICLES ============ -->
+    <!-- FLOATING CODE PARTICLES-->
     <script>
         (function initParticles() {
             "use strict";
