@@ -350,6 +350,21 @@ def get_team_recommendations(user_id):
             del r["_factor_1"]
             del r["_factor_2"]
 
+        # HU: (vacío documental) — indica si ya existe una solicitud PENDING
+        # del estudiante a cada equipo recomendado, para que el Frontend
+        # pueda mostrar "Pendiente" en vez de "Solicitar ingreso" de nuevo.
+        cursor.execute(
+            """
+            SELECT team_id, id_team_request
+            FROM team_requests
+            WHERE sender_user_id = %s AND type = 'REQUEST' AND status = 'PENDING'
+            """,
+            (user_id,)
+        )
+        pending_by_team = {row[0]: row[1] for row in cursor.fetchall()}
+        for r in recommendations:
+            r["pending_request_id"] = pending_by_team.get(r["team_id"])
+
         return {"recommendations": recommendations}, 200
     except Exception as e:
         return {"error": str(e)}, 500
