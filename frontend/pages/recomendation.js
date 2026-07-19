@@ -70,12 +70,24 @@ function renderRecommendations(teams) {
                             <span class="text-sm font-bold text-[#4B3FA8]">Por qué te lo recomendamos</span>
                             <p class="text-sm text-gray-600 leading-relaxed">${team.justification}</p>
                         </div>
+                        ${team.pending_request_id ? `
+                        <div class="flex items-center justify-between mt-2">
+                            <span class="text-xs text-amber-500 font-semibold">Pendiente</span>
+                            <button
+                                onclick="cancelRecommendedRequest(${team.team_id}, ${team.pending_request_id})"
+                                class=" cursor-pointer text-red-500 border border-red-200 font-semibold text-sm px-4 py-2 rounded-xl hover:bg-red-50 transition-all duration-200"
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                        ` : `
                         <button 
                             onclick="requestToJoinTeam(${team.team_id}, '${team.team_name.replace(/'/g, "\\'")}')"
                             class=" px-4 cursor-pointer mt-2 bg-[#4B3FA8] text-white font-bold py-2.5 rounded-xl transition-all duration-300 hover:bg-pink-600 hover:scale-[1.02] active:scale-95"
                         >
                             Solicitar ingreso
                         </button>
+                        `}
                     `
                 })}
             `).join('')}
@@ -107,6 +119,7 @@ window.requestToJoinTeam = async function(teamId, teamName) {
             confirmButtonText: 'Entendido',
             confirmButtonColor: '#4B3FA8'
         });
+        loadRecommendations();
     } catch (error) {
         console.error(error);
         Swal.fire({
@@ -116,6 +129,21 @@ window.requestToJoinTeam = async function(teamId, teamName) {
             confirmButtonText: 'Entendido',
             confirmButtonColor: '#4B3FA8'
         });
+    }
+};
+
+window.cancelRecommendedRequest = async function(teamId, requestId) {
+    try {
+        const response = await fetch(`/teams/${teamId}/requests/${requestId}`, { method: 'DELETE' });
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({ title: 'No se pudo cancelar', text: data.message || data.error || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+            return;
+        }
+        loadRecommendations();
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
     }
 };
 
