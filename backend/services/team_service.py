@@ -946,22 +946,32 @@ def list_available_teams(user_id):
     try:
         cursor.execute(
             """
-            SELECT t.id_team, t.team_name, COUNT(tm.user_id) AS member_count
+            SELECT t.id_team, t.team_name, COUNT(DISTINCT tm.user_id) AS member_count,
+                   tr.id_team_request
             FROM teams t
             LEFT JOIN team_members tm ON tm.team_id = t.id_team
+            LEFT JOIN team_requests tr ON tr.team_id = t.id_team
+                AND tr.sender_user_id = %s
+                AND tr.type = 'REQUEST'
+                AND tr.status = 'PENDING'
             WHERE t.id_team NOT IN (
                 SELECT team_id FROM team_members WHERE user_id = %s
             )
-            GROUP BY t.id_team, t.team_name
-            HAVING COUNT(tm.user_id) < 6
+            GROUP BY t.id_team, t.team_name, tr.id_team_request
+            HAVING COUNT(DISTINCT tm.user_id) < 6
             ORDER BY t.created_at DESC
             """,
-            (user_id,)
+            (user_id, user_id)
         )
         rows = cursor.fetchall()
         return [
-            {"id_team": id_team, "team_name": team_name, "member_count": member_count}
-            for id_team, team_name, member_count in rows
+            {
+                "id_team": id_team,
+                "team_name": team_name,
+                "member_count": member_count,
+                "pending_request_id": pending_request_id
+            }
+            for id_team, team_name, member_count, pending_request_id in rows
         ]
     finally:
         cursor.close()

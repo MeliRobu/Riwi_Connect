@@ -156,12 +156,24 @@ function renderEquiposTab() {
                         <div class="border border-gray-100 rounded-2xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all duration-300">
                             <span class="text-lg font-bold">${team.team_name}</span>
                             <span class="text-xs text-gray-400">${team.member_count} integrante(s)</span>
+                            ${team.pending_request_id ? `
+                            <div class="flex items-center justify-between mt-2">
+                                <span class="text-xs text-amber-500 font-semibold">Pendiente</span>
+                                <button
+                                    onclick="cancelRequest(${team.id_team}, ${team.pending_request_id})"
+                                    class=" cursor-pointer text-red-500 border border-red-200 font-semibold text-sm px-4 py-2 rounded-xl hover:bg-red-50 transition-all duration-200"
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                            ` : `
                             <button 
                                 onclick="requestToJoin(${team.id_team}, '${team.team_name.replace(/'/g, "\\'")}')"
                                 class=" cursor-pointer mt-2 border border-[#4B3FA8] text-[#4B3FA8] font-bold py-2 rounded-xl transition-all duration-300 hover:bg-[#4B3FA8] hover:text-white"
                             >
                                 Solicitar ingreso
                             </button>
+                            `}
                         </div>
                     `).join('')}
                 </div>
@@ -206,6 +218,9 @@ window.requestToJoin = async function(teamId, teamName) {
             return;
         }
         Swal.fire({ title: '¡Solicitud enviada!', text: `Solicitud enviada a ${teamName}`, icon: 'success', confirmButtonText: 'Aceptar', confirmButtonColor: '#4B3FA8' });
+        teamsLoaded = false;
+        myRequestsLoaded = false;
+        document.getElementById('tab-content').innerHTML = renderTabContent();
     } catch (error) {
         console.error(error);
         Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
@@ -265,6 +280,7 @@ window.cancelRequest = async function(teamId, requestId) {
             return;
         }
         myRequestsLoaded = false;
+        teamsLoaded = false;
         document.getElementById('tab-content').innerHTML = renderTabContent();
     } catch (error) {
         console.error(error);
