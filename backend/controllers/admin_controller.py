@@ -85,6 +85,19 @@ def update_question_status(question_id):
     except ValueError as validation_error:
         return jsonify({'error': str(validation_error)}), 400
 
+# HU: (vacío documental) — Eliminar Pregunta
+def delete_question(question_id):
+    """Handles DELETE /admin/questions/{question_id}"""
+    permission_error = check_admin_permissions()
+    if permission_error:
+        return permission_error
+    try:
+        result = admin_service.delete_question(question_id)
+        if result is None:
+            return jsonify({'error': 'Pregunta no encontrada'}), 404
+        return jsonify(result), 200
+    except ValueError as validation_error:
+        return jsonify({'error': str(validation_error)}), 400
 # HU: US-023 — Consultar Configuración del Assessment
 def get_assessment_configuration():
     #Handles GET /admin/assessment/configuration
