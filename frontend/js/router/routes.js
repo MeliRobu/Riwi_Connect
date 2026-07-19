@@ -43,33 +43,38 @@ export const routes = {
     isPrivate: true,
     setup: () => {},
     render: dashboard,
-    admin:false
+    admin:false,
+    studentOnly: true
   },
   "/teams" :{
     isPrivate: true,
     setup: () => {},
     render: teams_view,
     admin:false,
-    requiresAssessment: true
+    requiresAssessment: true,
+    studentOnly: true
   },
   "/profile" : {
     isPrivate: true,
     setup: () => {},
     render: smart_profile,
-    admin: false
+    admin: false,
+    studentOnly: true
   },
   "/assessment" : {
     isPrivate: true,
     setup: () => {},
     render: assessment,
     admin:false,
-    blockIfAssessmentCompleted: true
+    blockIfAssessmentCompleted: true,
+    studentOnly: true
   },
   "/assesment-result" : {
     isPrivate: true,
     setup: () => {},
     render: assessment_result,
-    admin : false
+    admin : false,
+    studentOnly: true
   },
   "/not-found" : {
     isPrivate: false,
@@ -106,6 +111,7 @@ export const routes = {
     setup: () => {},
     render: recommendations_view,
     admin: false,
-    requiresAssessment: true
+    requiresAssessment: true,
+    studentOnly: true
   }
 };
