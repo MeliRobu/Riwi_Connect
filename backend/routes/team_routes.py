@@ -20,6 +20,7 @@ from controllers.team_controller import get_sent_invitations_route
 from controllers.team_controller import get_received_invitations_route
 from controllers.team_controller import search_students_route
 from controllers.team_controller import search_teams_route
+from controllers.team_controller import get_team_detail_route
 from controllers.team_controller import get_my_team_route
 
 # HU: US-007 — Create Team (EP-002 - Team Management)
@@ -98,6 +99,9 @@ team_routes.add_url_rule(
 team_routes.add_url_rule("/teams/<int:team_id>",
 view_func=dissolve_team_route,
 methods=["DELETE"])
+team_routes.add_url_rule("/teams/<int:team_id>",
+view_func=get_team_detail_route,
+methods=["GET"])
 
 # HU: US-018 — Consultar Compatibilidad (Leader → Estudiantes)
 team_routes.add_url_rule("/teams/<int:team_id>/recommendations",

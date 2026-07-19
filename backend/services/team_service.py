@@ -1383,3 +1383,27 @@ def get_my_team_detail(user_id):
     finally:
         cursor.close()
         conn.close()
+
+
+# HU: (vacío documental) — Perfil público de cualquier equipo (para la
+# tarjeta de vista previa antes de solicitar ingreso desde el buscador).
+def get_team_public_detail(team_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT team_name FROM teams WHERE id_team = %s", (team_id,))
+        row = cursor.fetchone()
+        if row is None:
+            return None
+        team_name = row[0]
+
+        analysis = _get_team_analysis(cursor, team_id)
+        return {
+            "team_id": team_id,
+            "team_name": team_name,
+            "member_count": len(analysis["members"]),
+            **analysis,
+        }
+    finally:
+        cursor.close()
+        conn.close()

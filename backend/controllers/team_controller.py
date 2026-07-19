@@ -22,6 +22,7 @@ from services.team_service import list_sent_invitations
 from services.team_service import list_received_invitations
 from services.team_service import search_students_to_invite
 from services.team_service import search_teams_by_name
+from services.team_service import get_team_public_detail
 from services.team_service import get_my_team_detail
 
 # HU: US-007 — Create Team (EP-002 - Team Management)
@@ -173,6 +174,15 @@ def dissolve_team_route(team_id):
         return {"error": "Unauthorized"}, 401
     result, status_code = dissolve_team(session["user_id"], team_id)
     return result, status_code
+
+# HU: (vacío documental) — Consultar perfil público de un equipo
+def get_team_detail_route(team_id):
+    if "user_id" not in session:
+        return {"error": "Unauthorized"}, 401
+    team = get_team_public_detail(team_id)
+    if team is None:
+        return {"error": "Team not found"}, 404
+    return team, 200
 
 # HU: US-018 — Consultar Compatibilidad (Leader → Estudiantes)
 def get_recommendations_route(team_id):
