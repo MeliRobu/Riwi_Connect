@@ -17,6 +17,7 @@ from controllers.team_controller import get_received_requests_route
 from controllers.team_controller import get_sent_invitations_route
 from controllers.team_controller import get_received_invitations_route
 from controllers.team_controller import search_students_route
+from controllers.team_controller import get_my_team_route
 
 # HU: US-007 — Create Team (EP-002 - Team Management)
 team_routes = Blueprint('team_routes', __name__)
@@ -116,4 +117,9 @@ methods=["GET"])
 # HU: (vacío documental) — Buscar Estudiantes para Invitar
 team_routes.add_url_rule("/teams/students/search",
 view_func=search_students_route,
+methods=["GET"])
+
+# HU: (vacío documental) — Consultar Mi Equipo
+team_routes.add_url_rule("/users/team",
+view_func=get_my_team_route,
 methods=["GET"])

@@ -19,6 +19,7 @@ from services.team_service import list_received_requests
 from services.team_service import list_sent_invitations
 from services.team_service import list_received_invitations
 from services.team_service import search_students_to_invite
+from services.team_service import get_my_team_detail
 
 # HU: US-007 — Create Team (EP-002 - Team Management)
 def create():
@@ -176,7 +177,7 @@ def list_teams_route():
     assessment = get_assessment_by_user(session["user_id"])
     if assessment is None or assessment[1] is None:
         return {"error": "Assessment not completed"}, 403
-    return list_available_teams(), 200
+    return list_available_teams(session["user_id"]), 200
 
 # HU: (vacío documental) — Consultar Mis Solicitudes Enviadas
 def get_my_requests_route():
@@ -211,3 +212,12 @@ def search_students_route():
     if len(query) < 2:
         return {"error": "Escribe al menos 2 caracteres para buscar"}, 400
     return search_students_to_invite(session["user_id"], query), 200
+
+# HU: (vacío documental) — Consultar Mi Equipo
+def get_my_team_route():
+    if "user_id" not in session:
+        return {"error": "Unauthorized"}, 401
+    team = get_my_team_detail(session["user_id"])
+    if team is None:
+        return {"error": "No perteneces a ningún equipo"}, 404
+    return team, 200

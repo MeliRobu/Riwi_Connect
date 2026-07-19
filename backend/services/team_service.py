@@ -897,7 +897,7 @@ def dissolve_team(user_id, team_id):
         cursor.close()
         conn.close()
 # HU: (vacío documental) — Consultar Equipos Disponibles (DT-007 8.3, GI-004 Fase 9)
-def list_available_teams():
+def list_available_teams(user_id):
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -906,10 +906,14 @@ def list_available_teams():
             SELECT t.id_team, t.team_name, COUNT(tm.user_id) AS member_count
             FROM teams t
             LEFT JOIN team_members tm ON tm.team_id = t.id_team
+            WHERE t.id_team NOT IN (
+                SELECT team_id FROM team_members WHERE user_id = %s
+            )
             GROUP BY t.id_team, t.team_name
             HAVING COUNT(tm.user_id) < 6
             ORDER BY t.created_at DESC
-            """
+            """,
+            (user_id,)
         )
         rows = cursor.fetchall()
         return [
@@ -994,6 +998,10 @@ def list_sent_invitations(user_id):
         team_id = row[0]
         cursor.execute(
             """
+            SELECT tr.id_team_request, s.full_name, tr.status, tr.receiver_user_id
+            FROM team_requests tr
+            JOIN users u ON tr.receiver_user_id = u.id_user
+            JOIN institutional_sources s ON u.id_institutional_source = s.id_institutional_source
             WHERE tr.team_id = %s AND tr.type = 'INVITATION' AND tr.status = 'PENDING'
             ORDER BY tr.id_team_request DESC
             """,
@@ -1001,7 +1009,7 @@ def list_sent_invitations(user_id):
         )
         rows = cursor.fetchall()
         return [
-            {"id_team_request": r[0], "full_name": r[1], "status": r[2], "team_id": team_id}
+            {"id_team_request": r[0], "full_name": r[1], "status": r[2], "team_id": team_id, "receiver_user_id": r[3]}
             for r in rows
         ]
     finally:
@@ -1075,6 +1083,174 @@ def search_students_to_invite(user_id, query):
         )
         rows = cursor.fetchall()
         return [{"user_id": r[0], "full_name": r[1]} for r in rows]
+    finally:
+        cursor.close()
+        conn.close()
+
+# HU: (vacío documental) — Consultar Mi Equipo
+def get_my_team_detail(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "SELECT team_id FROM team_members WHERE user_id = %s",
+            (user_id,)
+        )
+        row = cursor.fetchone()
+        if row is None:
+            return None
+        team_id = row[0]
+
+        cursor.execute("SELECT team_name FROM teams WHERE id_team = %s", (team_id,))
+        team_name = cursor.fetchone()[0]
+
+        cursor.execute(
+            """
+            SELECT tm.user_id, s.full_name, tm.is_leader
+            FROM team_members tm
+            JOIN users u ON tm.user_id = u.id_user
+            JOIN institutional_sources s ON u.id_institutional_source = s.id_institutional_source
+            WHERE tm.team_id = %s
+            ORDER BY tm.is_leader DESC, s.full_name
+            """,
+            (team_id,)
+        )
+        members = [
+            {"user_id": r[0], "full_name": r[1], "is_leader": r[2]}
+            for r in cursor.fetchall()
+        ]
+
+
+        # Analisis tecnico del equipo (DT-009 seccion 8-9, GP-000 seccion 7:
+
+
+        # "Analizar fortalezas del equipo" / "Analizar debilidades del equipo").
+
+
+        # Se recalcula en cada consulta, asi que se actualiza solo con cada
+
+
+        # cambio real de integrantes -- no se guarda ningun valor cacheado.
+
+
+        cursor.execute(
+
+
+            """
+
+
+            SELECT ar.python_score, ar.sql_score, ar.javascript_score,
+
+
+                   ar.html_score, ar.css_score
+
+
+            FROM team_members tm
+
+
+            JOIN assessments a ON a.user_id = tm.user_id
+
+
+            JOIN assessment_results ar ON ar.assessment_id = a.id_assessment
+
+
+            WHERE tm.team_id = %s
+
+
+            """,
+
+
+            (team_id,)
+
+
+        )
+
+
+        score_rows = cursor.fetchall()
+
+
+        
+
+
+        tech_keys = ["python", "sql", "javascript", "html", "css"]
+
+
+        tech_labels = {"python": "Python", "sql": "SQL", "javascript": "JavaScript", "html": "HTML", "css": "CSS"}
+
+
+        averages = {}
+
+
+        strengths = []
+
+
+        weaknesses = []
+
+
+        interpretation = None
+
+
+        
+
+
+        if score_rows:
+
+
+            for i, key in enumerate(tech_keys):
+
+
+                averages[key] = round(sum(float(r[i]) for r in score_rows) / len(score_rows), 1)
+
+
+            sorted_techs = sorted(averages.items(), key=lambda x: x[1], reverse=True)
+
+
+            strengths = [tech_labels[t] for t, _ in sorted_techs[:2]]
+
+
+            weaknesses = [tech_labels[t] for t, _ in sorted_techs[-2:]]
+
+
+            interpretation = (
+
+
+                f"El equipo tiene un desempeño sólido en {' y '.join(strengths)}, "
+
+
+                f"y podría fortalecer {' y '.join(weaknesses)} para lograr un perfil más equilibrado."
+
+
+            )
+
+
+        
+
+
+        return {
+
+
+            "team_id": team_id,
+
+
+            "team_name": team_name,
+
+
+            "members": members,
+
+
+            "tech_averages": {tech_labels[k]: v for k, v in averages.items()},
+
+
+            "strengths": strengths,
+
+
+            "weaknesses": weaknesses,
+
+
+            "interpretation": interpretation,
+
+
+        }
     finally:
         cursor.close()
         conn.close()

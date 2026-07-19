@@ -81,7 +81,7 @@ export function teams_view() {
 function renderTabsNav() {
     const isLeader = currentUser && currentUser.is_leader;
     return `
-    <div id="tabs-nav" class="flex gap-2 border-b border-gray-200 overflow-x-auto pb-px">
+    <div id="tabs-nav" class="flex gap-2 border-b border-gray-200 overflow-x-auto pb-px min-h-12">
         ${renderTabButton('equipos', 'Equipos')}
         ${renderTabButton('mis-solicitudes', 'Mis solicitudes')}
         ${isLeader ? renderTabButton('solicitudes-recibidas', 'Solicitudes recibidas') : ''}
@@ -387,14 +387,20 @@ function renderInvitacionesTab() {
             <div class="flex flex-col gap-4">
                 <span class="text-lg font-bold">Enviar invitación</span>
                 ${card({
-                    className: 'p-6 flex flex-col md:flex-row gap-3',
+                    className: 'p-6 flex flex-col gap-3',
                     width: 'w-full',
                     content: `
-                        <div class="relative flex-1">
-                            <input id="invite-search" type="text" placeholder="Buscar estudiante por nombre..." autocomplete="off"
-                                oninput="handleInviteSearch()"
-                                class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#4B3FA8]">
-                            <div id="invite-search-results" class="absolute z-10 bg-white border border-gray-200 rounded-xl mt-1 w-full shadow-lg hidden"></div>
+                        <div class="flex flex-col md:flex-row gap-3">
+                            <div class="relative flex-1">
+                                <input id="invite-search" type="text" placeholder="Buscar estudiante por nombre..." autocomplete="off"
+                                    oninput="handleInviteSearch()"
+                                    class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#4B3FA8]">
+                                <div id="invite-search-results" class="absolute z-10 bg-white border border-gray-200 rounded-xl mt-1 w-full shadow-lg hidden"></div>
+                            </div>
+                            <button onclick="sendInvitation()" 
+                                class=" cursor-pointer bg-[#4B3FA8] text-white font-bold px-6 py-2.5 rounded-xl transition-all duration-300 hover:bg-pink-600">
+                                Enviar invitación
+                            </button>
                         </div>
                     `
                 })}
@@ -544,21 +550,168 @@ window.rejectInvitation = async function(teamId, requestId) {
 };
 
 // ===== TAB: MI EQUIPO (todavía pendiente) =====
-function renderMiEquipoTab() {
-    return emptyState('Esta pestaña todavía está en construcción (pendiente conectar con el Backend).');
+let myTeamData = null;
+let myTeamLoaded = false;
+
+async function loadMyTeam() {
+    try {
+        const response = await fetch('/users/team');
+        myTeamData = response.ok ? await response.json() : null;
+    } catch (error) {
+        console.error('Error cargando mi equipo:', error);
+        myTeamData = null;
+    }
+    myTeamLoaded = true;
 }
-window.expelMember = function(memberId) {};
-window.transferLeadership = function(memberId) {};
-window.dissolveTeam = async () => {};
+
+function renderMiEquipoTab() {
+    if (!myTeamLoaded) {
+        loadMyTeam().then(() => {
+            if (activeTab === 'mi-equipo') document.getElementById('tab-content').innerHTML = renderTabContent();
+        });
+        return emptyState('Cargando tu equipo...');
+    }
+    if (!myTeamData) {
+        return emptyState('No perteneces a ningún equipo actualmente.');
+    }
+    return `
+        <div class="flex flex-col gap-6 pt-4">
+            ${card({
+                className: 'p-6 flex flex-col gap-4',
+                width: 'w-full',
+                content: `
+                    <span class="text-xl font-bold">${myTeamData.team_name}</span>
+                    <div class="flex flex-col gap-2 mt-2">
+                        <span class="text-sm font-semibold text-gray-600">Integrantes</span>
+                        ${myTeamData.members.map(member => `
+                            <div class="flex items-center justify-between border border-gray-100 rounded-xl px-4 py-2.5">
+                                <span class="p-1 text-sm font-medium">${member.full_name}${member.is_leader ? ' (Líder)' : ''}</span>
+                                ${(currentUser.is_leader && !member.is_leader) ? `
+                                    <div class="flex gap-2">
+                                        <button onclick="transferLeadership(${member.user_id})" 
+                                            class=" cursor-pointer text-xs font-semibold text-[#4B3FA8] hover:underline">
+                                            Transferir liderazgo
+                                        </button>
+                                        <button onclick="expelMember(${member.user_id})" 
+                                            class="cursor-pointer text-xs font-semibold text-red-500 hover:underline">
+                                            Expulsar
+                                        </button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${myTeamData.interpretation ? `
+                    <div class="flex flex-col gap-3 mt-4 pt-4 border-t border-gray-100">
+                        <span class="text-sm font-semibold text-gray-600">Análisis técnico del equipo</span>
+                        <div class="flex flex-wrap gap-2">
+                            ${Object.entries(myTeamData.tech_averages).map(([tech, avg]) => `
+                                <span class="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">${tech}: ${avg}%</span>
+                            `).join('')}
+                        </div>
+                        <p class="text-sm text-gray-600 leading-relaxed">${myTeamData.interpretation}</p>
+                    </div>
+                    ` : ''}
+                                        ${currentUser.is_leader ? `
+                    <button onclick="dissolveTeam()" 
+                        class=" px-4 cursor-pointer mt-4 bg-pink-500 text-white font-bold py-2.5 rounded-xl hover:bg-pink-700 transition-all duration-200">
+                        Disolver equipo
+                    </button>
+                    ` : ''}
+                `
+            })}
+        </div>
+    `;
+}
+
+window.expelMember = async function(memberId) {
+    const result = await Swal.fire({
+        title: '¿Estás seguro?', text: '¿Seguro que quieres expulsar a este integrante?', icon: 'warning',
+        showCancelButton: true, confirmButtonColor: '#4B3FA8', cancelButtonColor: '#F63E9F',
+        confirmButtonText: 'Sí, expulsar', cancelButtonText: 'Cancelar'
+    });
+    if (!result.isConfirmed) return;
+    try {
+        const response = await fetch(`/teams/${myTeamData.team_id}/members/${memberId}`, { method: 'DELETE' });
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({ title: 'No se pudo expulsar', text: data.message || data.error || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+            return;
+        }
+        myTeamLoaded = false;
+        document.getElementById('tab-content').innerHTML = renderTabContent();
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+    }
+};
+
+window.transferLeadership = async function(memberId) {
+    const result = await Swal.fire({
+        title: '¿Estás seguro?', text: '¿Seguro que quieres transferir el liderazgo a este integrante? Perderás tus permisos de líder.', icon: 'warning',
+        showCancelButton: true, confirmButtonColor: '#4B3FA8', cancelButtonColor: '#F63E9F',
+        confirmButtonText: 'Sí, transferir', cancelButtonText: 'Cancelar'
+    });
+    if (!result.isConfirmed) return;
+    try {
+        const response = await fetch(`/teams/${myTeamData.team_id}/leader`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ new_leader_id: memberId })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({ title: 'No se pudo transferir', text: data.message || data.error || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+            return;
+        }
+        currentUser = await loadProfile();
+        myTeamLoaded = false;
+        const tabsNav = document.getElementById('tabs-nav');
+        if (tabsNav) tabsNav.outerHTML = renderTabsNav();
+        document.getElementById('tab-content').innerHTML = renderTabContent();
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+    }
+};
+
+window.dissolveTeam = async function() {
+    const result = await Swal.fire({
+        title: '¿Estás seguro?', text: 'Esta acción es irreversible. ¿Seguro que quieres disolver el equipo?', icon: 'warning',
+        showCancelButton: true, confirmButtonColor: '#4B3FA8', cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, disolver', cancelButtonText: 'Cancelar'
+    });
+    if (!result.isConfirmed) return;
+    try {
+        const response = await fetch(`/teams/${myTeamData.team_id}`, { method: 'DELETE' });
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({ title: 'No se pudo disolver', text: data.message || data.error || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+            return;
+        }
+        Swal.fire({ title: 'Equipo disuelto', text: 'El equipo ha sido eliminado correctamente.', icon: 'success', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+        await initTeamsPage();
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
+    }
+};
 
 // ===== TAB: RECOMENDACIONES =====
+let invitedUserIds = new Set();
+
 async function loadRecommendations() {
     if (!currentUser?.team_id) { recommendationsLoaded = true; return; }
     try {
-        const response = await fetch(`/teams/${currentUser.team_id}/recommendations`);
-        if (!response.ok) { recommendationsData = []; recommendationsLoaded = true; return; }
-        const data = await response.json();
-        recommendationsData = data.recommendations || [];
+        const [recRes, invRes] = await Promise.all([
+            fetch(`/teams/${currentUser.team_id}/recommendations`),
+            fetch('/teams/invitations/sent')
+        ]);
+        recommendationsData = recRes.ok ? (await recRes.json()).recommendations || [] : [];
+        if (invRes.ok) {
+            const invitations = await invRes.json();
+            invitedUserIds = new Set(invitations.map(inv => inv.receiver_user_id));
+        }
         recommendationsLoaded = true;
     } catch (error) {
         console.error('Error cargando recomendaciones:', error);
@@ -582,12 +735,26 @@ function renderRecomendacionesTab() {
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 ${recommendationsData.map(rec => `
                     <div class="border border-gray-100 rounded-2xl p-5 flex flex-col gap-2 shadow-sm hover:shadow-md transition-all duration-300">
+                        <img src="/${rec.profile_image}" alt="${rec.full_name}" class="w-14 h-14 rounded-full object-cover border-2 border-[#4B3FA8]">
                         <span class="font-bold">${rec.full_name}</span>
                         <span class="text-sm font-semibold text-[#4B3FA8]">${rec.compatibility}% de compatibilidad</span>
+                        <div class="flex flex-wrap gap-2 mt-1">
+                            ${(rec.strengthens || []).map(tech => `
+                                <span class="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">${tech}</span>
+                            `).join('')}
+                        </div>
+                        <p class="text-xs text-gray-500 leading-relaxed mt-1">${rec.justification || ''}</p>
+                        ${invitedUserIds.has(rec.user_id) ? `
+                        <button disabled
+                            class="mt-2 border border-gray-200 text-gray-400 font-bold py-2 rounded-xl cursor-not-allowed">
+                            Invitación pendiente
+                        </button>
+                        ` : `
                         <button onclick="sendInvitationTo(${rec.user_id}, '${rec.full_name.replace(/'/g, "\\'")}')" 
                             class=" cursor-pointer mt-2 border border-[#4B3FA8] text-[#4B3FA8] font-bold py-2 rounded-xl hover:bg-[#4B3FA8] hover:text-white transition-all duration-300">
                             Invitar al equipo
                         </button>
+                        `}
                     </div>
                 `).join('')}
             </div>

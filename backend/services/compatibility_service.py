@@ -117,7 +117,7 @@ def get_student_recommendations(user_id, team_id):
         # Available candidates in the same Campus/Journey as the team
         cursor.execute(
             """
-            SELECT u.id_user, s.full_name, s.id_clan,
+            SELECT u.id_user, s.full_name, s.id_clan, u.profile_image,
                    ar.overall_score, ar.python_score, ar.sql_score,
                    ar.javascript_score, ar.html_score, ar.css_score
             FROM users u
@@ -134,7 +134,7 @@ def get_student_recommendations(user_id, team_id):
         candidates = cursor.fetchall()
 
         recommendations = []
-        for cand_id, full_name, clan, overall, python_s, sql_s, js_s, html_s, css_s in candidates:
+        for cand_id, full_name, clan, profile_image, overall, python_s, sql_s, js_s, html_s, css_s in candidates:
             if clan in full_clans:
                 continue  # RN-047: this Clan is already at its limit in the team
 
@@ -148,15 +148,27 @@ def get_student_recommendations(user_id, team_id):
             }
 
             if weights is None:
-                factor_1, compatibility = 0, overall
+                factor_1, compatibility, top_techs = 0, overall, []
             else:
                 result = _four_factor_score(scores, weights)
                 factor_1, compatibility = result["factor_1"], result["compatibility"]
+                top_techs = _top_weak_techs(weights)
+
+            if top_techs:
+                justification = (
+                    f"Este candidato fortalece principalmente {' y '.join(top_techs)}, "
+                    f"tecnologías donde tu equipo presenta el menor rendimiento."
+                )
+            else:
+                justification = "Recomendado según su puntaje general, ya que el equipo aún no tiene integrantes."
 
             recommendations.append({
                 "user_id": cand_id,
+                "profile_image": profile_image,
                 "full_name": full_name,
                 "compatibility": compatibility,
+                "strengthens": top_techs,
+                "justification": justification,
                 "_factor_1": factor_1,   # used only to break ties below, then removed
                 "_factor_2": overall,
             })
