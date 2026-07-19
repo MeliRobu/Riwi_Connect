@@ -47,6 +47,13 @@ async function loadTeams() {
 }
 
 async function initTeamsPage() {
+    // Se resetean las banderas de "ya cargado" de todo lo que depende del
+    // equipo actual del usuario, para evitar mostrar datos de un equipo
+    // anterior (por ejemplo, tras crear un equipo nuevo justo despues de
+    // haber disuelto uno viejo, "Mi equipo" seguia mostrando el team_id
+    // del equipo ya eliminado, y "Disolver equipo" fallaba con 404).
+    myTeamLoaded = false;
+    recommendationsLoaded = false;
     currentUser = await loadProfile();
     await loadTeams();
     const tabsNav = document.getElementById('tabs-nav');

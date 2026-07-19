@@ -996,6 +996,16 @@ def list_available_teams(user_id):
     conn = get_connection()
     cursor = conn.cursor()
     try:
+        # Un estudiante que ya pertenece a un equipo no puede solicitar
+        # ingreso a otro (solo puede estar en uno a la vez), asi que no
+        # tiene sentido mostrarle "Equipos disponibles" para solicitar.
+        cursor.execute(
+            "SELECT 1 FROM team_members WHERE user_id = %s",
+            (user_id,)
+        )
+        if cursor.fetchone() is not None:
+            return []
+
         # Campus/Journey del estudiante que consulta -- se usan para limitar
         # la lista a equipos del mismo Campus y Journey (regla de negocio
         # ajustada por el equipo del proyecto: ver decision registrada en
