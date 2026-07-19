@@ -828,6 +828,12 @@ function renderRecomendacionesTab() {
     return `
         <div class="flex flex-col gap-4 pt-4">
             <span class="text-lg font-bold">Recomendaciones de estudiantes para tu equipo</span>
+            <div class="relative">
+                <input id="coder-search" type="text" placeholder="Buscar coder por nombre..." autocomplete="off"
+                    oninput="handleCoderSearch()"
+                    class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#4B3FA8]">
+                <div id="coder-search-results" class="absolute z-10 bg-white border border-gray-200 rounded-xl mt-1 w-full shadow-lg hidden"></div>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 ${recommendationsData.map(rec => `
                     <div class="border border-gray-100 rounded-2xl p-5 flex flex-col gap-2 shadow-sm hover:shadow-md transition-all duration-300">
@@ -878,6 +884,38 @@ window.sendInvitationTo = async function(userId, name) {
         console.error(error);
         Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Entendido', confirmButtonColor: '#4B3FA8' });
     }
+};
+
+let coderSearchTimeout;
+window.handleCoderSearch = function() {
+    const input = document.getElementById('coder-search');
+    const resultsBox = document.getElementById('coder-search-results');
+    const query = input.value.trim();
+    clearTimeout(coderSearchTimeout);
+    if (query.length < 2) {
+        resultsBox.classList.add('hidden');
+        resultsBox.innerHTML = '';
+        return;
+    }
+    coderSearchTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch(`/teams/students/search?q=${encodeURIComponent(query)}`);
+            const students = response.ok ? await response.json() : [];
+            if (students.length === 0) {
+                resultsBox.innerHTML = `<div class="px-4 py-2.5 text-sm text-gray-400">Sin resultados</div>`;
+            } else {
+                resultsBox.innerHTML = students.map(s => `
+                    <div onclick="sendInvitationTo(${s.user_id}, '${s.full_name.replace(/'/g, "\\'")}')"
+                        class="px-4 py-2.5 text-sm cursor-pointer hover:bg-[#F3F1FA]">
+                        ${s.full_name}
+                    </div>
+                `).join('');
+            }
+            resultsBox.classList.remove('hidden');
+        } catch (error) {
+            console.error(error);
+        }
+    }, 300);
 };
 
 window.showMemberProfile = async function(userId) {

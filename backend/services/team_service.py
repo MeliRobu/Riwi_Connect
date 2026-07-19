@@ -1241,6 +1241,61 @@ def search_students_to_invite(user_id, query):
         cursor.close()
         conn.close()
 
+
+# HU: (vacío documental) — Buscar equipos disponibles por nombre, restringido
+# al mismo Campus y Journey del estudiante (misma regla que list_available_teams).
+def search_teams_by_name(user_id, query):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            SELECT s.id_campus, s.id_journey
+            FROM users u
+            JOIN institutional_sources s ON u.id_institutional_source = s.id_institutional_source
+            WHERE u.id_user = %s
+            """,
+            (user_id,)
+        )
+        row = cursor.fetchone()
+        if row is None:
+            return []
+        student_campus, student_journey = row
+
+        cursor.execute(
+            """
+            SELECT t.id_team, t.team_name, COUNT(DISTINCT tm.user_id) AS member_count
+            FROM teams t
+            LEFT JOIN team_members tm ON tm.team_id = t.id_team
+            WHERE t.id_team NOT IN (
+                SELECT team_id FROM team_members WHERE user_id = %s
+            )
+            AND t.team_name ILIKE %s
+            AND EXISTS (
+                SELECT 1
+                FROM team_members tm2
+                JOIN users u2 ON tm2.user_id = u2.id_user
+                JOIN institutional_sources s2 ON u2.id_institutional_source = s2.id_institutional_source
+                WHERE tm2.team_id = t.id_team
+                  AND s2.id_campus = %s
+                  AND s2.id_journey = %s
+            )
+            GROUP BY t.id_team, t.team_name
+            HAVING COUNT(DISTINCT tm.user_id) < 6
+            LIMIT 10
+            """,
+            (user_id, f"%{query}%", student_campus, student_journey)
+        )
+        rows = cursor.fetchall()
+        return [
+            {"id_team": id_team, "team_name": team_name, "member_count": member_count}
+            for id_team, team_name, member_count in rows
+        ]
+    finally:
+        cursor.close()
+        conn.close()
+
+
 # HU: (vacío documental) — Consultar Mi Equipo
 # HU: (vacío documental) — Análisis técnico reusable de un equipo (fortalezas,
 # debilidades, interpretación e integrantes). Extraído de get_my_team_detail
