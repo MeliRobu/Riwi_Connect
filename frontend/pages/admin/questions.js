@@ -32,7 +32,7 @@ export function question_bank() {
             <span class="text-gray-500 text-sm">Crea, edita, activa o desactiva preguntas, y configura las pruebas técnicas</span>
         </div>
 
-        <div id="tabs-nav" class="flex gap-2 border-b border-gray-200 overflow-x-auto pb-px">
+        <div id="tabs-nav" class="flex gap-2 border-b border-gray-200 overflow-x-auto pb-px min-h-12">
             ${renderTabButton("banco", "Banco de preguntas")}
             ${renderTabButton("config", "Configuración del Assessment")}
         </div>
@@ -64,7 +64,7 @@ window.switchQBTab = function (tabId) {
     activeTab = tabId;
     editingQuestionId = null;
     document.getElementById("tabs-nav").outerHTML = `
-        <div id="tabs-nav" class="flex gap-2 border-b border-gray-200 overflow-x-auto pb-px">
+        <div id="tabs-nav" class="flex gap-2 border-b border-gray-200 overflow-x-auto pb-px min-h-12">
             ${renderTabButton("banco", "Banco de preguntas")}
             ${renderTabButton("config", "Configuración del Assessment")}
         </div>
