@@ -402,12 +402,25 @@ def calculate_statistics():
         # Create a cursor to run SQL commands
         stats_sql = connection.cursor()
 
-        # 1. Total people authorized to register (whitelist)
-        stats_sql.execute("SELECT COUNT(*) FROM institutional_sources")
+        # HU: (vacío documental) — Esta estadística mide el progreso de registro
+        # de la cohorte de ESTUDIANTES específicamente, por lo que se excluyen los
+        # ADMINISTRATOR (aunque RN-042/DT-003 los incluyen en InstitutionalSource
+        # por diseño, aquí se filtran a propósito por preferencia del usuario).
+
+        # 1. Total de estudiantes autorizados a registrarse (whitelist).
+        # Un registro de institutional_sources sin user asociado siempre es un
+        # estudiante pendiente (los administradores nunca quedan sin registrar,
+        # ver DT-003: se crean directamente en la base de datos ya completos).
+        stats_sql.execute("""
+            SELECT COUNT(*)
+            FROM institutional_sources isrc
+            LEFT JOIN users u ON u.id_institutional_source = isrc.id_institutional_source
+            WHERE u.id_user IS NULL OR u.role = 'STUDENT'
+        """)
         total_authorized = stats_sql.fetchone()[0]
 
-        # 2. Total people who actually registered
-        stats_sql.execute("SELECT COUNT(*) FROM users")
+        # 2. Total de estudiantes que ya se registraron (excluye ADMINISTRATOR)
+        stats_sql.execute("SELECT COUNT(*) FROM users WHERE role = 'STUDENT'")
         total_registered = stats_sql.fetchone()[0]
 
         # 3. Authorized people who have NOT registered yet.

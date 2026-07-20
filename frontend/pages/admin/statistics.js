@@ -1,26 +1,9 @@
 import { card } from "../../components/card";
 import { progressBar } from "../../components/progress_bar";
 
-const statsData = {
-    registrationComparison: {
-        institutionalSource: 245,
-        registeredUsers: 198
-    },
-    authorizedNotRegistered: 47,
-    statusDistribution: {
-        available: 62,
-        inTeam: 136
-    },
-    totalTeams: 41,
-    techAverages: [
-        { name: 'JavaScript', average: 84 },
-        { name: 'HTML & CSS', average: 88 },
-        { name: 'Node.js', average: 71 },
-        { name: 'SQL', average: 76 },
-        { name: 'React', average: 79 },
-        { name: 'Git & GitHub', average: 91 }
-    ]
-};
+// Orden fijo del sistema (igual que en Question Bank): Python, HTML, CSS, JavaScript, SQL
+const techOrder = ['python', 'html', 'css', 'javascript', 'sql'];
+const techLabels = { python: 'Python', html: 'HTML', css: 'CSS', javascript: 'JavaScript', sql: 'SQL' };
 
 export function statistics_view() {
     setTimeout(() => loadStatistics(), 0);
@@ -48,33 +31,67 @@ function renderLoadingState() {
     `;
 }
 
-// Simula el delay de una petición real
-function loadStatistics() {
+// CARGA DE DATOS REALES
+async function loadStatistics() {
     const container = document.getElementById('stats-content');
     if (!container) return;
 
-    setTimeout(() => {
-        try {
-            container.innerHTML = renderStatistics(statsData);
-        } catch (error) {
-            console.error(error);
-            container.innerHTML = renderErrorState();
+    try {
+        const response = await fetch('/admin/statistics');
+        if (!response.ok) throw new Error('Respuesta no exitosa del servidor');
+        const raw = await response.json();
+        container.innerHTML = renderStatistics(mapStatisticsData(raw));
+    } catch (error) {
+        console.error(error);
+        container.innerHTML = renderErrorState();
+    }
+}
+
+// Convierte la forma real del backend (GET /admin/statistics) a la forma
+// que espera renderStatistics(), manteniendo el orden fijo de tecnologías.
+function mapStatisticsData(raw) {
+    const techAverages = techOrder.map(key => ({
+        name: techLabels[key],
+        average: Math.round(raw.averages_by_technology[key])
+    }));
+
+    return {
+        registrationComparison: {
+            institutionalSource: raw.total_authorized,
+            registeredUsers: raw.total_registered
+        },
+        authorizedNotRegistered: raw.not_registered_yet,
+        statusDistribution: {
+            available: raw.status_distribution.AVAILABLE,
+            inTeam: raw.status_distribution.IN_TEAM
+        },
+        totalTeams: raw.total_teams,
+        techAverages: techAverages,
+        highestTech: {
+            name: techLabels[raw.highest_average_technology],
+            average: Math.round(raw.averages_by_technology[raw.highest_average_technology])
+        },
+        lowestTech: {
+            name: techLabels[raw.lowest_average_technology],
+            average: Math.round(raw.averages_by_technology[raw.lowest_average_technology])
         }
-    }, 500);
+    };
 }
 
 function renderStatistics(data) {
     const { institutionalSource, registeredUsers } = data.registrationComparison;
-    const registrationRate = Math.round((registeredUsers / institutionalSource) * 100);
+    const registrationRate = institutionalSource > 0
+        ? Math.round((registeredUsers / institutionalSource) * 100)
+        : 0;
 
     const { available, inTeam } = data.statusDistribution;
     const totalStudents = available + inTeam;
-    const availablePercent = Math.round((available / totalStudents) * 100);
+    const availablePercent = totalStudents > 0 ? Math.round((available / totalStudents) * 100) : 0;
     const inTeamPercent = 100 - availablePercent;
 
-    const sortedTech = [...data.techAverages].sort((a, b) => b.average - a.average);
-    const highestTech = sortedTech[0];
-    const lowestTech = sortedTech[sortedTech.length - 1];
+    const techAverages = data.techAverages;
+    const highestTech = data.highestTech;
+    const lowestTech = data.lowestTech;
 
     return `
         <div class="flex flex-col gap-6 pt-4">
@@ -181,7 +198,7 @@ function renderStatistics(data) {
                         <span class="text-xs text-gray-400 -mt-2">Toda la cohorte</span>
                     </span>
                         <div class="flex flex-col gap-3 mt-2">
-                            ${sortedTech.map(tech => `
+                            ${techAverages.map(tech => `
                                 <div class="flex flex-col gap-1">
                                     <div class="flex justify-between text-sm">
                                         <span class="font-semibold text-gray-600">${tech.name}</span>
