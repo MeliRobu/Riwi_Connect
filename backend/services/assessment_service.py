@@ -247,7 +247,7 @@ def generate_smart_profile(assessment_id):
 
         url = (
             "https://generativelanguage.googleapis.com/v1beta/models/"
-            f"gemini-flash-lite-latest:generateContent?key={GEMINI_API_KEY}"
+            f"gemini-3.1-flash-lite:generateContent?key={GEMINI_API_KEY}"
         )
 
         try:
