@@ -93,6 +93,12 @@ def create_question(data):
         # Create a cursor to run SQL commands
         insert_question_sql = connection.cursor()
 
+        # HU: (vacío documental) — Límite máximo de 500 preguntas en el banco
+        insert_question_sql.execute("SELECT COUNT(*) FROM questions")
+        total_questions = insert_question_sql.fetchone()[0]
+        if total_questions >= 500:
+            raise ValueError("El banco de preguntas alcanzó el límite máximo de 500 preguntas")
+
         insert_question_sql.execute("""
             INSERT INTO questions (statement, category, difficulty_level, status)
             VALUES (%s, %s, %s, 'ACTIVE')

@@ -215,9 +215,9 @@ function renderQuestionBankTab() {
 
                             ${renderAnswerOptionsInputs("new-question")}
 
-                            <button onclick="createQuestion()"
-                                class="w-40 cursor-pointer bg-[#4B3FA8] text-white font-bold py-2.5 rounded-xl transition-all duration-300 hover:bg-pink-600 hover:scale-[1.02] active:scale-95">
-                                Crear pregunta
+                            <button onclick="createQuestion()" ${questions.length >= 500 ? "disabled" : ""}
+                                class="w-40 font-bold py-2.5 rounded-xl transition-all duration-300 ${questions.length >= 500 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'cursor-pointer bg-[#4B3FA8] text-white hover:bg-pink-600 hover:scale-[1.02] active:scale-95'}">
+                                ${questions.length >= 500 ? "Límite alcanzado" : "Crear pregunta"}
                             </button>
                         </div>
                     </details>
@@ -227,7 +227,7 @@ function renderQuestionBankTab() {
             <div class="flex flex-col gap-4">
                 <div class="flex items-center justify-between">
                     <span class="text-lg font-bold">Preguntas registradas</span>
-                    <span class="text-sm text-gray-400">${questions.length} en total</span>
+                    <span class="text-sm text-gray-400">${questions.length} / 500 en total</span>
                 </div>
 
                 <div class="flex flex-col gap-3 max-h-[600px] overflow-y-auto pr-1">
