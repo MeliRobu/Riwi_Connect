@@ -114,8 +114,13 @@ def update_assessment_configuration():
     if permission_error:
         return permission_error
     request_data = request.get_json()
-    updated_configuration = admin_service.update_assessment_configuration(request_data)
-    return jsonify(updated_configuration), 200
+    try:
+        updated_configuration = admin_service.update_assessment_configuration(request_data)
+        return jsonify(updated_configuration), 200
+    except ValueError as validation_error:
+        # ValueError comes from a business rule check in the service layer
+        # (e.g. "question_count exceeds active questions")
+        return jsonify({'error': str(validation_error)}), 400
 
 # HU: US-026 — Consultar Estadísticas Administrativas
 def get_statistics():
