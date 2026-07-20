@@ -36,6 +36,13 @@ async function loadNavbarProfile() {
       statusText.className = 'status-label-text';
       statusText.textContent = statusLabels[data.status] || data.status || '';
       statusEl.append(statusText);
+    } else if (statusEl && statusDot) {
+      // HU: (vacío documental) — El concepto Disponible/En equipo no aplica a
+      // ADMINISTRATOR (RN-020 es exclusiva de estudiantes). Se limpia explícitamente
+      // en vez de solo omitir la actualización, para no dejar texto de una sesión
+      // anterior (ej. si el navegador ya había mostrado el estado de un estudiante).
+      statusEl.querySelectorAll('.status-label-text').forEach(el => el.remove());
+      statusDot.className = 'hidden';
     }
   } catch (error) {
     console.error('Error cargando perfil del navbar:', error);
