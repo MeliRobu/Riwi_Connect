@@ -4,10 +4,10 @@ VALUES
     (900000001,'Riwi Connect Administrator Barranquilla','admin.baq@riwi.io',1,4, null),
     (900000002,'Riwi Connect Administrator Medellin','admin.med@riwi.io',2,4,  null);
 -- ADMINISTRATOR - BARRANQUILLA
--- Initial password: admin1234, hashed with werkzeug generate_password_hash()
+-- Initial password: Prueba1234, hashed with werkzeug generate_password_hash()
 INSERT INTO users (password_hash, id_institutional_source, status, role)
 SELECT
-    'scrypt:32768:8:1$7JX74ufoYDWqGTj0$cb409fd13248a75b3d6e9f1fcd3447903957ccaf4648c6a5685e9d4531583247758aaafc8a1ac95ceedaad544403f3c0f7401c51386b3714e0264494e00fb8cc',
+    'scrypt:32768:8:1$cAGxOIoxBFSJL4sB$195d3945ce7102b45f050e166a698c22da87eb41c6f998d6bec5a4d20efbf8cc50e5571abe8d3e64731e83416dcef18a221b323da03108a3117e240ab96198ab',
     id_institutional_source,
     'AVAILABLE',
     'ADMINISTRATOR'
@@ -18,7 +18,7 @@ INSERT INTO users
 (password_hash, id_institutional_source, status, role)
 VALUES
 (
-    'scrypt:32768:8:1$7JX74ufoYDWqGTj0$cb409fd13248a75b3d6e9f1fcd3447903957ccaf4648c6a5685e9d4531583247758aaafc8a1ac95ceedaad544403f3c0f7401c51386b3714e0264494e00fb8cc',
+    'scrypt:32768:8:1$cAGxOIoxBFSJL4sB$195d3945ce7102b45f050e166a698c22da87eb41c6f998d6bec5a4d20efbf8cc50e5571abe8d3e64731e83416dcef18a221b323da03108a3117e240ab96198ab',
     (
         SELECT id_institutional_source
         FROM institutional_sources
