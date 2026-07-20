@@ -155,6 +155,39 @@ def request_join_team(user_id, team_id):
         if not team :
             return {"message": "Team not found"}, 404
 
+        # RN-047: no permitir enviar la solicitud si el equipo ya tiene 3
+        # integrantes del mismo clan que el estudiante (misma regla que ya
+        # se valida en accept_request(); se aplica tambien aqui para no dejar
+        # una solicitud pendiente que el lider nunca podria aceptar).
+        cursor.execute(
+            """
+            SELECT id_clan
+            FROM institutional_sources
+            WHERE id_institutional_source = (
+                SELECT id_institutional_source
+                FROM users
+                WHERE id_user = %s
+            )
+            """,
+            (user_id,)
+        )
+        student_clan = cursor.fetchone()[0]
+
+        cursor.execute(
+            """
+            SELECT COUNT(*)
+            FROM team_members tm
+            JOIN users u ON tm.user_id = u.id_user
+            JOIN institutional_sources i ON u.id_institutional_source = i.id_institutional_source
+            WHERE tm.team_id = %s AND i.id_clan = %s
+            """,
+            (team_id, student_clan)
+        )
+        clan_count = cursor.fetchone()[0]
+
+        if clan_count >= 3:
+            return {"message": "Team already has 3 members from this clan"}, 409
+
         cursor.execute(
             """SELECT id_team_request
             FROM team_requests
@@ -1065,8 +1098,15 @@ def list_available_teams(user_id):
 
         teams = []
         for id_team, team_name, member_count, pending_request_id in rows:
-            analysis = get_team_analysis(cursor, id_team)
             compat = compat_by_team.get(id_team)
+            # HU: (vacío documental) — Si el motor de compatibilidad excluyó
+            # este equipo (ej. RN-047: ya tiene 3 integrantes del mismo clan
+            # que el estudiante), no debe mostrarse en "Equipos disponibles" en
+            # absoluto. Antes se mostraba con estadísticas vacías y permitía
+            # enviar una solicitud que el equipo nunca podría aceptar.
+            if compat is None:
+                continue
+            analysis = get_team_analysis(cursor, id_team)
             teams.append({
                 "id_team": id_team,
                 "team_name": team_name,
@@ -1077,12 +1117,12 @@ def list_available_teams(user_id):
                 "strengths": analysis["strengths"],
                 "weaknesses": analysis["weaknesses"],
                 "interpretation": analysis["interpretation"],
-                "compatibility": compat["compatibility"] if compat else None,
-                "justification": compat["justification"] if compat else None,
+                "compatibility": compat["compatibility"],
+                "justification": compat["justification"],
             })
-        # Los equipos con mayor compatibilidad primero; los que no tienen
-        # compatibilidad calculada (None) quedan al final del listado.
-        teams.sort(key=lambda t: (t["compatibility"] is None, -(t["compatibility"] or 0)))
+        # Los equipos con mayor compatibilidad primero (todos los que llegan
+        # aqui ya tienen compatibilidad calculada, al haber sido filtrados).
+        teams.sort(key=lambda t: -(t["compatibility"] or 0))
         return teams
     finally:
         cursor.close()
