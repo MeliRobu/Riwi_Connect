@@ -349,6 +349,20 @@ def update_assessment_configuration(data):
         # Create a cursor to run SQL commands
         update_config_sql = connection.cursor()
 
+        # HU: (vacío documental) — El número de preguntas por prueba no puede ser mayor
+        # a la cantidad de preguntas activas disponibles, ni ser 0 o negativo
+        update_config_sql.execute("SELECT COUNT(*) FROM questions WHERE status = 'ACTIVE'")
+        active_questions_count = update_config_sql.fetchone()[0]
+
+        if data['question_count'] <= 0:
+            raise ValueError("El número de preguntas por prueba debe ser mayor a 0")
+
+        if data['question_count'] > active_questions_count:
+            raise ValueError(
+                f"El número de preguntas por prueba ({data['question_count']}) no puede superar "
+                f"la cantidad de preguntas activas disponibles ({active_questions_count})"
+            )
+
         # No WHERE clause needed: there's only ever one row in this table
         update_config_sql.execute("""
             UPDATE assessment_configurations
