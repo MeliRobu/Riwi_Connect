@@ -33,21 +33,6 @@ export function admin_home() {
                 })}
             </a>
 
-            <a class="group max-w-[360px] w-full cursor-pointer" href="#/statistics" data-route="/statistics" onclick="navigate(event, '/statistics')">
-                ${card({
-                    className:
-                        "h-auto min-h-[280px] md:h-120 overflow-visible transition-all duration-300 group-hover:bg-yellow-400 group-hover:text-white",
-                    width: "w-full",
-                    content: `
-                                <div class="flex flex-col gap-4 md:gap-8 font-bold">
-                                        <span class="font-bold text-lg md:text-xl">Estadísticas</span>
-                                        <img class="w-32 h-32 md:w-70 md:h-50 translate-x-2 translate-y-2 md:translate-x-4 md:translate-y-4 transition-transform duration-300 group-hover:scale-105" src="/assets/icons/statistics.svg">
-                                        <span class="text-sm md:text-base text-gray-400 group-hover:text-white">Revisa progreso de registro y estadísticas generales de equipos</span>
-                                </div>
-                                `,
-                })}
-            </a>
-
             <a class="group max-w-[360px] w-full cursor-pointer" href="#/admin_teams" data-route="/admin_teams" onclick="navigate(event, '/admin_teams')">
                 ${card({
                     className:
@@ -58,6 +43,21 @@ export function admin_home() {
                                         <span class="font-bold text-lg md:text-xl">Equipos</span>
                                         <img class="w-32 h-32 md:w-70 md:h-50 translate-x-2 translate-y-2 md:translate-x-4 md:translate-y-4 transition-transform duration-300 group-hover:scale-105" src="/assets/icons/scrum_teams.svg">
                                         <span class="text-sm md:text-base text-gray-400 group-hover:text-white">Consulta las fortalezas y debilidades de los equipos conformados</span>
+                                </div>
+                                `,
+                })}
+            </a>
+
+            <a class="group max-w-[360px] w-full cursor-pointer" href="#/statistics" data-route="/statistics" onclick="navigate(event, '/statistics')">
+                ${card({
+                    className:
+                        "h-auto min-h-[280px] md:h-120 overflow-visible transition-all duration-300 group-hover:bg-yellow-400 group-hover:text-white",
+                    width: "w-full",
+                    content: `
+                                <div class="flex flex-col gap-4 md:gap-8 font-bold">
+                                        <span class="font-bold text-lg md:text-xl">Estadísticas</span>
+                                        <img class="w-32 h-32 md:w-70 md:h-50 translate-x-2 translate-y-2 md:translate-x-4 md:translate-y-4 transition-transform duration-300 group-hover:scale-105" src="/assets/icons/statistics.svg">
+                                        <span class="text-sm md:text-base text-gray-400 group-hover:text-white">Revisa progreso de registro y estadísticas generales de equipos</span>
                                 </div>
                                 `,
                 })}
