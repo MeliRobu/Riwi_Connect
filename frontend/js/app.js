@@ -14,6 +14,7 @@ window.loadNavbarProfile = loadNavbarProfile;
 
 async function loadNavbarProfile() {
   try {
+    document.getElementById("sidebar-container").innerHTML = navbar();
     const response = await fetch('/users/profile');
     if (!response.ok) return; // not logged in (e.g. on /login), leave defaults
     const data = await response.json();
