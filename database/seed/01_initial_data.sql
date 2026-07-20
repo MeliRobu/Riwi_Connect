@@ -19,7 +19,9 @@ VALUES
     ('Medellin Rio'),
     ('Silletero'),
     ('Feria de las Flores'),
-    ('Botero');
+    ('Botero'),
+    ('Magdalena'),
+    ('Cortissoz');
 INSERT INTO campus (campus_name)
 VALUES
     ('Barranquilla'),
