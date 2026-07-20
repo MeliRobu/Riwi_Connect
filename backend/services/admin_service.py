@@ -1,5 +1,6 @@
 import psycopg2
 from database.connection import get_connection
+from services.team_service import get_team_analysis
 
 # HU: US-019 — Consultar Banco de Preguntas
 def list_questions():
@@ -493,8 +494,36 @@ def list_teams():
 
         # LEFT JOIN so teams with 0 members still show up (with count = 0)
         # GROUP BY is required because we're using COUNT()
+        # HU: (vacío documental) — Campus/Journey del líder y promedio del equipo,
+        # agregados como subconsultas correlacionadas para la vista de Administrador
         read_teams_sql.execute("""
-            SELECT t.id_team, t.team_name, t.created_at, COUNT(tm.id_team_member) AS member_count
+            SELECT
+                t.id_team, t.team_name, t.created_at, COUNT(tm.id_team_member) AS member_count,
+                (
+                    SELECT camp.campus_name
+                    FROM team_members ltm
+                    JOIN users lu ON lu.id_user = ltm.user_id
+                    JOIN institutional_sources lisrc ON lisrc.id_institutional_source = lu.id_institutional_source
+                    JOIN campus camp ON camp.id_campus = lisrc.id_campus
+                    WHERE ltm.team_id = t.id_team AND ltm.is_leader = TRUE
+                    LIMIT 1
+                ) AS leader_campus,
+                (
+                    SELECT jour.journey_time
+                    FROM team_members ltm
+                    JOIN users lu ON lu.id_user = ltm.user_id
+                    JOIN institutional_sources lisrc ON lisrc.id_institutional_source = lu.id_institutional_source
+                    JOIN journeys jour ON jour.id_journey = lisrc.id_journey
+                    WHERE ltm.team_id = t.id_team AND ltm.is_leader = TRUE
+                    LIMIT 1
+                ) AS leader_journey,
+                (
+                    SELECT ROUND(AVG(ar.overall_score), 1)
+                    FROM team_members tm2
+                    JOIN assessments a ON a.user_id = tm2.user_id
+                    JOIN assessment_results ar ON ar.assessment_id = a.id_assessment
+                    WHERE tm2.team_id = t.id_team
+                ) AS avg_score
             FROM teams t
             LEFT JOIN team_members tm ON tm.team_id = t.id_team
             GROUP BY t.id_team, t.team_name, t.created_at
@@ -515,7 +544,10 @@ def list_teams():
                 # created_at comes back as a Python datetime object,
                 # so we convert it to a string with isoformat() for JSON
                 'created_at': row[2].isoformat(),
-                'member_count': row[3]
+                'member_count': row[3],
+                'leader_campus': row[4],
+                'leader_journey': row[5],
+                'avg_score': float(row[6]) if row[6] is not None else None
             }
             team_list.append(team)
 
@@ -527,7 +559,9 @@ def list_teams():
 
 # HU: US-027 — Supervisar Equipos (detalle)
 def get_team_detail(team_id):
-    """GET /admin/teams/{team_id} - Returns one team plus its members' scores and Gemini interpretation."""
+    """GET /admin/teams/{team_id} - Returns one team plus its technical analysis
+    (averages, interpretation) reusing get_team_analysis from team_service.py,
+    and the leader's campus/journey."""
 
     # Open a new connection to PostgreSQL
     connection = get_connection()
@@ -547,53 +581,44 @@ def get_team_detail(team_id):
         if not team_row:
             return None
 
-        # Step 2: get every member of this team, joined with their user info,
-        # their institutional full_name, and their latest assessment scores.
-        # LEFT JOIN on assessments/assessment_results because a member might
-        # not have completed the assessment yet (scores would be NULL).
+        # HU: (vacío documental) — Reusa el mismo análisis técnico que usa Coder
+        # (promedios por tecnología, interpretación, avg_score) para no duplicar lógica
+        analysis = get_team_analysis(read_team_sql, team_id)
+
+        # Step 2: campus y journey del líder del equipo
         read_team_sql.execute("""
-            SELECT
-                u.id_user, isrc.full_name, u.status, tm.is_leader,
-                ar.overall_score, ar.python_score, ar.sql_score,
-                ar.javascript_score, ar.html_score, ar.css_score,
-                ar.profile_description
+            SELECT camp.campus_name, jour.journey_time
             FROM team_members tm
             JOIN users u ON u.id_user = tm.user_id
             JOIN institutional_sources isrc ON isrc.id_institutional_source = u.id_institutional_source
-            LEFT JOIN assessments a ON a.user_id = u.id_user
-            LEFT JOIN assessment_results ar ON ar.assessment_id = a.id_assessment
-            WHERE tm.team_id = %s
-            ORDER BY tm.is_leader DESC
+            JOIN campus camp ON camp.id_campus = isrc.id_campus
+            JOIN journeys jour ON jour.id_journey = isrc.id_journey
+            WHERE tm.team_id = %s AND tm.is_leader = TRUE
         """, (team_id,))
+        leader_row = read_team_sql.fetchone()
 
-        members_rows = read_team_sql.fetchall()
-
-        # Build the list of member dictionaries
-        member_list = []
-        for row in members_rows:
-            member = {
-                'id_user': row[0],
-                'full_name': row[1],
-                'status': row[2],
-                'is_leader': row[3],
-                # Scores might be None if the student hasn't finished the assessment
-                'overall_score': float(row[4]) if row[4] is not None else None,
-                'scores_by_technology': {
-                    'python': float(row[5]) if row[5] is not None else None,
-                    'sql': float(row[6]) if row[6] is not None else None,
-                    'javascript': float(row[7]) if row[7] is not None else None,
-                    'html': float(row[8]) if row[8] is not None else None,
-                    'css': float(row[9]) if row[9] is not None else None,
-                },
-                'profile_description': row[10]
+        # Build the list of member dictionaries with role and default avatar
+        # (DT-003: la foto de perfil siempre es la ruta por defecto en este MVP)
+        member_list = [
+            {
+                'id_user': m['user_id'],
+                'full_name': m['full_name'],
+                'is_leader': m['is_leader'],
+                'avatar': 'assets/default-profile.png'
             }
-            member_list.append(member)
+            for m in analysis['members']
+        ]
 
         # Build and return the final team detail dictionary
         return {
             'id_team': team_row[0],
             'team_name': team_row[1],
             'created_at': team_row[2].isoformat(),
+            'leader_campus': leader_row[0] if leader_row else None,
+            'leader_journey': leader_row[1] if leader_row else None,
+            'avg_score': analysis['avg_score'],
+            'tech_averages': analysis['tech_averages'],
+            'interpretation': analysis['interpretation'],
             'members': member_list
         }
 

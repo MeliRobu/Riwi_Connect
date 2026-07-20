@@ -1065,7 +1065,7 @@ def list_available_teams(user_id):
 
         teams = []
         for id_team, team_name, member_count, pending_request_id in rows:
-            analysis = _get_team_analysis(cursor, id_team)
+            analysis = get_team_analysis(cursor, id_team)
             compat = compat_by_team.get(id_team)
             teams.append({
                 "id_team": id_team,
@@ -1310,7 +1310,7 @@ def search_teams_by_name(user_id, query):
 # HU: (vacío documental) — Análisis técnico reusable de un equipo (fortalezas,
 # debilidades, interpretación e integrantes). Extraído de get_my_team_detail
 # para reusarlo también en list_available_teams sin duplicar la lógica.
-def _get_team_analysis(cursor, team_id):
+def get_team_analysis(cursor, team_id):
     cursor.execute(
         """
         SELECT tm.user_id, s.full_name, tm.is_leader
@@ -1334,7 +1334,7 @@ def _get_team_analysis(cursor, team_id):
     cursor.execute(
         """
         SELECT ar.python_score, ar.sql_score, ar.javascript_score,
-               ar.html_score, ar.css_score
+               ar.html_score, ar.css_score, ar.overall_score
         FROM team_members tm
         JOIN assessments a ON a.user_id = tm.user_id
         JOIN assessment_results ar ON ar.assessment_id = a.id_assessment
@@ -1349,9 +1349,13 @@ def _get_team_analysis(cursor, team_id):
     strengths = []
     weaknesses = []
     interpretation = None
+    avg_score = None
     if score_rows:
         for i, key in enumerate(tech_keys):
             averages[key] = round(sum(float(r[i]) for r in score_rows) / len(score_rows), 1)
+        # HU: (vacío documental) — Puntaje general promedio del equipo
+        # overall_score es la 6ta columna del SELECT (índice 5)
+        avg_score = round(sum(float(r[5]) for r in score_rows) / len(score_rows), 1)
         sorted_techs = sorted(averages.items(), key=lambda x: x[1], reverse=True)
         strengths = [tech_labels[t] for t, _ in sorted_techs[:2]]
         weaknesses = [tech_labels[t] for t, _ in sorted_techs[-2:]]
@@ -1365,6 +1369,7 @@ def _get_team_analysis(cursor, team_id):
         "strengths": strengths,
         "weaknesses": weaknesses,
         "interpretation": interpretation,
+        "avg_score": avg_score,
     }
 
 
@@ -1384,7 +1389,7 @@ def get_my_team_detail(user_id):
         cursor.execute("SELECT team_name FROM teams WHERE id_team = %s", (team_id,))
         team_name = cursor.fetchone()[0]
 
-        analysis = _get_team_analysis(cursor, team_id)
+        analysis = get_team_analysis(cursor, team_id)
         return {
             "team_id": team_id,
             "team_name": team_name,
@@ -1407,7 +1412,7 @@ def get_team_public_detail(team_id):
             return None
         team_name = row[0]
 
-        analysis = _get_team_analysis(cursor, team_id)
+        analysis = get_team_analysis(cursor, team_id)
         return {
             "team_id": team_id,
             "team_name": team_name,
