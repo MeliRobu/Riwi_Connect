@@ -170,6 +170,7 @@ function renderAnswerOptionsInputs(namePrefix, existingOptions = null) {
                         class="accent-[#4B3FA8] shrink-0">
                     <input id="${namePrefix}-option-${i}" type="text" value="${escapeHtml(opt.content || "")}" placeholder="Opción ${i + 1}"
                         class="border border-gray-200 rounded-xl px-4 py-2 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-[#4B3FA8]">
+                    <input id="${namePrefix}-option-${i}-id" type="hidden" value="${opt.id_answer_option || ''}">
                 </div>
             `).join("")}
         </div>
@@ -182,7 +183,16 @@ function readAnswerOptionsFromForm(namePrefix) {
     const options = [];
     for (let i = 0; i < 4; i++) {
         const content = document.getElementById(`${namePrefix}-option-${i}`).value.trim();
-        options.push({ content, is_correct: i === correctIndex });
+        const option = { content, is_correct: i === correctIndex };
+        // HU: (vacío documental) — Al editar una pregunta existente, cada opción
+        // debe conservar su id_answer_option original para que el backend sepa
+        // qué fila actualizar (antes se perdía por completo al leer el formulario,
+        // causando un 500 KeyError en update_answer_options()).
+        const idField = document.getElementById(`${namePrefix}-option-${i}-id`);
+        if (idField && idField.value) {
+            option.id_answer_option = parseInt(idField.value, 10);
+        }
+        options.push(option);
     }
     return options;
 }

@@ -208,6 +208,12 @@ def update_answer_options(question_id, options):
             # Question doesn't exist: return None so the controller can respond 404
             return None
 
+        # HU: (vacío documental) — Antes, si faltaba id_answer_option en
+        # alguna opción, esto crasheaba con un KeyError sin control (500).
+        # Se valida explícitamente para responder un 400 con mensaje claro.
+        for opt in options:
+            if 'id_answer_option' not in opt:
+                raise ValueError("Cada opción de respuesta debe incluir su id_answer_option")
         for opt in options:
             update_options_sql.execute("""
                 UPDATE answer_options
