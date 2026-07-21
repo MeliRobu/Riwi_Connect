@@ -15,7 +15,7 @@ function escapeHtml(text) {
 
 async function loadQuestions() {
     try {
-        const response = await fetch('/assessments');
+        const response = await fetch('/assessments', { cache: 'no-store' });
         if (!response.ok) {
             const data = await response.json().catch(() => ({}));
             loadError = data.error || 'No se pudo cargar el Assessment.';
