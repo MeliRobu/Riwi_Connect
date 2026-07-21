@@ -438,13 +438,25 @@ window.handleRegisterSubmit = async function (event) {
             throw new Error(errorData.message || 'Error al registrar el usuario');
         }
 
-        const data = await response.json();
+        const loginResponse = await fetch('/users/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                document_number: documentNumber,
+                password: password
+            })
+        });
+
+        if (!loginResponse.ok) {
+            throw new Error('Cuenta creada correctamente, pero no se pudo iniciar sesion automaticamente. Intenta iniciar sesion manualmente.');
+        }
+
+        const loginData = await loginResponse.json();
 
         window.localStorage.setItem('isLogged', 'true');
-        window.localStorage.setItem('token', data.token || '');
-        window.localStorage.setItem('role', data.role || 'user');
+        window.localStorage.setItem('role', loginData.role || 'user');
 
-        navigate(null, data.role === 'ADMINISTRATOR' ? '/admin_home' : '/dashboard');
+        navigate(null, loginData.role === 'ADMINISTRATOR' ? '/admin_home' : '/dashboard');
 
     } catch (error) {
         console.error(error);
