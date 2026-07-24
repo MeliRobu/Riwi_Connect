@@ -2,8 +2,8 @@ import threading
 from database.connection import get_connection
 import json
 import requests
-from config import GEMINI_API_KEY
-
+import os 
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "default_gemini_api_key")  # Use a default API key if not set in environment
 # HU: US-004 — Presentar Assessment (EP-002 — Assessment Management)
 # Covers: question selection per AssessmentConfiguration, answer registration,
 # score calculation per technology and overall
