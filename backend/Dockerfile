@@ -16,6 +16,12 @@ COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ .
+# On Render (or any fresh clone), config.py does not exist because it's
+# gitignored -- create it from the template so the os.environ.get() calls
+# inside it still work, reading real environment variables set on the
+# platform. Locally, config.py already exists with real values (copied in
+# by COPY backend/ . above), so this line does nothing there.
+RUN [ -f config.py ] || cp config.example.py config.py
 # Only grab the compiled frontend output from Stage 1, nothing else.
 COPY --from=frontend-build /frontend/dist ./frontend_dist
 
