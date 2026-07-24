@@ -1,5 +1,4 @@
 import os 
-from database.connection import get_connection
 import psycopg2
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
