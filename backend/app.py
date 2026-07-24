@@ -1,11 +1,13 @@
 from flask import Flask
 from database.connection import get_connection
-from config import SECRET_KEY
 from routes.user_routes import user_routes
 from routes.assessment_routes import assessment_routes
 from routes.team_routes import team_routes
 from routes.admin_routes import admin_bp
+import os
 
+
+SECRET_KEY = os.environ.get("SECRET_KEY", "default_secret_key")  # Use a default secret key if not set in environment
 # Flask also serves the frontend directly (static files in frontend_dist),
 # so we don't need to deal with CORS between two separate servers
 app = Flask(__name__, static_folder="frontend_dist", static_url_path="")
