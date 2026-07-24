@@ -126,9 +126,13 @@ export function loginRegister() {
 
 
                     <!-- Enlace visible en móvil y web -->
-                    <p class="text-sm font-medium leading-5 mt-2 mb-6 self-start text-left text-slate-500">
+                    <p class="text-sm font-medium leading-5 mt-2 mb-2 self-start text-left text-slate-500">
                         ¿No te has registrado? <a
                             class="text-brand-600 font-bold cursor-pointer transition-colors hover:text-brand-700 trigger-signup">Registrarse</a>
+                    </p>
+                    <p class="text-xs font-medium leading-5 mb-6 self-start text-left text-slate-400">
+                        ¿Primera vez aquí? <a href="./assets/credenciales.xlsx" download
+                            class="text-brand-600 font-bold cursor-pointer transition-colors hover:text-brand-700">Descargar credenciales de prueba</a>
                     </p>
 
                     <div id="login-error" class="hidden bg-red-50 text-red-600 text-sm font-semibold px-4 py-2.5 rounded-xl w-full mb-3 text-left"></div>
