@@ -160,13 +160,13 @@ function renderStatistics(data) {
                             <div class="h-full bg-[#4B3FA8]" style="width: ${inTeamPercent}%"></div>
                         </div>
 
-                        <div class="flex gap-6 mt-1">
+                        <div class="flex flex-wrap gap-x-6 gap-y-2 mt-1">
                             <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+                                <span class="w-3 h-3 rounded-full bg-emerald-400 shrink-0"></span>
                                 <span class="text-sm text-gray-600">Disponibles: <span class="font-bold">${available}</span> (${availablePercent}%)</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-[#4B3FA8]"></span>
+                                <span class="w-3 h-3 rounded-full bg-[#4B3FA8] shrink-0"></span>
                                 <span class="text-sm text-gray-600">En equipo: <span class="font-bold">${inTeam}</span> (${inTeamPercent}%)</span>
                             </div>
                         </div>
