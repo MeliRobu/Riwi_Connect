@@ -1,4 +1,5 @@
 from flask import Flask
+import os
 from database.connection import get_connection
 from config import SECRET_KEY
 from routes.user_routes import user_routes
@@ -35,4 +36,11 @@ def health():
 if __name__ == "__main__":
     # 0.0.0.0 so the container is reachable from outside;
     # 127.0.0.1 would only work internally
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    # HU: (vacío documental) — debug=True estaba escrito directamente en
+    # el código, dejando el depurador interactivo de Werkzeug expuesto
+    # públicamente incluso en producción (Render) -- riesgo de seguridad
+    # real, ya que ese depurador permite ejecutar código arbitrario si se
+    # desbloquea. Ahora depende de una variable de entorno, en falso por
+    # defecto en cualquier entorno donde no se active explícitamente.
+    debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(host="0.0.0.0", port=5000, debug=debug_mode)
