@@ -42,8 +42,8 @@ function getProgressValue() {
 export function assessment() {
     setTimeout(() => { initAssessmentPage(); }, 0);
     return `
-    <div id="assessment-root" class="m-10 p-2 flex flex-col gap-2">
-        <span class="text-3xl font-bold">Assessment técnico</span>
+    <div id="assessment-root" class="m-4 md:m-10 p-2 flex flex-col gap-2">
+        <span class="text-2xl md:text-3xl font-bold">Assessment técnico</span>
         <div class="text-center text-gray-400 text-sm py-20">Cargando preguntas...</div>
     </div>
     `;
@@ -52,7 +52,7 @@ export function assessment() {
 function renderRoot() {
     if (loadError) {
         return `
-            <span class="text-3xl font-bold">Assessment técnico</span>
+            <span class="text-2xl md:text-3xl font-bold">Assessment técnico</span>
             <div class="text-center text-gray-500 text-sm py-10 border border-dashed border-gray-200 rounded-xl mt-4">
                 ${loadError}
             </div>
@@ -60,15 +60,15 @@ function renderRoot() {
     }
     if (questions.length === 0) {
         return `
-            <span class="text-3xl font-bold">Assessment técnico</span>
+            <span class="text-2xl md:text-3xl font-bold">Assessment técnico</span>
             <div class="text-center text-gray-500 text-sm py-10 border border-dashed border-gray-200 rounded-xl mt-4">
                 No hay preguntas disponibles en este momento.
             </div>
         `;
     }
     return `
-        <span class="text-3xl font-bold">Assessment técnico</span>
-        <span>Responde cada pregunta con cuidado. Sólo serás capaz de presentar esta prueba una vez</span>
+        <span class="text-2xl md:text-3xl font-bold">Assessment técnico</span>
+        <span class="text-sm md:text-base">Responde cada pregunta con cuidado. Sólo serás capaz de presentar esta prueba una vez</span>
         <div id="progress-bar-container">
             ${progressBar({ value: getProgressValue(), size: 'w-full h-3' })}
         </div>
@@ -87,7 +87,7 @@ function renderQuestion() {
     return `
         <div class="flex flex-col gap-4">
             <span class="text-xs font-semibold text-gray-400">Pregunta ${currentQuestionIndex + 1} de ${questions.length}</span>
-            <span class="text-xl font-bold">${escapeHtml(question.statement)}</span>
+            <span class="text-lg md:text-xl font-bold">${escapeHtml(question.statement)}</span>
             <div class="flex flex-col gap-3 mt-2">
                 ${question.options.map(opt => {
                     const isChecked = selectedAnswer === opt.id_answer_option;
@@ -109,13 +109,13 @@ function renderQuestion() {
             <div class="flex justify-between mt-6">
                 <button 
                     onclick="goToPreviousQuestion()"
-                    class=" cursor-pointer px-6 py-2.5 rounded-xl font-bold border border-gray-200 text-gray-500 transition-all duration-300 hover:bg-gray-100 ${isFirst ? 'opacity-0 pointer-events-none' : ''}"
+                    class=" cursor-pointer px-4 md:px-6 py-2.5 rounded-xl font-bold border border-gray-200 text-gray-500 transition-all duration-300 hover:bg-gray-100 ${isFirst ? 'opacity-0 pointer-events-none' : ''}"
                 >
                     Anterior
                 </button>
                 <button 
                     onclick="${isLast ? 'submitAssessment()' : 'goToNextQuestion()'}"
-                    class="cursor-pointer px-6 py-2.5 rounded-xl font-bold bg-[#4B3FA8] text-white transition-all duration-300 hover:bg-pink-600 hover:scale-[1.02] active:scale-95"
+                    class="cursor-pointer px-4 md:px-6 py-2.5 rounded-xl font-bold bg-[#4B3FA8] text-white transition-all duration-300 hover:bg-pink-600 hover:scale-[1.02] active:scale-95"
                 >
                     ${isLast ? 'Finalizar' : 'Siguiente'}
                 </button>
