@@ -60,9 +60,9 @@ function renderRecommendations(teams) {
                     className: 'p-6 flex flex-col gap-4',
                     width: 'w-full',
                     content: `
-                        <div class="flex items-center justify-between">
-                            <span class="text-xl font-bold">${team.team_name}</span>
-                            <span class="bg-[#F3F1FA] text-[#4B3FA8] text-sm font-bold px-4 py-1.5 rounded-full">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <span class="text-xl font-bold break-words">${team.team_name}</span>
+                            <span class="bg-[#F3F1FA] text-[#4B3FA8] text-sm font-bold px-4 py-1.5 rounded-full whitespace-nowrap">
                                 ${team.compatibility}% match
                             </span>
                         </div>
@@ -88,7 +88,7 @@ function renderRecommendations(teams) {
                             </div>
                         </details>
                         ${team.pending_request_id ? `
-                        <div class="flex items-center justify-between mt-2">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mt-2">
                             <span class="text-xs text-amber-500 font-semibold">Pendiente</span>
                             <button
                                 onclick="cancelRecommendedRequest(${team.team_id}, ${team.pending_request_id})"
