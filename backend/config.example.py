@@ -11,3 +11,9 @@ import os
 DATABASE_URL = os.environ.get("DATABASE_URL", "dbname=riwi_connect user=postgres password=postgres host=db")
 SECRET_KEY = os.environ.get("SECRET_KEY", "replace_with_a_random_secret_key")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "replace_with_your_gemini_api_key")
+
+# Clave de respaldo (opcional). Si la clave principal agota su cuota diaria
+# (error 429), el sistema reintenta automaticamente con esta clave, generada
+# en un proyecto/cuenta de Google distinto para tener cuota independiente.
+# Dejar vacio ("") si no se tiene una clave de respaldo configurada.
+GEMINI_API_KEY_BACKUP = os.environ.get("GEMINI_API_KEY_BACKUP", "")

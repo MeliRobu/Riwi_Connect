@@ -245,32 +245,43 @@ def generate_smart_profile(assessment_id):
             '{"strengths": "...", "improvement_opportunities": "...", "profile_description": "..."}'
         )
 
-        url = (
-            "https://generativelanguage.googleapis.com/v1beta/models/"
-            f"gemini-3.1-flash-lite:generateContent?key={GEMINI_API_KEY}"
-        )
-
-        try:
-            response = requests.post(
-                url,
-                json={"contents": [{"parts": [{"text": prompt}]}]},
-                timeout=10
+        def call_gemini(api_key):
+            """Intenta una llamada a Gemini con una clave especifica.
+            Devuelve una tupla (strengths, improvement, description) si
+            funciono, la cadena 'QUOTA_EXCEEDED' si la clave llego a su
+            tope de uso (429), o None para cualquier otro fallo."""
+            url = (
+                "https://generativelanguage.googleapis.com/v1beta/models/"
+                f"gemini-3.1-flash-lite:generateContent?key={api_key}"
             )
-            if response.status_code != 200:
-                # Auth error, quota, or any non-2xx: leave NULL for retry
-                return
-            data = response.json()
-            text = data["candidates"][0]["content"]["parts"][0]["text"]
-            parsed = json.loads(text)
-            strengths = parsed.get("strengths")
-            improvement = parsed.get("improvement_opportunities")
-            description = parsed.get("profile_description")
-        except (requests.RequestException, ValueError, KeyError, json.JSONDecodeError):
-            # Connection error, timeout, or malformed response: leave NULL for retry
-            return
+            try:
+                response = requests.post(
+                    url,
+                    json={"contents": [{"parts": [{"text": prompt}]}]},
+                    timeout=10
+                )
+                if response.status_code == 429:
+                    return "QUOTA_EXCEEDED"
+                if response.status_code != 200:
+                    return None
+                data = response.json()
+                text = data["candidates"][0]["content"]["parts"][0]["text"]
+                parsed = json.loads(text)
+                strengths = parsed.get("strengths")
+                improvement = parsed.get("improvement_opportunities")
+                description = parsed.get("profile_description")
+                if not strengths or not improvement or not description:
+                    return None
+                return (strengths, improvement, description)
+            except (requests.RequestException, ValueError, KeyError, json.JSONDecodeError):
+                return None
 
-        if not strengths or not improvement or not description:
+        result = call_gemini(GEMINI_API_KEY)
+        if result == "QUOTA_EXCEEDED" and GEMINI_API_KEY_BACKUP:
+            result = call_gemini(GEMINI_API_KEY_BACKUP)
+        if result is None or result == "QUOTA_EXCEEDED":
             return
+        strengths, improvement, description = result
 
         cursor.execute(
             """
