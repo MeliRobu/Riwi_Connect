@@ -37,6 +37,27 @@ export function toggleSettingsSubmenu(event) {
   arrow.classList.toggle("rotate-180");
 }
 
+// Aplica el tema guardado en localStorage antes de que se pinte la UI,
+// para evitar el parpadeo claro->oscuro al cargar o cambiar de ruta.
+export function applyStoredTheme() {
+  const isDark = window.localStorage.getItem('darkMode') === 'true';
+  document.documentElement.classList.toggle('dark', isDark);
+}
+
+export function toggleDarkMode() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  window.localStorage.setItem('darkMode', isDark ? 'true' : 'false');
+
+  const label = document.getElementById('dark-mode-label');
+  if (label) label.textContent = isDark ? 'Modo claro' : 'Modo oscuro';
+  const moonIcon = document.getElementById('dark-mode-icon-moon');
+  const sunIcon = document.getElementById('dark-mode-icon-sun');
+  if (moonIcon && sunIcon) {
+    moonIcon.classList.toggle('hidden', isDark);
+    sunIcon.classList.toggle('hidden', !isDark);
+  }
+}
+
 // export const skillsData = { ... };
 
 export function renderGrafica(id, datos) {

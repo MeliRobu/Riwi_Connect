@@ -8,6 +8,7 @@
 export function navbar() {
   // Ajusta este valor según cómo llames al rol en tu app
  const isAdmin = (window.localStorage.getItem('role') || '').toUpperCase() === 'ADMINISTRATOR';
+ const isDarkMode = document.documentElement.classList.contains('dark');
   return `
 <!-- Botón hamburguesa - solo visible en móvil -->
 <button id="menu-toggle" onclick="toggleMobileMenu()"
@@ -175,10 +176,13 @@ export function navbar() {
             </a>
             <button onclick="toggleDarkMode()"
               class="w-full flex items-center gap-3 pl-11 pr-5 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-white transition-all duration-200 group cursor-pointer">
-              <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg id="dark-mode-icon-moon" class="w-4 h-4 text-gray-400 group-hover:text-gray-700 transition-colors ${isDarkMode ? 'hidden' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
               </svg>
-              Modo oscuro
+              <svg id="dark-mode-icon-sun" class="w-4 h-4 text-gray-400 group-hover:text-gray-700 transition-colors ${isDarkMode ? '' : 'hidden'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <span id="dark-mode-label">${isDarkMode ? 'Modo claro' : 'Modo oscuro'}</span>
             </button>
           </div>
         </div>

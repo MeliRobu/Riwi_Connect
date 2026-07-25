@@ -151,5 +151,47 @@ body.no-nav #app {
 }
 
 #app::-webkit-scrollbar {
-  display: none; 
+  display: none;
 }
+
+/*
+ * Modo oscuro
+ * Se activa agregando la clase `dark` a <html> (ver toggleDarkMode() en utils.js).
+ * Se aplica solo en páginas con sidebar (body sin `.no-nav`): el toggle vive dentro
+ * del menú de usuario, que solo existe en las rutas autenticadas — home/login/register
+ * mantienen su diseño de marca sin tocar.
+ */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body:not(.no-nav) {
+  background-color: #0b0d13;
+}
+
+html.dark body:not(.no-nav) .bg-white { background-color: #171a23 !important; }
+html.dark body:not(.no-nav) .bg-gray-50 { background-color: #12141c !important; }
+html.dark body:not(.no-nav) .bg-gray-100 { background-color: #1f2230 !important; }
+html.dark body:not(.no-nav) .bg-gray-200 { background-color: #2a2e3d !important; }
+html.dark body:not(.no-nav) .bg-gray-300 { background-color: #343849 !important; }
+html.dark body:not(.no-nav) .bg-gray-400 { background-color: #3f4456 !important; }
+html.dark body:not(.no-nav) .bg-black { background-color: #05060a !important; }
+
+html.dark body:not(.no-nav) .border-gray-100 { border-color: #262a38 !important; }
+html.dark body:not(.no-nav) .border-gray-200 { border-color: #31364a !important; }
+html.dark body:not(.no-nav) .border-gray-300 { border-color: #3c4257 !important; }
+
+html.dark body:not(.no-nav) .text-gray-900 { color: #f3f4f6 !important; }
+html.dark body:not(.no-nav) .text-gray-800 { color: #e5e7eb !important; }
+html.dark body:not(.no-nav) .text-gray-700 { color: #d1d5db !important; }
+html.dark body:not(.no-nav) .text-gray-600 { color: #b6bac6 !important; }
+html.dark body:not(.no-nav) .text-gray-500 { color: #9aa0ae !important; }
+html.dark body:not(.no-nav) .text-gray-400 { color: #7d8496 !important; }
+html.dark body:not(.no-nav) .text-black { color: #f3f4f6 !important; }
+
+/* Fondos translúcidos "glass" del sidebar (bg-white/NN, bg-gray-100/NN, etc.) */
+html.dark body:not(.no-nav) [class*="bg-white/"] { background-color: rgba(23, 26, 35, 0.85) !important; }
+html.dark body:not(.no-nav) [class*="bg-gray-50/"] { background-color: rgba(23, 26, 35, 0.6) !important; }
+html.dark body:not(.no-nav) [class*="bg-gray-100/"] { background-color: rgba(42, 46, 61, 0.6) !important; }
+html.dark body:not(.no-nav) [class*="border-white/"] { border-color: rgba(255, 255, 255, 0.08) !important; }
+html.dark body:not(.no-nav) .group:hover .group-hover\:bg-white { background-color: #2a2e3d !important; }
