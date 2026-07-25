@@ -1,5 +1,6 @@
 from flask import request, session
 from services.user_service import register_user, get_user_by_id, get_public_profile
+from services.user_service import get_institutional_options, create_demo_institutional_source
 from services.assessment_service import retry_smart_profile_if_needed
 from services.auth_service import login_user, logout_user
 from services.compatibility_service import get_team_recommendations
@@ -69,3 +70,23 @@ def get_public_profile_route(user_id):
     if profile is None:
         return {"error": "User not found"}, 404
     return profile, 200
+
+# HU: (vacío documental) — Combinaciones válidas de sede/jornada/clan (demo pública)
+def get_institutional_options_route():
+    result, status_code = get_institutional_options()
+    return result, status_code
+
+
+# HU: (vacío documental) — Crear un registro simulado en institutional_sources (demo pública)
+def create_demo_institutional_source_route():
+    data = request.get_json()
+    document_number = data.get("document_number")
+    full_name = data.get("full_name")
+    email = data.get("email")
+    id_campus = data.get("id_campus")
+    id_journey = data.get("id_journey")
+    id_clan = data.get("id_clan")
+    result, status_code = create_demo_institutional_source(
+        document_number, full_name, email, id_campus, id_journey, id_clan
+    )
+    return result, status_code

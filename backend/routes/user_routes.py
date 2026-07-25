@@ -2,6 +2,7 @@ from flask import Blueprint
 from controllers.user_controller import register, login, logout, profile
 from controllers.user_controller import get_team_recommendations_route
 from controllers.user_controller import get_public_profile_route
+from controllers.user_controller import get_institutional_options_route, create_demo_institutional_source_route
 
 # HU: US-001, US-002, US-003 (EP-001 — User Management)
 # All four User Management endpoints from DO-003 Sprint 3
@@ -29,3 +30,12 @@ methods=["GET"])
 user_routes.add_url_rule("/users/<int:user_id>/profile",
 view_func=get_public_profile_route,
 methods=["GET"])
+
+# HU: (vacío documental) — Consultar combinaciones válidas sede/jornada/clan (demo pública)
+user_routes.add_url_rule("/demo/institutional-options",
+view_func=get_institutional_options_route,
+methods=["GET"])
+# HU: (vacío documental) — Crear un registro simulado en institutional_sources (demo pública)
+user_routes.add_url_rule("/demo/institutional-sources",
+view_func=create_demo_institutional_source_route,
+methods=["POST"])
