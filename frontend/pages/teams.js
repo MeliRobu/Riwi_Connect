@@ -190,7 +190,7 @@ function renderEquiposTab() {
                                 </div>
                             </details>
                             ${team.pending_request_id ? `
-                            <div class="flex items-center justify-between mt-2">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mt-2">
                                 <span class="text-xs text-amber-500 font-semibold">Pendiente</span>
                                 <button
                                     onclick="cancelRequest(${team.id_team}, ${team.pending_request_id})"
@@ -286,14 +286,14 @@ function renderMisSolicitudesTab() {
             ${myRequestsData.length === 0 ? emptyState('No tienes solicitudes pendientes.') : `
                 <div class="flex flex-col gap-3">
                     ${myRequestsData.map(req => `
-                        <div class="flex items-center justify-between border border-gray-100 rounded-xl p-4 shadow-sm">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-gray-100 rounded-xl p-4 shadow-sm">
                             <div class="flex flex-col">
-                                <span class="font-semibold">${req.team_name}</span>
+                                <span class="font-semibold break-words">${req.team_name}</span>
                                 <span class="text-xs text-amber-500 font-semibold">Pendiente</span>
                             </div>
-                            <button 
+                            <button
                                 onclick="cancelRequest(${req.team_id}, ${req.id_team_request})"
-                                class=" cursor-pointer text-red-500 border border-red-200 font-semibold text-sm px-4 py-2 rounded-xl hover:bg-red-50 transition-all duration-200"
+                                class=" cursor-pointer text-red-500 border border-red-200 font-semibold text-sm px-4 py-2 rounded-xl hover:bg-red-50 transition-all duration-200 w-fit"
                             >
                                 Cancelar
                             </button>
@@ -363,14 +363,14 @@ function renderSolicitudesRecibidasTab() {
             ${receivedRequestsData.length === 0 ? emptyState('No tienes solicitudes recibidas.') : `
                 <div class="flex flex-col gap-3">
                     ${receivedRequestsData.map(req => `
-                        <div class="flex items-center justify-between border border-gray-100 rounded-xl p-4 shadow-sm">
-                            <span class="font-semibold">${req.full_name}</span>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-gray-100 rounded-xl p-4 shadow-sm">
+                            <span class="font-semibold break-words">${req.full_name}</span>
                             <div class="flex gap-2">
-                                <button onclick="acceptRequest(${req.team_id}, ${req.id_team_request})" 
+                                <button onclick="acceptRequest(${req.team_id}, ${req.id_team_request})"
                                     class=" cursor-pointer bg-emerald-500 text-white font-semibold text-sm px-4 py-2 rounded-xl hover:bg-emerald-600 transition-all duration-200">
                                     Aceptar
                                 </button>
-                                <button onclick="rejectRequest(${req.team_id}, ${req.id_team_request})" 
+                                <button onclick="rejectRequest(${req.team_id}, ${req.id_team_request})"
                                     class=" cursor-pointer border border-red-200 text-red-500 font-semibold text-sm px-4 py-2 rounded-xl hover:bg-red-50 transition-all duration-200">
                                     Rechazar
                                 </button>
@@ -474,8 +474,8 @@ function renderInvitacionesTab() {
                 ${sentInvitationsData.length === 0 ? emptyState('No has enviado invitaciones.') : `
                     <div class="flex flex-col gap-3">
                         ${sentInvitationsData.map(inv => `
-                            <div class="flex items-center justify-between border border-gray-100 rounded-xl p-4 shadow-sm">
-                                <span class="font-semibold">${inv.full_name}</span>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-gray-100 rounded-xl p-4 shadow-sm">
+                                <span class="font-semibold break-words">${inv.full_name}</span>
                                 <div class="flex items-center gap-3">
                                     <span class="text-xs text-amber-500 font-semibold">Pendiente</span>
                                     <button
@@ -496,8 +496,8 @@ function renderInvitacionesTab() {
                 ${receivedInvitationsData.length === 0 ? emptyState('No tienes invitaciones recibidas.') : `
                     <div class="flex flex-col gap-3">
                         ${receivedInvitationsData.map(inv => `
-                            <div class="flex items-center justify-between border border-gray-100 rounded-xl p-4 shadow-sm">
-                                <span class="font-semibold">${inv.team_name}</span>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-gray-100 rounded-xl p-4 shadow-sm">
+                                <span class="font-semibold break-words">${inv.team_name}</span>
                                 <div class="flex gap-2">
                                     <button onclick="acceptInvitation(${inv.team_id}, ${inv.id_team_request})" 
                                         class="  cursor-pointer bg-emerald-500 text-white font-semibold text-sm px-4 py-2 rounded-xl hover:bg-emerald-600 transition-all duration-200">
@@ -658,15 +658,15 @@ function renderMiEquipoTab() {
                     <div class="flex flex-col gap-2 mt-2">
                         <span class="text-sm font-semibold text-gray-600">Integrantes</span>
                         ${myTeamData.members.map(member => `
-                            <div class="flex items-center justify-between border border-gray-100 rounded-xl px-4 py-2.5">
-                                <span class="p-1 text-sm font-medium">${member.full_name}${member.is_leader ? ' (Líder)' : ''}</span>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border border-gray-100 rounded-xl px-4 py-2.5">
+                                <span class="p-1 text-sm font-medium break-words">${member.full_name}${member.is_leader ? ' (Líder)' : ''}</span>
                                 ${(currentUser.is_leader && !member.is_leader) ? `
-                                    <div class="flex gap-2">
-                                        <button onclick="transferLeadership(${member.user_id})" 
+                                    <div class="flex flex-wrap gap-2">
+                                        <button onclick="transferLeadership(${member.user_id})"
                                             class=" cursor-pointer text-xs font-semibold text-[#4B3FA8] hover:underline">
                                             Transferir liderazgo
                                         </button>
-                                        <button onclick="expelMember(${member.user_id})" 
+                                        <button onclick="expelMember(${member.user_id})"
                                             class="cursor-pointer text-xs font-semibold text-red-500 hover:underline">
                                             Expulsar
                                         </button>
