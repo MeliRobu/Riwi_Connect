@@ -2,11 +2,12 @@ import '../css/styles.css';
 import {navbar} from '../components/navbar';
 import { router } from './router/router';
 import { smart_profile } from '../pages/smart_profile.js';
-import { toggleUserMenu,initUserMenuListener, toggleSettingsSubmenu, logout } from './utils';
+import { toggleUserMenu,initUserMenuListener, toggleSettingsSubmenu, logout, applyStoredTheme, toggleDarkMode } from './utils';
 
 
 // Asegura que exista un rol global; por defecto 'user'. Cambiar desde el login cuando corresponda.
 
+applyStoredTheme();
 document.getElementById("sidebar-container").innerHTML = navbar();
 loadNavbarProfile();
 window.addEventListener("hashchange", loadNavbarProfile);
@@ -55,6 +56,7 @@ window.toggleUserMenu = toggleUserMenu;
 
 window.toggleUserMenu = toggleUserMenu;
 window.toggleSettingsSubmenu = toggleSettingsSubmenu;
+window.toggleDarkMode = toggleDarkMode;
 initUserMenuListener();
 router();
 

@@ -69,9 +69,9 @@ function renderOverview() {
                             onclick="viewTeamDetail(${team.id_team})"
                             class="border border-gray-100 rounded-2xl p-3.5 flex flex-col gap-2 shadow-sm hover:shadow-md hover:border-[#4B3FA8]/40 transition-all duration-300 cursor-pointer"
                         >
-                            <div class="flex items-center justify-between">
-                                <span class="text-lg font-bold">${escapeHtml(team.team_name)}</span>
-                                <span class="text-xs font-semibold px-3 py-1 rounded-full bg-[#F3F1FA] text-[#4B3FA8]">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <span class="text-lg font-bold break-words">${escapeHtml(team.team_name)}</span>
+                                <span class="text-xs font-semibold px-3 py-1 rounded-full bg-[#F3F1FA] text-[#4B3FA8] whitespace-nowrap">
                                     ${team.member_count}/6 integrantes
                                 </span>
                             </div>

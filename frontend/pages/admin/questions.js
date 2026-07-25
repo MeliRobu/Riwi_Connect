@@ -281,10 +281,10 @@ function renderQuestionItem(q) {
     }
 
     return `
-        <div class="flex items-center justify-between border border-gray-100 rounded-xl p-4 shadow-sm ${isActive ? "" : "opacity-50"}">
-            <div class="flex flex-col gap-1 flex-1">
-                <span class="font-semibold text-sm">${escapeHtml(q.statement)}</span>
-                <div class="flex gap-2">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-gray-100 rounded-xl p-4 shadow-sm ${isActive ? "" : "opacity-50"}">
+            <div class="flex flex-col gap-1 flex-1 min-w-0">
+                <span class="font-semibold text-sm break-words">${escapeHtml(q.statement)}</span>
+                <div class="flex flex-wrap gap-2">
                     <span class="text-xs bg-[#F3F1FA] text-[#4B3FA8] font-semibold px-3 py-0.5 rounded-full">${CATEGORY_LABELS[q.category] || q.category}</span>
                     <span class="text-xs ${DIFFICULTY_COLORS[q.difficulty_level] || ""} font-semibold px-3 py-0.5 rounded-full">${DIFFICULTY_LABELS[q.difficulty_level] || q.difficulty_level}</span>
                     <span class="text-xs ${isActive ? "bg-emerald-100 text-emerald-600" : "bg-gray-100 text-gray-400"} font-semibold px-3 py-0.5 rounded-full">
@@ -293,7 +293,7 @@ function renderQuestionItem(q) {
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 ml-4">
+            <div class="flex items-center gap-2 sm:ml-4">
                 <button onclick="editQuestion(${q.id_question})"
                     class="cursor-pointer text-xs font-semibold text-[#4B3FA8] hover:underline">
                     Editar
