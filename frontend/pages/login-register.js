@@ -1,4 +1,5 @@
 import '../css/login-register.css';
+import Swal from 'sweetalert2';
 
 export function loginRegister() {
     setTimeout(() => {
@@ -130,9 +131,13 @@ export function loginRegister() {
                         ¿No te has registrado? <a
                             class="text-brand-600 font-bold cursor-pointer transition-colors hover:text-brand-700 trigger-signup">Registrarse</a>
                     </p>
-                    <p class="text-xs font-medium leading-5 mb-6 self-start text-left text-slate-400">
+                    <p class="text-xs font-medium leading-5 mb-2 self-start text-left text-slate-400">
                         ¿Primera vez aquí? <a href="./assets/credenciales.xlsx" download
                             class="text-brand-600 font-bold cursor-pointer transition-colors hover:text-brand-700">Descargar credenciales de prueba</a>
+                    </p>
+                    <p class="text-xs font-medium leading-5 mb-6 self-start text-left text-slate-400">
+                        ¿No estás en la lista? <a onclick="openDemoProfileForm()"
+                            class="text-brand-600 font-bold cursor-pointer transition-colors hover:text-brand-700">Crea tu perfil de prueba</a>
                     </p>
 
                     <div id="login-error" class="hidden bg-red-50 text-red-600 text-sm font-semibold px-4 py-2.5 rounded-xl w-full mb-3 text-left"></div>
@@ -468,5 +473,90 @@ window.handleRegisterSubmit = async function (event) {
             errorBox.textContent = error.message || "Error al registrar. Intenta de nuevo.";
             errorBox.classList.remove('hidden');
         }
+    }
+};
+
+// HU: (vacío documental) — Formulario público para simular ser un estudiante
+// autorizado (crea un registro en institutional_sources), pensado para que
+// cualquiera que visite la demo pública pueda probar el flujo completo.
+window.openDemoProfileForm = async function () {
+    let options;
+    try {
+        const response = await fetch('./demo/institutional-options', { cache: 'no-store' });
+        if (!response.ok) throw new Error('load-failed');
+        options = await response.json();
+    } catch (error) {
+        Swal.fire({ title: 'Error', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonColor: '#4B3FA8' });
+        return;
+    }
+    const campuses = options.campuses;
+    const { value: formValues } = await Swal.fire({
+        title: 'Crea tu perfil de prueba',
+        html: `
+            <input id="demo-document" class="swal2-input" placeholder="Documento (solo números)">
+            <input id="demo-fullname" class="swal2-input" placeholder="Nombre completo">
+            <input id="demo-email" class="swal2-input" placeholder="Correo">
+            <select id="demo-campus" class="swal2-select"></select>
+            <select id="demo-journey" class="swal2-select"></select>
+            <select id="demo-clan" class="swal2-select"></select>
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Crear perfil',
+        confirmButtonColor: '#4B3FA8',
+        cancelButtonText: 'Cancelar',
+        didOpen: () => {
+            const campusSelect = document.getElementById('demo-campus');
+            const journeySelect = document.getElementById('demo-journey');
+            const clanSelect = document.getElementById('demo-clan');
+            function populateJourney() {
+                const campus = campuses.find(c => c.id_campus === parseInt(campusSelect.value));
+                journeySelect.innerHTML = campus.journeys.map(j => `<option value="${j.id_journey}">${j.journey_time}</option>`).join('');
+                populateClan();
+            }
+            function populateClan() {
+                const campus = campuses.find(c => c.id_campus === parseInt(campusSelect.value));
+                const journey = campus.journeys.find(j => j.id_journey === parseInt(journeySelect.value));
+                clanSelect.innerHTML = journey.clans.map(cl => `<option value="${cl.id_clan}">${cl.clan_name}</option>`).join('');
+            }
+            campusSelect.innerHTML = campuses.map(c => `<option value="${c.id_campus}">${c.campus_name}</option>`).join('');
+            populateJourney();
+            campusSelect.addEventListener('change', populateJourney);
+            journeySelect.addEventListener('change', populateClan);
+        },
+        preConfirm: () => {
+            const document_number = document.getElementById('demo-document').value.trim();
+            const full_name = document.getElementById('demo-fullname').value.trim();
+            const email = document.getElementById('demo-email').value.trim();
+            const id_campus = parseInt(document.getElementById('demo-campus').value);
+            const id_journey = parseInt(document.getElementById('demo-journey').value);
+            const id_clan = parseInt(document.getElementById('demo-clan').value);
+            if (!document_number || !full_name || !email) {
+                Swal.showValidationMessage('Completa todos los campos.');
+                return false;
+            }
+            return { document_number, full_name, email, id_campus, id_journey, id_clan };
+        }
+    });
+    if (!formValues) return;
+    try {
+        const response = await fetch('./demo/institutional-sources', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formValues)
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            Swal.fire({ title: 'No se pudo crear', text: data.error || 'Ocurrió un error inesperado.', icon: 'error', confirmButtonColor: '#4B3FA8' });
+            return;
+        }
+        Swal.fire({
+            title: '¡Perfil creado!',
+            text: `Ya puedes registrarte con el documento ${data.document_number}.`,
+            icon: 'success',
+            confirmButtonColor: '#4B3FA8'
+        });
+    } catch (error) {
+        Swal.fire({ title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonColor: '#4B3FA8' });
     }
 };

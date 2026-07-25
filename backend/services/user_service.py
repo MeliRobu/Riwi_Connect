@@ -154,3 +154,92 @@ def get_public_profile(id_user):
         "improvement_opportunities": improvements,
         "profile_description": profile,
     }
+
+# HU: (vacío documental) — Consultar combinaciones válidas de sede/jornada/clan
+# para el formulario público de "crear perfil de prueba" (demo publica).
+def get_institutional_options():
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            SELECT DISTINCT c.id_campus, c.campus_name, j.id_journey, j.journey_time,
+                   cl.id_clan, cl.clan_name
+            FROM institutional_sources isrc
+            JOIN campus c ON c.id_campus = isrc.id_campus
+            JOIN journeys j ON j.id_journey = isrc.id_journey
+            JOIN clan cl ON cl.id_clan = isrc.id_clan
+            WHERE isrc.id_clan IS NOT NULL
+            ORDER BY c.id_campus, j.id_journey, cl.id_clan
+            """
+        )
+        rows = cursor.fetchall()
+        campuses = {}
+        for id_campus, campus_name, id_journey, journey_time, id_clan, clan_name in rows:
+            campus = campuses.setdefault(id_campus, {"id_campus": id_campus, "campus_name": campus_name, "journeys": {}})
+            journey = campus["journeys"].setdefault(id_journey, {"id_journey": id_journey, "journey_time": journey_time, "clans": []})
+            journey["clans"].append({"id_clan": id_clan, "clan_name": clan_name})
+        result = []
+        for campus in campuses.values():
+            campus["journeys"] = list(campus["journeys"].values())
+            result.append(campus)
+        return {"campuses": result}, 200
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# HU: (vacío documental) — Permite a cualquier visitante crear un registro
+# simulado en institutional_sources (lista blanca), para poder probar el
+# flujo completo de registro sin depender de los estudiantes ya sembrados.
+def create_demo_institutional_source(document_number, full_name, email, id_campus, id_journey, id_clan):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        if not document_number or not full_name or not email or not id_campus or not id_journey or not id_clan:
+            return {"error": "Todos los campos son obligatorios"}, 400
+        # document_number es INTEGER en la base de datos (max ~2147483647);
+        # validar el rango aqui evita un error crudo de PostgreSQL si alguien
+        # ingresa un numero fuera de rango en este formulario publico.
+        try:
+            document_number_int = int(document_number)
+        except (ValueError, TypeError):
+            return {"error": "El documento debe ser un número válido"}, 400
+        if document_number_int <= 0 or document_number_int > 2147483647:
+            return {"error": "El documento debe ser un número positivo de hasta 10 dígitos"}, 400
+        cursor.execute(
+            """
+            SELECT 1 FROM institutional_sources
+            WHERE id_campus = %s AND id_journey = %s AND id_clan = %s
+            LIMIT 1
+            """,
+            (id_campus, id_journey, id_clan)
+        )
+        if cursor.fetchone() is None:
+            return {"error": "La combinación de sede, jornada y clan no es válida"}, 400
+        cursor.execute(
+            "SELECT 1 FROM institutional_sources WHERE document_number = %s",
+            (document_number,)
+        )
+        if cursor.fetchone() is not None:
+            return {"error": "Ese número de documento ya está en la lista"}, 409
+        cursor.execute(
+            "SELECT 1 FROM institutional_sources WHERE email = %s",
+            (email,)
+        )
+        if cursor.fetchone() is not None:
+            return {"error": "Ese correo ya está en la lista"}, 409
+        cursor.execute(
+            """
+            INSERT INTO institutional_sources (document_number, full_name, email, id_campus, id_journey, id_clan)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING id_institutional_source
+            """,
+            (document_number, full_name, email, id_campus, id_journey, id_clan)
+        )
+        new_id = cursor.fetchone()[0]
+        conn.commit()
+        return {"id_institutional_source": new_id, "document_number": document_number}, 201
+    finally:
+        cursor.close()
+        conn.close()
